@@ -1,0 +1,3023 @@
+<!DOCTYPE html>
+<!-- saved from url=(0078)file:///C:/Users/WAGNER%20ROJAS/Downloads/OTMs_Atenciones_Biomedicas_v3_3.html -->
+<html lang="es"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>OTMs — Atenciones Biomédicas</title>
+
+<!--
+══════════════════════════════════════════════════════════════
+  BUSCADOR DE OTMs — CÓDIGO FUENTE
+  Versión: 1.0 | Mayo 2026
+  
+  CÓMO ACTUALIZAR LOS DATOS:
+  1. Exportar el Excel a JSON con el script Python adjunto
+  2. Reemplazar el contenido de ALL = [...] en la línea ~320
+  3. Guardar y abrir en el navegador
+══════════════════════════════════════════════════════════════
+-->
+
+<style>
+/* ════════════════════════════════════════
+   VARIABLES DE COLOR
+════════════════════════════════════════ */
+:root {
+  --azul-oscuro:  #0d2b5e;
+  --azul:         #1d4ed8;
+  --azul-claro:   #dbeafe;
+  --azul-suave:   #eff6ff;
+  --fondo:        #eef2f7;
+  --blanco:       #ffffff;
+  --borde:        #e2e8f0;
+  --texto:        #1e293b;
+  --texto-dim:    #64748b;
+  --verde:        #15803d;
+  --rojo:         #dc2626;
+  --naranja:      #b45309;
+  --morado:       #7c3aed;
+}
+
+/* ════════════════════════════════════════
+   RESET
+════════════════════════════════════════ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Segoe UI', Arial, sans-serif;
+  background: var(--fondo);
+  color: var(--texto);
+  font-size: 14px;
+  min-height: 100vh;
+}
+
+/* ════════════════════════════════════════
+   HEADER
+════════════════════════════════════════ */
+.hdr {
+  background: linear-gradient(135deg, var(--azul-oscuro) 0%, #1a3f8f 100%);
+  color: #fff;
+  padding: 0 24px;
+  height: 64px;
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  position: sticky;
+  top: 0;
+  z-index: 200;
+  box-shadow: 0 3px 12px rgba(0,0,0,.25);
+}
+.hdr-logo {
+  width: 42px; height: 42px;
+  background: rgba(255,255,255,.15);
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px; flex-shrink: 0;
+}
+.hdr-title  { font-size: 17px; font-weight: 700; }
+.hdr-sub    { font-size: 11px; opacity: .7; margin-top: 2px; }
+.hdr-space  { flex: 1; }
+.hdr-pill   {
+  background: rgba(255,255,255,.18);
+  border-radius: 20px;
+  padding: 5px 16px;
+  font-size: 12px; font-weight: 600;
+  border: 1px solid rgba(255,255,255,.25);
+}
+#hdr-total  { color: #7dd3fc; font-weight: 800; }
+
+/* ════════════════════════════════════════
+   LAYOUT
+════════════════════════════════════════ */
+.layout { display: flex; height: calc(100vh - 64px); }
+
+/* ════════════════════════════════════════
+   SIDEBAR
+════════════════════════════════════════ */
+.sidebar {
+  width: 268px; flex-shrink: 0;
+  background: var(--blanco);
+  border-right: 1px solid #dde3ef;
+  overflow-y: auto;
+  overflow-x: visible;
+  display: flex; flex-direction: column;
+}
+.sb-head {
+  background: var(--azul-oscuro); color: #fff;
+  padding: 10px 16px;
+  font-size: 12px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: .08em;
+}
+.sb-body { padding: 10px 14px; flex: 1; display: flex; flex-direction: column; justify-content: space-between; overflow-y: auto; overflow-x: visible; }
+
+/* Grupos de filtro */
+.fg   { margin-bottom: 9px; }
+.fl   {
+  display: block;
+  font-size: 11px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: .06em;
+  color: var(--texto-dim); margin-bottom: 4px;
+}
+select.fc, input.fc {
+  width: 100%;
+  padding: 7px 11px;
+  border: 1.5px solid var(--borde);
+  border-radius: 7px;
+  font-size: 13px; color: var(--texto);
+  background: var(--blanco);
+  outline: none;
+  transition: border-color .15s, box-shadow .15s;
+  cursor: pointer;
+  font-family: inherit;
+}
+select.fc:focus, input.fc:focus {
+  border-color: var(--azul);
+  box-shadow: 0 0 0 3px rgba(29,78,216,.12);
+}
+
+.divider { height: 1px; background: #f1f5f9; margin: 8px 0; }
+
+/* Botones */
+.btn-go {
+  width: 100%; padding: 10px;
+  background: var(--azul); color: #fff;
+  border: none; border-radius: 9px;
+  font-size: 13px; font-weight: 700;
+  cursor: pointer; margin-bottom: 7px;
+  transition: background .15s;
+}
+.btn-go:hover    { background: #1e40af; }
+.btn-go:active   { transform: scale(.98); }
+.btn-reset {
+  width: 100%; padding: 9px;
+  background: var(--blanco); color: var(--texto-dim);
+  border: 1.5px solid var(--borde);
+  border-radius: 9px; font-size: 12px;
+  cursor: pointer; font-weight: 600;
+  transition: all .15s;
+}
+.btn-reset:hover { border-color: #ef4444; color: #ef4444; }
+
+/* ════════════════════════════════════════
+   MULTISELECT PERSONALIZADO
+════════════════════════════════════════ */
+.ms-wrap { position: relative; width: 100%; margin-bottom: 0; }
+
+/* Caja que muestra los seleccionados */
+.ms-box {
+  width: 100%; min-height: 34px;
+  border: 1.5px solid var(--borde);
+  border-radius: 7px; padding: 4px 30px 4px 10px;
+  background: var(--blanco); cursor: pointer;
+  display: flex; flex-wrap: wrap; gap: 3px;
+  align-items: center; position: relative;
+  transition: border-color .15s, box-shadow .15s;
+  font-size: 13px;
+}
+.ms-box:hover   { border-color: #94a3b8; }
+.ms-box.open    { border-color: var(--azul); box-shadow: 0 0 0 3px rgba(29,78,216,.12); }
+.ms-box-arrow {
+  position: absolute; right: 9px; top: 50%; transform: translateY(-50%);
+  font-size: 11px; color: var(--texto-dim); pointer-events: none;
+  transition: transform .2s;
+}
+.ms-box.open .ms-box-arrow { transform: translateY(-50%) rotate(180deg); }
+.ms-placeholder { color: var(--texto-dim); font-size: 13px; padding: 1px 0; }
+
+/* Tags de seleccionados */
+.ms-tag {
+  display: inline-flex; align-items: center; gap: 3px;
+  background: var(--azul-claro); color: #1e40af;
+  border-radius: 4px; padding: 2px 7px;
+  font-size: 12px; font-weight: 600; max-width: 150px;
+}
+.ms-tag span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ms-tag-x { cursor: pointer; opacity: .7; font-size: 13px; flex-shrink: 0; }
+.ms-tag-x:hover { opacity: 1; color: #dc2626; }
+.ms-count {
+  background: var(--azul); color: #fff;
+  border-radius: 10px; padding: 0 8px;
+  font-size: 11px; font-weight: 700; white-space: nowrap;
+}
+
+/* Dropdown */
+.ms-dropdown {
+  display: none; position: fixed;
+  z-index: 9999;
+  background: var(--blanco);
+  border: 1.5px solid var(--azul);
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0,0,0,.12);
+  overflow: visible;
+}
+.ms-dropdown.open { display: block; }
+
+/* Búsqueda interna */
+.ms-search {
+  display: flex; align-items: center; gap: 6px;
+  padding: 8px 11px; border-bottom: 1px solid var(--borde);
+}
+.ms-search-icon { font-size: 13px; color: var(--texto-dim); flex-shrink: 0; }
+.ms-search input {
+  flex: 1; border: none; outline: none; font-size: 13px;
+  font-family: inherit; color: var(--texto); background: transparent;
+}
+.ms-search input::placeholder { color: var(--texto-dim); }
+
+/* Acciones Selec. todo / Limpiar */
+.ms-actions {
+  display: flex; gap: 0;
+  border-bottom: 1px solid var(--borde);
+}
+.ms-action-btn {
+  flex: 1; padding: 6px; font-size: 11px; font-weight: 700;
+  text-align: center; cursor: pointer; color: var(--texto-dim);
+  background: #f8fafc; border: none; font-family: inherit;
+  transition: background .12s, color .12s;
+}
+.ms-action-btn:hover { background: var(--azul-suave); color: var(--azul); }
+.ms-action-btn:first-child { border-right: 1px solid var(--borde); }
+
+/* Lista de opciones */
+.ms-list {
+  max-height: 240px; overflow-y: auto;
+  padding: 4px 0;
+}
+.ms-option {
+  display: flex; align-items: center; gap: 8px;
+  padding: 7px 11px; cursor: pointer; font-size: 13px;
+  color: var(--texto); transition: background .1s;
+}
+.ms-option:hover { background: var(--azul-suave); }
+.ms-option.selected { background: #eff6ff; }
+.ms-option input[type=checkbox] { accent-color: var(--azul); width: 14px; height: 14px; flex-shrink: 0; cursor: pointer; }
+.ms-option-label { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ms-empty { padding: 14px 10px; text-align: center; font-size: 13px; color: var(--texto-dim); }
+
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 2px; }
+
+
+/* ════════════════════════════════════════
+   MAIN
+════════════════════════════════════════ */
+.main {
+  flex: 1; overflow-y: auto;
+  padding: 20px;
+  display: flex; flex-direction: column; gap: 16px;
+}
+
+/* Tags de filtros activos */
+.tags { display: flex; flex-wrap: wrap; gap: 6px; min-height: 4px; }
+.tag {
+  display: inline-flex; align-items: center; gap: 5px;
+  background: var(--azul-claro); color: #1e40af;
+  border-radius: 20px; padding: 4px 10px 4px 12px;
+  font-size: 11px; font-weight: 700;
+}
+.tag-x { cursor: pointer; font-size: 14px; opacity: .65; }
+.tag-x:hover { opacity: 1; color: #ef4444; }
+
+/* KPIs */
+.kpis { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px; }
+.kpi {
+  background: var(--blanco);
+  border-radius: 11px; padding: 13px 15px;
+  border-left: 4px solid;
+  box-shadow: 0 1px 4px rgba(0,0,0,.07);
+}
+.kpi-v { font-size: 26px; font-weight: 800; line-height: 1; margin-bottom: 3px; }
+.kpi-l { font-size: 10px; color: var(--texto-dim); font-weight: 700; text-transform: uppercase; }
+
+/* Searchbar */
+.sbar {
+  background: var(--blanco); border-radius: 11px;
+  padding: 12px 16px; display: flex; align-items: center; gap: 10px;
+  box-shadow: 0 1px 4px rgba(0,0,0,.07);
+}
+.sbar input {
+  flex: 1; border: 1.5px solid var(--borde);
+  border-radius: 8px; padding: 8px 13px;
+  font-size: 13px; outline: none;
+  font-family: inherit; color: var(--texto);
+}
+.sbar input:focus { border-color: var(--azul); }
+.sbar-cnt {
+  background: #f1f5f9; border-radius: 20px;
+  padding: 4px 12px; font-size: 11px;
+  font-weight: 700; color: #475569; white-space: nowrap;
+}
+
+/* Tabla */
+.tcard { background: var(--blanco); border-radius: 11px; box-shadow: 0 1px 4px rgba(0,0,0,.07); overflow: hidden; }
+.tscroll { overflow-x: auto; max-height: calc(100vh - 380px); overflow-y: auto; }
+table { width: 100%; border-collapse: collapse; min-width: 960px; }
+thead { position: sticky; top: 0; z-index: 10; }
+th {
+  background: var(--azul-oscuro); color: #fff;
+  font-size: 10.5px; font-weight: 700;
+  text-transform: uppercase; letter-spacing: .05em;
+  padding: 11px 13px; text-align: left;
+  white-space: nowrap; cursor: pointer; user-select: none;
+  border-right: 1px solid rgba(255,255,255,.08);
+}
+th:hover        { background: #1a3f8f; }
+th.asc::after   { content: " ▲"; font-size: 8px; opacity: .8; }
+th.desc::after  { content: " ▼"; font-size: 8px; opacity: .8; }
+td {
+  padding: 9px 13px; border-bottom: 1px solid #f0f4f8;
+  font-size: 12.5px; color: #334155;
+  max-width: 200px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+tr:nth-child(even) td { background: #f8fafc; }
+tr:hover td { background: var(--azul-suave); cursor: pointer; }
+
+/* Badges */
+.b { display: inline-block; padding: 2px 10px; border-radius: 20px; font-size: 10px; font-weight: 700; white-space: nowrap; }
+.ok   { background: #dcfce7; color: #14532d; }
+.nc   { background: #dbeafe; color: #1e3a8a; }
+.par  { background: #ede9fe; color: #3730a3; }
+.bad  { background: #fee2e2; color: #7f1d1d; }
+.baja { background: #fce7f3; color: #831843; }
+.cons { background: #fef9c3; color: #713f12; }
+.mt   { background: #ffedd5; color: #7c2d12; }
+.gray { background: #f1f5f9; color: #475569; }
+.t-prev { background: #dcfce7; color: #14532d; }
+.t-corr { background: #fee2e2; color: #7f1d1d; }
+.t-eval { background: #dbeafe; color: #1e3a8a; }
+.t-cap  { background: #fef9c3; color: #713f12; }
+.t-sup  { background: #f1f5f9; color: #475569; }
+.pdf-si { background: #dcfce7; color: #14532d; }
+.pdf-no { background: #fee2e2; color: #7f1d1d; }
+
+/* ════════════════════════════════════════
+   BOTONES EDITAR / ELIMINAR en modal detalle
+════════════════════════════════════════ */
+.btn-edit {
+  flex:1; padding:9px 0; background:var(--azul); color:#fff;
+  border:none; border-radius:9px; font-size:13px; font-weight:700;
+  cursor:pointer; transition:background .15s;
+}
+.btn-edit:hover { background:#1e40af; }
+.btn-delete {
+  flex:1; padding:9px 0; background:#dc2626; color:#fff;
+  border:none; border-radius:9px; font-size:13px; font-weight:700;
+  cursor:pointer; transition:background .15s;
+}
+.btn-delete:hover { background:#b91c1c; }
+
+/* ════════════════════════════════════════
+   MODAL EDICIÓN
+════════════════════════════════════════ */
+.edit-bg {
+  display:none; position:fixed; inset:0; z-index:600;
+  background:rgba(0,0,0,.55); backdrop-filter:blur(4px);
+  align-items:center; justify-content:center;
+}
+.edit-bg.open { display:flex; }
+.edit-box {
+  background:#fff; border-radius:18px; width:min(680px,96vw);
+  max-height:90vh; overflow-y:auto;
+  box-shadow:0 24px 64px rgba(0,0,0,.35);
+  padding:28px 28px 20px;
+}
+.edit-title {
+  font-size:16px; font-weight:800; color:var(--azul-oscuro);
+  margin-bottom:20px; display:flex; align-items:center; gap:10px;
+}
+.edit-grid {
+  display:grid; grid-template-columns:1fr 1fr; gap:12px 18px;
+  margin-bottom:20px;
+}
+.edit-grid .full { grid-column:1/-1; }
+.edit-lbl { font-size:10px; font-weight:700; text-transform:uppercase;
+  color:var(--texto-dim); letter-spacing:.06em; display:block; margin-bottom:3px; }
+.edit-inp {
+  width:100%; padding:8px 11px; border:1.5px solid var(--borde);
+  border-radius:8px; font-size:13px; font-family:inherit;
+  color:var(--texto); background:#fff; outline:none;
+  transition:border-color .15s, box-shadow .15s;
+}
+.edit-inp:focus { border-color:var(--azul); box-shadow:0 0 0 3px rgba(29,78,216,.1); }
+.edit-inp[readonly] { background:#f8fafc; color:#94a3b8; cursor:not-allowed; }
+.edit-footer { display:flex; gap:10px; padding-top:4px; }
+.btn-save {
+  flex:1; padding:10px 0; background:#15803d; color:#fff;
+  border:none; border-radius:9px; font-size:14px; font-weight:700;
+  cursor:pointer; transition:background .15s;
+}
+.btn-save:hover { background:#166534; }
+.btn-save:disabled { background:#94a3b8; cursor:not-allowed; }
+.btn-cancel-edit {
+  flex:1; padding:10px 0; background:#fff; color:var(--texto-dim);
+  border:1.5px solid var(--borde); border-radius:9px;
+  font-size:14px; font-weight:700; cursor:pointer; transition:all .15s;
+}
+.btn-cancel-edit:hover { border-color:#94a3b8; }
+
+/* Toast de éxito/error edición */
+.edit-msg {
+  padding:8px 14px; border-radius:8px; font-size:12px;
+  font-weight:700; text-align:center; margin-top:10px;
+  display:none;
+}
+.edit-msg.ok  { background:#dcfce7; color:#14532d; display:block; }
+.edit-msg.err { background:#fee2e2; color:#7f1d1d; display:block; }
+
+/* Paginación */
+.pag {
+  padding: 11px 16px; display: flex; align-items: center;
+  gap: 7px; border-top: 1px solid #f0f4f8;
+  flex-wrap: wrap; background: #fafbfc;
+}
+.pag-info { flex: 1; font-size: 11px; color: var(--texto-dim); font-variant-numeric: tabular-nums; }
+.pb {
+  padding: 5px 12px; border: 1.5px solid var(--borde);
+  border-radius: 7px; background: var(--blanco);
+  color: #334155; font-size: 11.5px; cursor: pointer;
+}
+.pb:hover:not(:disabled) { border-color: var(--azul); color: var(--azul); }
+.pb.on   { background: var(--azul); color: #fff; border-color: var(--azul); }
+.pb:disabled { opacity: .35; cursor: default; }
+
+/* Modal */
+.mbg {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,.55); z-index: 400;
+  align-items: center; justify-content: center;
+}
+.mbg.open { display: flex; }
+.mbox {
+  background: var(--blanco); border-radius: 16px;
+  padding: 26px; max-width: 700px; width: 96%;
+  max-height: 85vh; overflow-y: auto;
+  box-shadow: 0 24px 64px rgba(0,0,0,.28);
+}
+.m-title { font-size: 15px; font-weight: 700; color: var(--azul-oscuro); padding-bottom: 13px; border-bottom: 2px solid var(--borde); margin-bottom: 14px; }
+.m-grid  { display: grid; grid-template-columns: 130px 1fr; gap: 8px 12px; }
+.mk { font-size: 10px; font-weight: 700; color: var(--texto-dim); text-transform: uppercase; letter-spacing: .04em; padding-top: 3px; }
+.mv { font-size: 13px; color: var(--texto); word-break: break-word; line-height: 1.5; }
+.m-close { margin-top: 18px; width: 100%; padding: 11px; background: var(--azul-oscuro); color: #fff; border: none; border-radius: 9px; font-size: 13px; font-weight: 700; cursor: pointer; }
+.m-close:hover { background: var(--azul); }
+
+/* Scrollbar */
+::-webkit-scrollbar        { width: 6px; height: 6px; }
+::-webkit-scrollbar-track  { background: #f1f5f9; }
+::-webkit-scrollbar-thumb  { background: #cbd5e1; border-radius: 3px; }
+@keyframes spin360 { to { transform: rotate(360deg); } }
+@keyframes pulse   { 0%,100%{opacity:1} 50%{opacity:.4} }
+
+/* ════════════════════════════════════════
+   PANTALLA DE ACCESO
+════════════════════════════════════════ */
+#login-overlay {
+  position: fixed; inset: 0; z-index: 9999;
+  background: linear-gradient(135deg, #0d2b5e 0%, #1a3f8f 60%, #1d4ed8 100%);
+  display: flex; align-items: center; justify-content: center;
+  font-family: 'Segoe UI', Arial, sans-serif;
+}
+#login-box {
+  background: #fff; border-radius: 18px;
+  padding: 44px 40px 36px; width: 100%; max-width: 400px;
+  box-shadow: 0 24px 64px rgba(0,0,0,.35); text-align: center;
+}
+#login-box .login-icon { font-size: 48px; margin-bottom: 10px; display: block; }
+#login-box h2 { font-size: 20px; font-weight: 800; color: #0d2b5e; margin-bottom: 4px; }
+#login-box p  { font-size: 13px; color: #64748b; margin-bottom: 26px; }
+#login-box input {
+  width: 100%; padding: 13px 16px;
+  border: 2px solid #e2e8f0; border-radius: 10px;
+  font-size: 14px; outline: none; transition: border .2s;
+  margin-bottom: 14px; color: #1e293b; font-family: inherit;
+}
+#login-box input:focus { border-color: #1d4ed8; }
+#login-btn {
+  width: 100%; padding: 13px;
+  background: linear-gradient(135deg, #0d2b5e, #1d4ed8);
+  color: #fff; border: none; border-radius: 10px;
+  font-size: 15px; font-weight: 700; cursor: pointer; transition: opacity .2s;
+}
+#login-btn:hover { opacity: .88; }
+#login-error {
+  display: none; margin-top: 12px;
+  background: #fef2f2; border: 1px solid #fecaca;
+  color: #dc2626; border-radius: 8px; padding: 10px 14px; font-size: 13px;
+}
+#login-box .login-footer { margin-top: 20px; font-size: 11px; color: #94a3b8; }
+.m-layout { display:flex; gap:20px; align-items:flex-start; }
+.m-info   { flex:0 0 320px; min-width:0; }
+.m-viewer { flex:1; min-width:0; display:flex; flex-direction:column; gap:8px; }
+.m-viewer-label { font-size:10px; font-weight:700; color:#94a3b8; text-transform:uppercase; letter-spacing:.04em; }
+.m-viewer-bar   { display:flex; gap:8px; flex-wrap:wrap; }
+.m-viewer-bar a { display:inline-flex;align-items:center;gap:5px;padding:7px 14px;border-radius:8px;font-size:12px;font-weight:700;text-decoration:none; }
+.btn-ver { background:#1d4ed8;color:#fff; } .btn-ver:hover{background:#1e40af;}
+.btn-dl  { background:#15803d;color:#fff; } .btn-dl:hover{background:#166534;}
+.m-no-pdf { width:100%;height:160px;border:2px dashed #e2e8f0;border-radius:10px;
+  display:flex;align-items:center;justify-content:center;flex-direction:column;
+  gap:8px;color:#94a3b8;font-size:13px; }
+@media(max-width:720px){.m-layout{flex-direction:column}.m-info{flex:none;width:100%}}
+</style>
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+</head>
+<body>
+
+<!-- ════════════════════════════════════
+     PANTALLA DE ACCESO POR CORREO
+════════════════════════════════════ -->
+<div id="login-overlay" style="display: none;">
+  <div id="login-box">
+    <span class="login-icon">🏥</span>
+    <h2>Registro de OTMs</h2>
+    <p>Ingresa tu correo institucional para acceder</p>
+    <input type="email" id="login-email" placeholder="tucorreo@ejemplo.com" onkeydown="if(event.key===&#39;Enter&#39;) verificarAcceso()" autocomplete="email">
+    <button id="login-btn" onclick="verificarAcceso()">Ingresar →</button>
+    <div id="login-error">❌ Este correo no tiene acceso autorizado.</div>
+    <div class="login-footer">Atenciones Biomédicas · Solo personal autorizado</div>
+  </div>
+</div>
+
+
+<script>
+/* ════════════════════════════════════════════════════════
+   LISTA DE CORREOS AUTORIZADOS
+   — Agrega o elimina correos aquí —
+════════════════════════════════════════════════════════ */
+const CORREOS_AUTORIZADOS = [
+"wagnerrch19_94@hotmail.com",
+"danny.correa.ing@gmail.com",
+"maguina.jean.biomedica@gmail.com",
+"jorge.fernandez@dirisln.gob.pe",
+// Agrega más correos aquí...
+];
+
+function verificarAcceso() {
+  const email = document.getElementById('login-email').value.trim().toLowerCase();
+  const lista = CORREOS_AUTORIZADOS.map(c => c.toLowerCase());
+  if (lista.includes(email)) {
+    document.getElementById('login-overlay').style.display = 'none';
+    sessionStorage.setItem('otm_acceso', email);
+  } else {
+    const err = document.getElementById('login-error');
+    err.style.display = 'block';
+    document.getElementById('login-email').style.borderColor = '#dc2626';
+    setTimeout(() => { document.getElementById('login-email').style.borderColor = '#e2e8f0'; }, 2000);
+  }
+}
+
+// Mostrar login al inicio si no hay sesión activa
+(function() {
+  if (sessionStorage.getItem('otm_acceso')) {
+    document.getElementById('login-overlay').style.display = 'none';
+  } else {
+    document.getElementById('login-overlay').style.display = 'flex';
+  }
+})();
+</script>
+
+<!-- ════════════════════════════════════
+     HEADER
+════════════════════════════════════ -->
+<header class="hdr">
+  <div class="hdr-logo">🏥</div>
+  <div>
+    <div class="hdr-title">Registro de OTMs — Atenciones Biomédicas</div>
+    <div class="hdr-sub">Dirección de Redes Integradas de Salud Lima Norte</div>
+  </div>
+  <div class="hdr-space"></div>
+
+  <!-- Indicador última actualización -->
+  <div id="hdr-sync" style="display:flex;align-items:center;gap:8px;margin-right:10px">
+    <span id="sync-dot" style="width: 8px; height: 8px; border-radius: 50%; background: rgb(250, 204, 21); flex-shrink: 0; transition: background 0.3s;"></span>
+    <span id="sync-txt" style="font-size:11px;color:rgba(255,255,255,.55);white-space:nowrap">Actualizando...</span>
+  </div>
+
+  <!-- Botón refresh manual -->
+  <button id="btn-refresh" onclick="refreshManual()" title="Actualizar ahora" style="background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.25);color:#fff;
+           border-radius:8px;padding:6px 13px;font-size:12px;font-weight:600;cursor:pointer;
+           display:flex;align-items:center;gap:6px;margin-right:10px;font-family:inherit;
+           transition:background .15s">
+    <span id="refresh-icon" style="display: inline-block; font-size: 13px; animation: 0.8s linear 0s infinite normal none running spin360;">🔄</span>
+    <span>Actualizar</span>
+  </button>
+
+  <!-- Contador y countdown -->
+  <div class="hdr-pill">
+    Total: <span id="hdr-total">869</span> &nbsp;|&nbsp;
+    <span style="font-size:11px;opacity:.75">próx. en <span id="countdown">0</span>s</span>
+  </div>
+
+</header>
+
+<div class="layout">
+
+  <!-- ════════════════════════════════
+       SIDEBAR — FILTROS
+  ════════════════════════════════ -->
+  <aside class="sidebar">
+    <div class="sb-head">⚙ Filtros de búsqueda</div>
+    <div class="sb-body">
+
+      <!-- Filtro 1: N° OTM -->
+      <div class="fg">
+        <label class="fl">📋 N° OTM</label>
+        <input class="fc" id="f-otm" type="text" placeholder="Ej: 125">
+      </div>
+
+      <!-- Filtro 2: Establecimiento -->
+      <div class="fg">
+        <label class="fl">🏥 Establecimiento</label>
+        <div class="estab-quick-search" style="margin-bottom:2px;position:relative">
+          <span style="position:absolute;left:9px;top:50%;transform:translateY(-50%);font-size:12px;color:#64748b;pointer-events:none">🔍</span>
+          <input id="estab-quick" type="text" placeholder="Escribir para buscar..." autocomplete="off" style="width:100%;padding:4px 8px 4px 26px;border:1.5px solid #e2e8f0;border-radius:7px;
+                   font-size:12px;font-family:inherit;color:#1e293b;outline:none;transition:border-color .15s,box-shadow .15s" oninput="estabQuickSearch(this.value)" onfocus="this.style.borderColor=&#39;#1d4ed8&#39;;this.style.boxShadow=&#39;0 0 0 3px rgba(29,78,216,.12)&#39;" onblur="this.style.borderColor=&#39;#e2e8f0&#39;;this.style.boxShadow=&#39;none&#39;">
+        </div>
+        <div class="ms-wrap" id="ms-wrap-f-estab">
+  <div class="ms-box" id="ms-box-f-estab" onclick="msToggleOpen(&#39;f-estab&#39;)">
+    <span class="ms-placeholder" id="ms-ph-f-estab">— Todos —</span>
+    <span class="ms-box-arrow">▾</span>
+  </div>
+  <div class="ms-dropdown" id="ms-dd-f-estab">
+    <div class="ms-search">
+      <span class="ms-search-icon">🔍</span>
+      <input type="text" placeholder="Buscar..." oninput="msSearch(this,&#39;f-estab&#39;)">
+    </div>
+    <div class="ms-actions">
+      <button class="ms-action-btn" onclick="msSelectAll(&#39;f-estab&#39;)">☑ Seleccionar todo</button>
+      <button class="ms-action-btn" onclick="msClear(&#39;f-estab&#39;)">✕ Limpiar</button>
+    </div>
+    <div class="ms-list" id="ms-list-f-estab"><div class="ms-option" data-val="CMI   DR. ENRIQUE MARTIN ALTUNA" onclick="msToggle(this,&#39;f-estab&#39;)"><input type="checkbox" tabindex="-1"><span class="ms-option-label" title="CMI   DR. ENRIQUE MARTIN ALTUNA">CMI   DR. ENRIQUE MARTIN ALTUNA</span></div><div class="ms-option" data-val="CMI  EL PROGRESO" onclick="msToggle(this,&#39;f-estab&#39;)"><input type="checkbox" tabindex="-1"><span class="ms-option-label" title="CMI  EL PROGRESO">CMI  EL PROGRESO</span></div><div class="ms-option" data-val="CMI  LAURA RODRIGUEZ DULANTO DUSKIL" onclick="msToggle(this,&#39;f-estab&#39;)"><input type="checkbox" tabindex="-1"><span class="ms-option-label" title="CMI  LAURA RODRIGUEZ DULANTO DUSKIL">CMI  LAURA RODRIGUEZ DULANTO DUSKIL</span></div><div class="ms-option" data-val="CMI  LOS SUREÑOS" onclick="msToggle(this,&#39;f-estab&#39;)"><input type="checkbox" tabindex="-1"><span class="ms-option-label" title="CMI  LOS SUREÑOS">CMI  LOS SUREÑOS</span></div><div class="ms-option" data-val="CMI  MEXICO" onclick="msToggle(this,&#39;f-estab&#39;)"><input type="checkbox" tabindex="-1"><span class="ms-option-label" title="CMI  MEXICO">CMI  MEXICO</span></div><div class="ms-option" data-val="CMI  RIMAC" onclick="msToggle(this,&#39;f-estab&#39;)"><input type="checkbox" tabindex="-1"><span class="ms-option-label" title="CMI  RIMAC">CMI  RIMAC</span></div><div class="ms-option" data-val="CMI  SANTA LUZMILA II" onclick="msToggle(this,&#39;f-estab&#39;)"><input type="checkbox" tabindex="-1"><span class="ms-option-label" title="CMI  SANTA LUZMILA II">CMI  SANTA LUZMILA II</span></div><div class="ms-option" data-val="CMI  SANTA ROSA" onclick="msToggle(this,&#39;f-estab&#39;)"><input type="checkbox" tabindex="-1"><span class="ms-option-label" title="CMI  SANTA ROSA">CMI  SANTA ROSA</span></div><div class="ms-option" data-val="CMI  TAHUANTINSUYO BAJO" onclick="msToggle(this,&#39;f-estab&#39;)"><input type="checkbox" tabindex="-1"><span class="ms-option-label" title="CMI  TAHUANTINSUYO BAJO">CMI  TAHUANTINSUYO BAJO</span></div><div class="ms-option" data-val="CMI ANCON" onclick="msToggle(this,&#39;f-estab&#39;)"><input type="checkbox" tabindex="-1"><span class="ms-option-label" title="CMI ANCON">CMI ANCON</span></div><div class="ms-option" data-val="CMI JUAN PABLO II" onclick="msToggle(this,&#39;f-estab&#39;)"><input type="checkbox" tabindex="-1"><span class="ms-option-label" title="CMI JUAN PABLO II">CMI JUAN PABLO II</span></div><div class="ms-option" data-val="CMI LAURA RODRIGUEZ DULANTO DUSKIL" onclick="msToggle(this,&#39;f-estab&#39;)"><input type="checkbox" tabindex="-1"><span class="ms-option-label" title="CMI LAURA RODRIGUEZ DULANTO DUSKIL">CMI LAURA RODRIGUEZ DULANTO DUSKIL</span></div><div class="ms-option" data-val="CMI PIEDRA LIZA" onclick="msToggle(this,&#39;f-estab&#39;)"><input type="checkbox" tabindex="-1"><span class="ms-option-label" title="CMI PIEDRA LIZA">CMI PIEDRA LIZA</span></div><div class="ms-option" data-val="CS  AÑO NUEVO" onclick="msToggle(this,&#39;f-estab&#39;)"><input type="checkbox" tabindex="-1"><span class="ms-option-label" title="CS  AÑO NUEVO">CS  AÑO NUEVO</span></div><div class="ms-option" data-val="CS  BASE SAN MARTIN DE PORRES" onclick="msToggle(this,&#39;f-estab&#39;)"><input type="checkbox" tabindex="-1"><span class="ms-option-label" title="CS  BASE SAN MARTIN DE PORRES">CS  BASE SAN MARTIN DE PORRES</span></div><div class="ms-option" data-val="CS  CAQUETA" onclick="msToggle(this,&#39;f-estab&#39;)"><input type="checkbox" tabindex="-1"><span class="ms-option-label" title="CS  CAQUETA">CS  CAQUETA</span></div><div class="ms-option" data-val="CS  CARLOS CUETO FERNANDINI" onclick="msToggle(this,&#39;f-estab&#39;)"><input type="checkbox" tabindex="-1"><span class="ms-option-label" title="CS  CARLOS CUETO FERNANDINI">CS  CARLOS CUETO FERNANDINI</span></div><div class="ms-option" data-val="CS  CARLOS PHILLIPS" onclick="msToggle(this,&#39;f-estab&#39;)"><input type="checkbox" tabindex="-1"><span class="ms-option-label" title="CS  CARLOS PHILLIPS">CS  CARLOS PHILLIPS</span></div><div class="ms-option" data-val="CS  CARLOS PROTZEL" onclick="msToggle(this,&#39;f-estab&#39;)"><input type="checkbox" tabindex="-1"><span class="ms-option-label" title="CS  CARLOS PROTZEL">CS  CARLOS PROTZEL</span></div><div class="ms-option" data-val="CS  CIUDAD Y CAMPO" onclick="msToggle(this,&#39;f-estab&#39;)"><input type="checkbox" tabindex="-1"><span class="ms-option-label" title="CS  CIUDAD Y CAMPO">CS  CIUDAD Y CAMPO</span></div><div class="ms-option" data-val="CS  CLORINDA MALAGA" onclick="msToggle(this,&#39;f-estab&#39;)"><input type="checkbox" tabindex="-1"><span class="ms-option-label" title="CS  CLORINDA MALAGA">CS  CLORINDA MALAGA</span></div><div class="ms-option" data-val="CS  EL ALAMO" onclick="msToggle(this,&#39;f-estab&#39;)"><input type="checkbox" tabindex="-1"><span class="ms-option-label" title="CS  EL ALAMO">CS  EL ALAMO</span></div><div class="ms-option" data-val="CS  ERMITAÑO ALTO" onclick="msToggle(this,&#39;f-estab&#39;)"><input type="checkbox" tabindex="-1"><span class="ms-option-label" title="CS  ERMITAÑO ALTO">CS  ERMITAÑO ALTO</span></div><div class="ms-option" data-val="CS  EX FUNDO NARANJAL" onclick="msToggle(this,&#39;f-estab&#39;)"><input type="checkbox" tabindex="-1"><span class="ms-option-label" title="CS  EX FUNDO NARANJAL">CS  EX FUNDO NARANJAL</span></div><div class="ms-option" data-val="CS  FLOR DE AMANCAES" onclick="msToggle(this,&#39;f-estab&#39;)"><input type="checkbox" tabindex="-1"><span class="ms-option-label" title="CS  FLOR DE AMANCAES">CS  FLOR DE AMANCAES</span></div><div class="ms-option" data-val="CS  GUSTAVO LANATTA" onclick="msToggle(this,&#39;f-estab&#39;)"><input type="checkbox" tabindex="-1"><span class="ms-option-label" title="CS  GUSTAVO LANATTA">CS  GUSTAVO LANATTA</span></div><div class="ms-option" data-val="CS  GUSTAVO LANATTA LUJAN" onclick="msToggle(this,&#39;f-estab&#39;)"><input type="checkbox" tabindex="-1"><span class="ms-option-label" title="CS  GUSTAVO LANATTA LUJAN">CS  GUSTAVO LANATTA LUJAN</span></div><div class="ms-option" data-val="CS  HUSARES DE JUNIN" onclick="msToggle(this,&#39;f-estab&#39;)"><input type="checkbox" tabindex="-1"><span class="ms-option-label" title="CS  HUSARES DE JUNIN">CS  HUSARES DE JUNIN</span></div><div class="ms-option" data-val="CS  JERUSALEN" onclick="msToggle(this,&#39;f-estab&#39;)"><input type="checkbox" tabindex="-1"><span class="ms-option-label" title="CS  JERUSALEN">CS  JERUSALEN</span></div><div class="ms-option" data-val="CS  JUAN PABLO II" onclick="msToggle(this,&#39;f-estab&#39;)"><input type="checkbox" tabindex="-1"><span class="ms-option-label" title="CS  JUAN PABLO II">CS  JUAN PABLO II</span></div><div class="ms-option" data-val="CS  LA ENSENADA" onclick="msToggle(this,&#39;f-estab&#39;)"><input type="checkbox" tabindex="-1"><span class="ms-option-label" title="CS  LA ENSENADA">CS  LA ENSENADA</span></div><div class="ms-option" data-val="CS  LADERAS DE CHILLON" onclick="msToggle(this,&#39;f-estab&#39;)"><input type="checkbox" tabindex="-1"><span class="ms-option-label" title="CS  LADERAS DE CHILLON">CS  LADERAS DE CHILLON</span></div><div class="ms-option" data-val="CS  LAURA CALLER" onclick="msToggle(this,&#39;f-estab&#39;)"><input type="checkbox" tabindex="-1"><span class="ms-option-label" title="CS  LAURA CALLER">CS  LAURA CALLER</span></div><div class="ms-option" data-val="CS  LOS OLIVOS" onclick="msToggle(this,&#39;f-estab&#39;)"><input type="checkbox" tabindex="-1"><span class="ms-option-label" title="CS  LOS OLIVOS">CS  LOS OLIVOS</span></div><div class="ms-option" data-val="CS  LOS OLIVOS DE PRO" onclick="msToggle(this,&#39;f-estab&#39;)"><input type="checkbox" tabindex="-1"><span class="ms-option-label" title="CS  LOS OLIVOS DE PRO">CS  LOS OLIVOS DE PRO</span></div><div class="ms-option" data-val="CS  MARISCAL CASTILLA" onclick="msToggle(this,&#39;f-estab&#39;)"><input type="checkbox" tabindex="-1"><span class="ms-option-label" title="CS  MARISCAL CASTILLA">CS  MARISCAL CASTILLA</span></div><div class="ms-option" data-val="CS  MESA REDONDA" onclick="msToggle(this,&#39;f-estab&#39;)"><input type="checkbox" tabindex="-1"><span class="ms-option-label" title="CS  MESA REDONDA">CS  MESA REDONDA</span></div><div class="ms-option" data-val="CS  MILAGRO DE LA FRATERNIDAD" onclick="msToggle(this,&#39;f-estab&#39;)"><input type="checkbox" tabindex="-1"><span class="ms-option-label" title="CS  MILAGRO DE LA FRATERNIDAD">CS  MILAGRO DE LA FRATERNIDAD</span></div><div class="ms-option" data-val="CS  PERU III ZONA" onclick="msToggle(this,&#39;f-estab&#39;)"><input type="checkbox" tabindex="-1"><span class="ms-option-label" title="CS  PERU III ZONA">CS  PERU III ZONA</span></div><div class="ms-option" data-val="CS  PERU IV ZONA" onclick="msToggle(this,&#39;f-estab&#39;)"><input type="checkbox" tabindex="-1"><span class="ms-option-label" title="CS  PERU IV ZONA">CS  PERU IV ZONA</span></div><div class="ms-option" data-val="CS  RAUL PORRAS BARNECHEA" onclick="msToggle(this,&#39;f-estab&#39;)"><input type="checkbox" tabindex="-1"><span class="ms-option-label" title="CS  RAUL PORRAS BARNECHEA">CS  RAUL PORRAS BARNECHEA</span></div><div class="ms-option" data-val="CS  RIO SANTA" onclick="msToggle(this,&#39;f-estab&#39;)"><input type="checkbox" tabindex="-1"><span class="ms-option-label" title="CS  RIO SANTA">CS  RIO SANTA</span></div><div class="ms-option" data-val="CS  SAN JOSE" onclick="msToggle(this,&#39;f-estab&#39;)"><input type="checkbox" tabindex="-1"><span class="ms-option-label" title="CS  SAN JOSE">CS  SAN JOSE</span></div><div class="ms-option" data-val="CS  SAN JUAN DE SALINAS" onclick="msToggle(this,&#39;f-estab&#39;)"><input type="checkbox" tabindex="-1"><span class="ms-option-label" title="CS  SAN JUAN DE SALINAS">CS  SAN JUAN DE SALINAS</span></div><div class="ms-option" data-val="CS  SAN MARTIN DE PORRES CONFRATERNIDAD" onclick="msToggle(this,&#39;f-estab&#39;)"><input type="checkbox" tabindex="-1"><span class="ms-option-label" title="CS  SAN MARTIN DE PORRES CONFRATERNIDAD">CS  SAN MARTIN DE PORRES CONFRATERNIDAD</span></div><div class="ms-option" data-val="CS  SANTA LUZMILA I" onclick="msToggle(this,&#39;f-estab&#39;)"><input type="checkbox" tabindex="-1"><span class="ms-option-label" title="CS  SANTA LUZMILA I">CS  SANTA LUZMILA I</span></div><div class="ms-option" data-val="CS  SANTIAGO APOSTOL" onclick="msToggle(this,&#39;f-estab&#39;)"><input type="checkbox" tabindex="-1"><span class="ms-option-label" title="CS  SANTIAGO APOSTOL">CS  SANTIAGO APOSTOL</span></div><div class="ms-option" data-val="CS  TAHUANTINSUYO ALTO" onclick="msToggle(this,&#39;f-estab&#39;)"><input type="checkbox" tabindex="-1"><span class="ms-option-label" title="CS  TAHUANTINSUYO ALTO">CS  TAHUANTINSUYO ALTO</span></div><div class="ms-option" data-val="CS  TUPAC AMARU" onclick="msToggle(this,&#39;f-estab&#39;)"><input type="checkbox" tabindex="-1"><span class="ms-option-label" title="CS  TUPAC AMARU">CS  TUPAC AMARU</span></div><div class="ms-option" data-val="CS  VALDIVIEZO" onclick="msToggle(this,&#39;f-estab&#39;)"><input type="checkbox" tabindex="-1"><span class="ms-option-label" title="CS  VALDIVIEZO">CS  VALDIVIEZO</span></div><div class="ms-option" data-val="CS  VILLA DE LOS ANGELES" onclick="msToggle(this,&#39;f-estab&#39;)"><input type="checkbox" tabindex="-1"><span class="ms-option-label" title="CS  VILLA DE LOS ANGELES">CS  VILLA DE LOS ANGELES</span></div><div class="ms-option" data-val="CS  VILLA DEL NORTE" onclick="msToggle(this,&#39;f-estab&#39;)"><input type="checkbox" tabindex="-1"><span class="ms-option-label" title="CS  VILLA DEL NORTE">CS  VILLA DEL NORTE</span></div><div class="ms-option" data-val="CS  VILLA ESPERANZA" onclick="msToggle(this,&#39;f-estab&#39;)"><input type="checkbox" tabindex="-1"><span class="ms-option-label" title="CS  VILLA ESPERANZA">CS  VILLA ESPERANZA</span></div><div class="ms-option" data-val="CS  VIRGEN DEL PILAR NARANJAL" onclick="msToggle(this,&#39;f-estab&#39;)"><input type="checkbox" tabindex="-1"><span class="ms-option-label" title="CS  VIRGEN DEL PILAR NARANJAL">CS  VIRGEN DEL PILAR NARANJAL</span></div><div class="ms-option" data-val="CS AMAKELLA" onclick="msToggle(this,&#39;f-estab&#39;)"><input type="checkbox" tabindex="-1"><span class="ms-option-label" title="CS AMAKELLA">CS AMAKELLA</span></div><div class="ms-option" data-val="CS CARMEN ALTO" onclick="msToggle(this,&#39;f-estab&#39;)"><input type="checkbox" tabindex="-1"><span class="ms-option-label" title="CS CARMEN ALTO">CS CARMEN ALTO</span></div><div class="ms-option" data-val="CS CARMEN MEDIO" onclick="msToggle(this,&#39;f-estab&#39;)"><input type="checkbox" tabindex="-1"><span class="ms-option-label" title="CS CARMEN MEDIO">CS CARMEN MEDIO</span></div><div class="ms-option" data-val="CS COLLIQUE III ZONA" onclick="msToggle(this,&#39;f-estab&#39;)"><input type="checkbox" tabindex="-1"><span class="ms-option-label" title="CS COLLIQUE III ZONA">CS COLLIQUE III ZONA</span></div><div class="ms-option" data-val="CS COMAS" onclick="msToggle(this,&#39;f-estab&#39;)"><input type="checkbox" tabindex="-1"><span class="ms-option-label" title="CS COMAS">CS COMAS</span></div><div class="ms-option" data-val="CS CONDEVILLA" onclick="msToggle(this,&#39;f-estab&#39;)"><input type="checkbox" tabindex="-1"><span class="ms-option-label" title="CS CONDEVILLA">CS CONDEVILLA</span></div><div class="ms-option" data-val="CS ENRIQUE MILLA OCHOA" onclick="msToggle(this,&#39;f-estab&#39;)"><input type="checkbox" tabindex="-1"><span class="ms-option-label" title="CS ENRIQUE MILLA OCHOA">CS ENRIQUE MILLA OCHOA</span></div><div class="ms-option" data-val="CS ERMITAÑO BAJO" onclick="msToggle(this,&#39;f-estab&#39;)"><input type="checkbox" tabindex="-1"><span class="ms-option-label" title="CS ERMITAÑO BAJO">CS ERMITAÑO BAJO</span></div><div class="ms-option" data-val="CS HÚSARES DE JUNÍN" onclick="msToggle(this,&#39;f-estab&#39;)"><input type="checkbox" tabindex="-1"><span class="ms-option-label" title="CS HÚSARES DE JUNÍN">CS HÚSARES DE JUNÍN</span></div><div class="ms-option" data-val="CS LA ENSENADA" onclick="msToggle(this,&#39;f-estab&#39;)"><input type="checkbox" tabindex="-1"><span class="ms-option-label" title="CS LA ENSENADA">CS LA ENSENADA</span></div><div class="ms-option" data-val="CS MILAGROS DE LA FRATERNIDAD" onclick="msToggle(this,&#39;f-estab&#39;)"><input type="checkbox" tabindex="-1"><span class="ms-option-label" title="CS MILAGROS DE LA FRATERNIDAD">CS MILAGROS DE LA FRATERNIDAD</span></div><div class="ms-option" data-val="CS SAN JUAN DE AMANCAES" onclick="msToggle(this,&#39;f-estab&#39;)"><input type="checkbox" tabindex="-1"><span class="ms-option-label" title="CS SAN JUAN DE AMANCAES">CS SAN JUAN DE AMANCAES</span></div><div class="ms-option" data-val="CS SANGARARA" onclick="msToggle(this,&#39;f-estab&#39;)"><input type="checkbox" tabindex="-1"><span class="ms-option-label" title="CS SANGARARA">CS SANGARARA</span></div><div class="ms-option" data-val="CS VILLA LOS ANGELES" onclick="msToggle(this,&#39;f-estab&#39;)"><input type="checkbox" tabindex="-1"><span class="ms-option-label" title="CS VILLA LOS ANGELES">CS VILLA LOS ANGELES</span></div><div class="ms-option" data-val="CS. INFANTAS" onclick="msToggle(this,&#39;f-estab&#39;)"><input type="checkbox" tabindex="-1"><span class="ms-option-label" title="CS. INFANTAS">CS. INFANTAS</span></div><div class="ms-option" data-val="CSMC ASIRI" onclick="msToggle(this,&#39;f-estab&#39;)"><input type="checkbox" tabindex="-1"><span class="ms-option-label" title="CSMC ASIRI">CSMC ASIRI</span></div><div class="ms-option" data-val="CSMC PUENTE PIEDRA" onclick="msToggle(this,&#39;f-estab&#39;)"><input type="checkbox" tabindex="-1"><span class="ms-option-label" title="CSMC PUENTE PIEDRA">CSMC PUENTE PIEDRA</span></div><div class="ms-option" data-val="CSMC QISPICAY" onclick="msToggle(this,&#39;f-estab&#39;)"><input type="checkbox" tabindex="-1"><span class="ms-option-label" title="CSMC QISPICAY">CSMC QISPICAY</span></div><div class="ms-option" data-val="LABORATORIO REFERENCIAL" onclick="msToggle(this,&#39;f-estab&#39;)"><input type="checkbox" tabindex="-1"><span class="ms-option-label" title="LABORATORIO REFERENCIAL">LABORATORIO REFERENCIAL</span></div><div class="ms-option" data-val="LABORATORIO REFERENCIAL-COMAS" onclick="msToggle(this,&#39;f-estab&#39;)"><input type="checkbox" tabindex="-1"><span class="ms-option-label" title="LABORATORIO REFERENCIAL-COMAS">LABORATORIO REFERENCIAL-COMAS</span></div><div class="ms-option" data-val="PS  11 DE JULIO" onclick="msToggle(this,&#39;f-estab&#39;)"><input type="checkbox" tabindex="-1"><span class="ms-option-label" title="PS  11 DE JULIO">PS  11 DE JULIO</span></div><div class="ms-option" data-val="PS  DAVID TEJADA DE RIVERO" onclick="msToggle(this,&#39;f-estab&#39;)"><input type="checkbox" tabindex="-1"><span class="ms-option-label" title="PS  DAVID TEJADA DE RIVERO">PS  DAVID TEJADA DE RIVERO</span></div><div class="ms-option" data-val="PS  EL CARMEN" onclick="msToggle(this,&#39;f-estab&#39;)"><input type="checkbox" tabindex="-1"><span class="ms-option-label" title="PS  EL CARMEN">PS  EL CARMEN</span></div><div class="ms-option" data-val="PS  JESUS OROPEZA CHONTA" onclick="msToggle(this,&#39;f-estab&#39;)"><input type="checkbox" tabindex="-1"><span class="ms-option-label" title="PS  JESUS OROPEZA CHONTA">PS  JESUS OROPEZA CHONTA</span></div><div class="ms-option" data-val="PS  JORGE LINGAN" onclick="msToggle(this,&#39;f-estab&#39;)"><input type="checkbox" tabindex="-1"><span class="ms-option-label" title="PS  JORGE LINGAN">PS  JORGE LINGAN</span></div><div class="ms-option" data-val="PS  JOSE OLAYA" onclick="msToggle(this,&#39;f-estab&#39;)"><input type="checkbox" tabindex="-1"><span class="ms-option-label" title="PS  JOSE OLAYA">PS  JOSE OLAYA</span></div><div class="ms-option" data-val="PS  LAS AMERICAS" onclick="msToggle(this,&#39;f-estab&#39;)"><input type="checkbox" tabindex="-1"><span class="ms-option-label" title="PS  LAS AMERICAS">PS  LAS AMERICAS</span></div><div class="ms-option" data-val="PS  LOS GERANIOS" onclick="msToggle(this,&#39;f-estab&#39;)"><input type="checkbox" tabindex="-1"><span class="ms-option-label" title="PS  LOS GERANIOS">PS  LOS GERANIOS</span></div><div class="ms-option" data-val="PS  LOS QUECHUAS" onclick="msToggle(this,&#39;f-estab&#39;)"><input type="checkbox" tabindex="-1"><span class="ms-option-label" title="PS  LOS QUECHUAS">PS  LOS QUECHUAS</span></div><div class="ms-option" data-val="PS  LUIS ALBERTO B" onclick="msToggle(this,&#39;f-estab&#39;)"><input type="checkbox" tabindex="-1"><span class="ms-option-label" title="PS  LUIS ALBERTO B">PS  LUIS ALBERTO B</span></div><div class="ms-option" data-val="PS  LUIS ENRIQUE" onclick="msToggle(this,&#39;f-estab&#39;)"><input type="checkbox" tabindex="-1"><span class="ms-option-label" title="PS  LUIS ENRIQUE">PS  LUIS ENRIQUE</span></div><div class="ms-option" data-val="PS  MILAGRO DE JESUS" onclick="msToggle(this,&#39;f-estab&#39;)"><input type="checkbox" tabindex="-1"><span class="ms-option-label" title="PS  MILAGRO DE JESUS">PS  MILAGRO DE JESUS</span></div><div class="ms-option" data-val="PS  NUEVA JERUSALEN" onclick="msToggle(this,&#39;f-estab&#39;)"><input type="checkbox" tabindex="-1"><span class="ms-option-label" title="PS  NUEVA JERUSALEN">PS  NUEVA JERUSALEN</span></div><div class="ms-option" data-val="PS  PRIMAVERA" onclick="msToggle(this,&#39;f-estab&#39;)"><input type="checkbox" tabindex="-1"><span class="ms-option-label" title="PS  PRIMAVERA">PS  PRIMAVERA</span></div><div class="ms-option" data-val="PS  PUNCHAUCA" onclick="msToggle(this,&#39;f-estab&#39;)"><input type="checkbox" tabindex="-1"><span class="ms-option-label" title="PS  PUNCHAUCA">PS  PUNCHAUCA</span></div><div class="ms-option" data-val="PS  SAN CARLOS" onclick="msToggle(this,&#39;f-estab&#39;)"><input type="checkbox" tabindex="-1"><span class="ms-option-label" title="PS  SAN CARLOS">PS  SAN CARLOS</span></div><div class="ms-option" data-val="PS  SAN PEDRO DE CARABAYLLO" onclick="msToggle(this,&#39;f-estab&#39;)"><input type="checkbox" tabindex="-1"><span class="ms-option-label" title="PS  SAN PEDRO DE CARABAYLLO">PS  SAN PEDRO DE CARABAYLLO</span></div><div class="ms-option" data-val="PS  VILLAS DE ANCON" onclick="msToggle(this,&#39;f-estab&#39;)"><input type="checkbox" tabindex="-1"><span class="ms-option-label" title="PS  VILLAS DE ANCON">PS  VILLAS DE ANCON</span></div><div class="ms-option" data-val="PS CERRO CANDELA" onclick="msToggle(this,&#39;f-estab&#39;)"><input type="checkbox" tabindex="-1"><span class="ms-option-label" title="PS CERRO CANDELA">PS CERRO CANDELA</span></div><div class="ms-option" data-val="PS DAVID TEJADA RIVERA" onclick="msToggle(this,&#39;f-estab&#39;)"><input type="checkbox" tabindex="-1"><span class="ms-option-label" title="PS DAVID TEJADA RIVERA">PS DAVID TEJADA RIVERA</span></div><div class="ms-option" data-val="PS JORGE LINGAN" onclick="msToggle(this,&#39;f-estab&#39;)"><input type="checkbox" tabindex="-1"><span class="ms-option-label" title="PS JORGE LINGAN">PS JORGE LINGAN</span></div><div class="ms-option" data-val="PS LAS AMERICAS" onclick="msToggle(this,&#39;f-estab&#39;)"><input type="checkbox" tabindex="-1"><span class="ms-option-label" title="PS LAS AMERICAS">PS LAS AMERICAS</span></div><div class="ms-option" data-val="PS LOS QUECHUAS" onclick="msToggle(this,&#39;f-estab&#39;)"><input type="checkbox" tabindex="-1"><span class="ms-option-label" title="PS LOS QUECHUAS">PS LOS QUECHUAS</span></div><div class="ms-option" data-val="PS NUEVA ESPERANZA" onclick="msToggle(this,&#39;f-estab&#39;)"><input type="checkbox" tabindex="-1"><span class="ms-option-label" title="PS NUEVA ESPERANZA">PS NUEVA ESPERANZA</span></div><div class="ms-option" data-val="PS PRIMAVERA" onclick="msToggle(this,&#39;f-estab&#39;)"><input type="checkbox" tabindex="-1"><span class="ms-option-label" title="PS PRIMAVERA">PS PRIMAVERA</span></div><div class="ms-option" data-val="PS SAGRADO CORAZON DE JESUS" onclick="msToggle(this,&#39;f-estab&#39;)"><input type="checkbox" tabindex="-1"><span class="ms-option-label" title="PS SAGRADO CORAZON DE JESUS">PS SAGRADO CORAZON DE JESUS</span></div><div class="ms-option" data-val="PS VIRGEN DE LAS MERCEDES" onclick="msToggle(this,&#39;f-estab&#39;)"><input type="checkbox" tabindex="-1"><span class="ms-option-label" title="PS VIRGEN DE LAS MERCEDES">PS VIRGEN DE LAS MERCEDES</span></div></div>
+  </div>
+</div>
+      </div>
+
+      <!-- Filtro 3: Servicio -->
+      <div class="fg">
+        <label class="fl">🩺 Servicio</label>
+        <div class="ms-wrap" id="ms-wrap-f-serv">
+  <div class="ms-box" id="ms-box-f-serv" onclick="msToggleOpen('f-serv')">
+    <span class="ms-placeholder" id="ms-ph-f-serv">— Todos —</span>
+    <span class="ms-box-arrow">▾</span>
+  </div>
+  <div class="ms-dropdown" id="ms-dd-f-serv">
+    <div class="ms-search">
+      <span class="ms-search-icon">🔍</span>
+      <input type="text" placeholder="Buscar..." oninput="msSearch(this,'f-serv')">
+    </div>
+    <div class="ms-actions">
+      <button class="ms-action-btn" onclick="msSelectAll('f-serv')">☑ Seleccionar todo</button>
+      <button class="ms-action-btn" onclick="msClear('f-serv')">✕ Limpiar</button>
+    </div>
+    <div class="ms-list" id="ms-list-f-serv"></div>
+  </div>
+</div>
+      </div>
+
+      <!-- Filtro 4: Mes -->
+      <div class="fg">
+        <label class="fl">📆 Mes</label>
+        <div class="ms-wrap" id="ms-wrap-f-mes">
+  <div class="ms-box" id="ms-box-f-mes" onclick="msToggleOpen(&#39;f-mes&#39;)">
+    <span class="ms-placeholder" id="ms-ph-f-mes" style="">— Todos —</span>
+    <span class="ms-box-arrow">▾</span>
+  </div>
+  <div class="ms-dropdown" id="ms-dd-f-mes">
+    <div class="ms-search">
+      <span class="ms-search-icon">🔍</span>
+      <input type="text" placeholder="Buscar..." oninput="msSearch(this,&#39;f-mes&#39;)">
+    </div>
+    <div class="ms-actions">
+      <button class="ms-action-btn" onclick="msSelectAll(&#39;f-mes&#39;)">☑ Seleccionar todo</button>
+      <button class="ms-action-btn" onclick="msClear(&#39;f-mes&#39;)">✕ Limpiar</button>
+    </div>
+    <div class="ms-list" id="ms-list-f-mes"><div class="ms-option" data-val="ENERO 2026" onclick="msToggle(this,&#39;f-mes&#39;)"><input type="checkbox" tabindex="-1"><span class="ms-option-label" title="ENERO 2026">ENERO 2026</span></div><div class="ms-option" data-val="FEBRERO 2026" onclick="msToggle(this,&#39;f-mes&#39;)"><input type="checkbox" tabindex="-1"><span class="ms-option-label" title="FEBRERO 2026">FEBRERO 2026</span></div><div class="ms-option" data-val="MARZO 2026" onclick="msToggle(this,&#39;f-mes&#39;)"><input type="checkbox" tabindex="-1"><span class="ms-option-label" title="MARZO 2026">MARZO 2026</span></div><div class="ms-option" data-val="ABRIL 2026" onclick="msToggle(this,&#39;f-mes&#39;)"><input type="checkbox" tabindex="-1"><span class="ms-option-label" title="ABRIL 2026">ABRIL 2026</span></div><div class="ms-option" data-val="MAYO 2026" onclick="msToggle(this,&#39;f-mes&#39;)"><input type="checkbox" tabindex="-1"><span class="ms-option-label" title="MAYO 2026">MAYO 2026</span></div></div>
+  </div>
+</div>
+      </div>
+
+      <!-- Filtro 4: Fecha desde -->
+      <div class="fg">
+        <label class="fl">📅 Fecha desde</label>
+        <input class="fc" id="f-desde" type="date">
+      </div>
+
+      <!-- Filtro 5: Fecha hasta -->
+      <div class="fg">
+        <label class="fl">📅 Fecha hasta</label>
+        <input class="fc" id="f-hasta" type="date">
+      </div>
+
+      <div class="divider"></div>
+
+      <!-- Filtro 6: Tipo mantenimiento -->
+      <div class="fg">
+        <label class="fl">🔧 Tipo mantenimiento</label>
+        <div class="ms-wrap" id="ms-wrap-f-tipo">
+  <div class="ms-box" id="ms-box-f-tipo" onclick="msToggleOpen(&#39;f-tipo&#39;)">
+    <span class="ms-placeholder" id="ms-ph-f-tipo">— Todos —</span>
+    <span class="ms-box-arrow">▾</span>
+  </div>
+  <div class="ms-dropdown" id="ms-dd-f-tipo">
+    <div class="ms-search">
+      <span class="ms-search-icon">🔍</span>
+      <input type="text" placeholder="Buscar..." oninput="msSearch(this,&#39;f-tipo&#39;)">
+    </div>
+    <div class="ms-actions">
+      <button class="ms-action-btn" onclick="msSelectAll(&#39;f-tipo&#39;)">☑ Seleccionar todo</button>
+      <button class="ms-action-btn" onclick="msClear(&#39;f-tipo&#39;)">✕ Limpiar</button>
+    </div>
+    <div class="ms-list" id="ms-list-f-tipo"><div class="ms-option" data-val="CAPACITACION" onclick="msToggle(this,&#39;f-tipo&#39;)"><input type="checkbox" tabindex="-1"><span class="ms-option-label" title="CAPACITACION">CAPACITACION</span></div><div class="ms-option" data-val="CORRECTIVO" onclick="msToggle(this,&#39;f-tipo&#39;)"><input type="checkbox" tabindex="-1"><span class="ms-option-label" title="CORRECTIVO">CORRECTIVO</span></div><div class="ms-option" data-val="EVALUACION" onclick="msToggle(this,&#39;f-tipo&#39;)"><input type="checkbox" tabindex="-1"><span class="ms-option-label" title="EVALUACION">EVALUACION</span></div><div class="ms-option" data-val="PREVENTIVO" onclick="msToggle(this,&#39;f-tipo&#39;)"><input type="checkbox" tabindex="-1"><span class="ms-option-label" title="PREVENTIVO">PREVENTIVO</span></div><div class="ms-option" data-val="SUPERVISION" onclick="msToggle(this,&#39;f-tipo&#39;)"><input type="checkbox" tabindex="-1"><span class="ms-option-label" title="SUPERVISION">SUPERVISION</span></div></div>
+  </div>
+</div>
+      </div>
+
+      <!-- Filtro 7: Estado funcional -->
+      <div class="fg">
+        <label class="fl">⚙ Estado funcional</label>
+        <div class="ms-wrap" id="ms-wrap-f-estado">
+  <div class="ms-box" id="ms-box-f-estado" onclick="msToggleOpen(&#39;f-estado&#39;)">
+    <span class="ms-placeholder" id="ms-ph-f-estado">— Todos —</span>
+    <span class="ms-box-arrow">▾</span>
+  </div>
+  <div class="ms-dropdown" id="ms-dd-f-estado">
+    <div class="ms-search">
+      <span class="ms-search-icon">🔍</span>
+      <input type="text" placeholder="Buscar..." oninput="msSearch(this,&#39;f-estado&#39;)">
+    </div>
+    <div class="ms-actions">
+      <button class="ms-action-btn" onclick="msSelectAll(&#39;f-estado&#39;)">☑ Seleccionar todo</button>
+      <button class="ms-action-btn" onclick="msClear(&#39;f-estado&#39;)">✕ Limpiar</button>
+    </div>
+    <div class="ms-list" id="ms-list-f-estado"><div class="ms-option" data-val="Inoperativo x Consumibles" onclick="msToggle(this,&#39;f-estado&#39;)"><input type="checkbox" tabindex="-1"><span class="ms-option-label" title="Inoperativo x Consumibles">Inoperativo x Consumibles</span></div><div class="ms-option" data-val="Inoperativo x Mantenimiento" onclick="msToggle(this,&#39;f-estado&#39;)"><input type="checkbox" tabindex="-1"><span class="ms-option-label" title="Inoperativo x Mantenimiento">Inoperativo x Mantenimiento</span></div><div class="ms-option" data-val="Inoperativo x Repuestos" onclick="msToggle(this,&#39;f-estado&#39;)"><input type="checkbox" tabindex="-1"><span class="ms-option-label" title="Inoperativo x Repuestos">Inoperativo x Repuestos</span></div><div class="ms-option" data-val="Op. Parcial Calibrado" onclick="msToggle(this,&#39;f-estado&#39;)"><input type="checkbox" tabindex="-1"><span class="ms-option-label" title="Op. Parcial Calibrado">Op. Parcial Calibrado</span></div><div class="ms-option" data-val="Op. Parcial No Calibrado" onclick="msToggle(this,&#39;f-estado&#39;)"><input type="checkbox" tabindex="-1"><span class="ms-option-label" title="Op. Parcial No Calibrado">Op. Parcial No Calibrado</span></div><div class="ms-option" data-val="Operativo Calibrado" onclick="msToggle(this,&#39;f-estado&#39;)"><input type="checkbox" tabindex="-1"><span class="ms-option-label" title="Operativo Calibrado">Operativo Calibrado</span></div><div class="ms-option" data-val="Operativo No Calibrado" onclick="msToggle(this,&#39;f-estado&#39;)"><input type="checkbox" tabindex="-1"><span class="ms-option-label" title="Operativo No Calibrado">Operativo No Calibrado</span></div><div class="ms-option" data-val="Para Baja" onclick="msToggle(this,&#39;f-estado&#39;)"><input type="checkbox" tabindex="-1"><span class="ms-option-label" title="Para Baja">Para Baja</span></div></div>
+  </div>
+</div>
+      </div>
+
+      <!-- Filtro 8: Ejecutor -->
+      <div class="fg">
+        <label class="fl">👤 Ejecutor</label>
+        <div class="ms-wrap" id="ms-wrap-f-ejec">
+  <div class="ms-box" id="ms-box-f-ejec" onclick="msToggleOpen(&#39;f-ejec&#39;)">
+    <span class="ms-placeholder" id="ms-ph-f-ejec">— Todos —</span>
+    <span class="ms-box-arrow">▾</span>
+  </div>
+  <div class="ms-dropdown" id="ms-dd-f-ejec">
+    <div class="ms-search">
+      <span class="ms-search-icon">🔍</span>
+      <input type="text" placeholder="Buscar..." oninput="msSearch(this,&#39;f-ejec&#39;)">
+    </div>
+    <div class="ms-actions">
+      <button class="ms-action-btn" onclick="msSelectAll(&#39;f-ejec&#39;)">☑ Seleccionar todo</button>
+      <button class="ms-action-btn" onclick="msClear(&#39;f-ejec&#39;)">✕ Limpiar</button>
+    </div>
+    <div class="ms-list" id="ms-list-f-ejec"><div class="ms-option" data-val="ALFONSO VARGAS" onclick="msToggle(this,&#39;f-ejec&#39;)"><input type="checkbox" tabindex="-1"><span class="ms-option-label" title="ALFONSO VARGAS">ALFONSO VARGAS</span></div><div class="ms-option" data-val="ANGEL FLORES" onclick="msToggle(this,&#39;f-ejec&#39;)"><input type="checkbox" tabindex="-1"><span class="ms-option-label" title="ANGEL FLORES">ANGEL FLORES</span></div><div class="ms-option" data-val="DANNY CORREA" onclick="msToggle(this,&#39;f-ejec&#39;)"><input type="checkbox" tabindex="-1"><span class="ms-option-label" title="DANNY CORREA">DANNY CORREA</span></div><div class="ms-option" data-val="JEAN MAGUIÑA" onclick="msToggle(this,&#39;f-ejec&#39;)"><input type="checkbox" tabindex="-1"><span class="ms-option-label" title="JEAN MAGUIÑA">JEAN MAGUIÑA</span></div><div class="ms-option" data-val="JOSE ESPINOZA" onclick="msToggle(this,&#39;f-ejec&#39;)"><input type="checkbox" tabindex="-1"><span class="ms-option-label" title="JOSE ESPINOZA">JOSE ESPINOZA</span></div><div class="ms-option" data-val="JOSE LUIS CAMPOS" onclick="msToggle(this,&#39;f-ejec&#39;)"><input type="checkbox" tabindex="-1"><span class="ms-option-label" title="JOSE LUIS CAMPOS">JOSE LUIS CAMPOS</span></div><div class="ms-option" data-val="JULIO VEGA" onclick="msToggle(this,&#39;f-ejec&#39;)"><input type="checkbox" tabindex="-1"><span class="ms-option-label" title="JULIO VEGA">JULIO VEGA</span></div><div class="ms-option" data-val="KEVIN BLANCO" onclick="msToggle(this,&#39;f-ejec&#39;)"><input type="checkbox" tabindex="-1"><span class="ms-option-label" title="KEVIN BLANCO">KEVIN BLANCO</span></div><div class="ms-option" data-val="WAGNER ROJAS" onclick="msToggle(this,&#39;f-ejec&#39;)"><input type="checkbox" tabindex="-1"><span class="ms-option-label" title="WAGNER ROJAS">WAGNER ROJAS</span></div></div>
+  </div>
+</div>
+      </div>
+
+      <!-- Filtro 9: PDF adjunto -->
+      <div class="fg">
+        <label class="fl">📄 PDF Adjunto</label>
+        <select id="f-pdf" style="width:100%;padding:5px 9px;border:1.5px solid var(--borde);border-radius:7px;background:#fff;font-size:12px;color:var(--texto);font-family:inherit;cursor:pointer;" onchange="applyFilters()">
+          <option value="">— Todos —</option>
+          <option value="SI">✔ Con PDF</option>
+          <option value="NO">✘ Sin PDF</option>
+        </select>
+      </div>
+
+      <div class="divider"></div>
+
+      <button class="btn-go" id="btn-apply">▶ APLICAR FILTROS</button>
+      <button class="btn-reset" id="btn-reset">✕ Limpiar todo</button>
+
+    </div>
+  </aside>
+
+  <!-- ════════════════════════════════
+       CONTENIDO PRINCIPAL
+  ════════════════════════════════ -->
+  <main class="main">
+
+    <!-- Tags de filtros activos -->
+    <div class="tags" id="tags"></div>
+
+    <!-- Tarjetas KPI -->
+    <div class="kpis" id="kpis"><div class="kpi" style="border-left-color:#1d4ed8">
+    <div class="kpi-v" style="color:#1d4ed8">869</div>
+    <div class="kpi-l">Total atenciones</div>
+  </div><div class="kpi" style="border-left-color:#15803d">
+    <div class="kpi-v" style="color:#15803d">155</div>
+    <div class="kpi-l">Op. Calibrado</div>
+  </div><div class="kpi" style="border-left-color:#0369a1">
+    <div class="kpi-v" style="color:#0369a1">262</div>
+    <div class="kpi-l">Op. No Calibrado</div>
+  </div><div class="kpi" style="border-left-color:#dc2626">
+    <div class="kpi-v" style="color:#dc2626">139</div>
+    <div class="kpi-l">Inoperativos</div>
+  </div><div class="kpi" style="border-left-color:#9d174d">
+    <div class="kpi-v" style="color:#9d174d">72</div>
+    <div class="kpi-l">Para Baja</div>
+  </div><div class="kpi" style="border-left-color:#0f766e">
+    <div class="kpi-v" style="color:#0f766e">293</div>
+    <div class="kpi-l">Preventivos</div>
+  </div><div class="kpi" style="border-left-color:#b45309">
+    <div class="kpi-v" style="color:#b45309">330</div>
+    <div class="kpi-l">Correctivos</div>
+  </div><div class="kpi" style="border-left-color:#7c3aed">
+    <div class="kpi-v" style="color:#7c3aed">101</div>
+    <div class="kpi-l">Establecimientos</div>
+  </div></div>
+
+    <!-- Barra de búsqueda libre + botón gráficas -->
+    <div style="display:flex;gap:10px;align-items:stretch;margin-bottom:0">
+      <div class="sbar" style="flex:1;margin-bottom:0">
+        <span style="font-size:18px">🔍</span>
+        <input type="text" id="srch" placeholder="Buscar por equipo, marca, servicio, observaciones…">
+        <div class="sbar-cnt" id="srch-cnt">869 resultados</div>
+      </div>
+      <button id="btn-charts" onclick="toggleCharts()" style="display: flex; align-items: center; gap: 8px; padding: 0px 20px; background: linear-gradient(135deg, rgb(13, 43, 94), rgb(29, 78, 216)); color: rgb(255, 255, 255); border-width: medium; border-style: none; border-color: currentcolor; border-image: initial; border-radius: 12px; font-size: 13px; font-weight: 700; cursor: pointer; white-space: nowrap; box-shadow: rgba(29, 78, 216, 0.25) 0px 2px 8px; transition: opacity 0.2s; font-family: inherit;">📊 Gráficas</button>
+    </div>
+
+    <!-- Panel de Gráficas -->
+    <div id="charts-panel" style="display: none; margin-top: 14px;">
+      <div style="background:#fff;border-radius:14px;padding:22px 24px;
+                  box-shadow:0 2px 12px rgba(0,0,0,.07);border:1px solid #e2e8f0">
+
+        <!-- Título panel -->
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px">
+          <div>
+            <div style="font-size:15px;font-weight:800;color:#0d2b5e">📊 Análisis Visual</div>
+            <div style="font-size:11px;color:#94a3b8;margin-top:2px">Basado en los filtros aplicados</div>
+          </div>
+          <div style="display:flex;gap:8px;align-items:center">
+            <button id="btn-print-pdf" onclick="printPDFReport()" style="background:linear-gradient(135deg,#0d2b5e,#1d4ed8);border:none;border-radius:8px;
+                     padding:7px 16px;font-size:12px;font-weight:700;cursor:pointer;color:#fff;
+                     font-family:inherit;display:flex;align-items:center;gap:6px;
+                     box-shadow:0 2px 6px rgba(29,78,216,.25);transition:opacity .2s">
+              🖨️ Imprimir Informe
+            </button>
+            <button onclick="toggleCharts()" style="background:#f1f5f9;border:1px solid #e2e8f0;border-radius:8px;
+                     padding:6px 12px;font-size:12px;cursor:pointer;color:#64748b;font-family:inherit">
+              ✕ Cerrar
+            </button>
+          </div>
+        </div>
+
+        <!-- Grid de gráficas -->
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
+
+          <!-- Gráfica 1: Estado Funcional (Dona) -->
+          <div style="background:#f8fafc;border-radius:10px;padding:16px">
+            <div style="font-size:12px;font-weight:700;color:#0d2b5e;margin-bottom:12px;text-transform:uppercase;letter-spacing:.04em">
+              Estado Funcional
+            </div>
+            <div style="position:relative;height:220px">
+              <canvas id="chart-estado" style="box-sizing: border-box; display: block; height: 220px; width: 220px;" width="275" height="275"></canvas>
+            </div>
+          </div>
+
+          <!-- Gráfica 2: Tipo de Mantenimiento (Barras) -->
+          <div style="background:#f8fafc;border-radius:10px;padding:16px">
+            <div style="font-size:12px;font-weight:700;color:#0d2b5e;margin-bottom:12px;text-transform:uppercase;letter-spacing:.04em">
+              Tipo de Mantenimiento
+            </div>
+            <div style="position:relative;height:220px">
+              <canvas id="chart-tipo" style="box-sizing: border-box; display: block; height: 220px; width: 440px;" width="550" height="275"></canvas>
+            </div>
+          </div>
+
+          <!-- Gráfica 3: OTMs por Mes (Línea) -->
+          <div style="background:#f8fafc;border-radius:10px;padding:16px">
+            <div style="font-size:12px;font-weight:700;color:#0d2b5e;margin-bottom:12px;text-transform:uppercase;letter-spacing:.04em">
+              OTMs por Mes
+            </div>
+            <div style="position:relative;height:220px">
+              <canvas id="chart-mes" style="box-sizing: border-box; display: block; height: 220px; width: 440px;" width="550" height="275"></canvas>
+            </div>
+          </div>
+
+          <!-- Gráfica 4: Top 8 Establecimientos (Barras horizontales) -->
+          <div style="background:#f8fafc;border-radius:10px;padding:16px">
+            <div style="font-size:12px;font-weight:700;color:#0d2b5e;margin-bottom:12px;text-transform:uppercase;letter-spacing:.04em">
+              Top Establecimientos
+            </div>
+            <div style="position:relative;height:220px">
+              <canvas id="chart-estab" style="box-sizing: border-box; display: block; height: 220px; width: 440px;" width="550" height="275"></canvas>
+            </div>
+          </div>
+
+          <!-- Gráfica 5: OTMs por Ejecutor (Barras horizontales) -->
+          <div style="background:#f8fafc;border-radius:10px;padding:16px;grid-column:1/-1">
+            <div style="font-size:12px;font-weight:700;color:#0d2b5e;margin-bottom:12px;text-transform:uppercase;letter-spacing:.04em">
+              OTMs por Ejecutor
+            </div>
+            <div style="position:relative;height:240px">
+              <canvas id="chart-ejec" style="box-sizing: border-box; display: block; height: 240px; width: 480px;" width="600" height="300"></canvas>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+
+    <!-- Tabla de datos -->
+    <div class="tcard">
+      <div class="tscroll">
+        <table>
+          <thead>
+            <tr>
+              <th onclick="sortBy(&#39;id&#39;)" data-c="id" class="asc">    # OTM</th>
+              <th onclick="sortBy(&#39;fdisp&#39;)" data-c="fdisp" class=""> Fecha</th>
+              <th onclick="sortBy(&#39;mes_n&#39;)" data-c="mes_n" class=""> Mes</th>
+              <th onclick="sortBy(&#39;estab&#39;)" data-c="estab" class=""> Establecimiento</th>
+              <th onclick="sortBy(&#39;serv&#39;)" data-c="serv" class="">  Servicio</th>
+              <th onclick="sortBy(&#39;equipo&#39;)" data-c="equipo" class="">Equipo</th>
+              <th onclick="sortBy(&#39;marca&#39;)" data-c="marca" class=""> Marca</th>
+              <th onclick="sortBy(&#39;tienePdf&#39;)" data-c="tienePdf" class="">PDF</th>
+              <th onclick="sortBy(&#39;tipo&#39;)" data-c="tipo" class="">  Tipo</th>
+              <th onclick="sortBy(&#39;estado&#39;)" data-c="estado" class="">Estado</th>
+              <th onclick="sortBy(&#39;ejec&#39;)" data-c="ejec" class="">  Ejecutor</th>
+            </tr>
+          </thead>
+          <tbody id="tbody"><tr onclick="showDetail(&#39;OTM_0702&#39;)" title="Click para ver detalle">
+        <td style="font-weight:700;color:#1d4ed8">OTM_0702</td>
+        <td style="white-space:nowrap">—</td>
+        <td style="white-space:nowrap;font-size:11px">—</td>
+        <td title="">—</td>
+        <td title="">—</td>
+        <td title="" style="font-weight:600;color:#0d2b5e">—</td>
+        <td>—</td>
+        <td><span class="b gray">—</span></td>
+        <td><span class="b gray">Sin dato</span></td>
+        <td>—</td>
+      </tr><tr onclick="showDetail(&#39;OTM_0703&#39;)" title="Click para ver detalle">
+        <td style="font-weight:700;color:#1d4ed8">OTM_0703</td>
+        <td style="white-space:nowrap">—</td>
+        <td style="white-space:nowrap;font-size:11px">—</td>
+        <td title="">—</td>
+        <td title="">—</td>
+        <td title="" style="font-weight:600;color:#0d2b5e">—</td>
+        <td>—</td>
+        <td><span class="b gray">—</span></td>
+        <td><span class="b gray">Sin dato</span></td>
+        <td>—</td>
+      </tr><tr onclick="showDetail(&#39;OTM_0001&#39;)" title="Click para ver detalle">
+        <td style="font-weight:700;color:#1d4ed8">OTM_0001</td>
+        <td style="white-space:nowrap">02/01/2026</td>
+        <td style="white-space:nowrap;font-size:11px">ENERO 2026</td>
+        <td title="CMI  EL PROGRESO">CMI  EL PROGRESO</td>
+        <td title="">—</td>
+        <td title="ECOGRAFO RODABLE" style="font-weight:600;color:#0d2b5e">ECOGRAFO RODABLE</td>
+        <td>ESAOTE</td>
+        <td><span class="b t-eval">EVALUACION</span></td>
+        <td><span class="b mt">Inoperativo x Mantenimiento</span></td>
+        <td>ANGEL FLORES</td>
+      </tr><tr onclick="showDetail(&#39;OTM_0013&#39;)" title="Click para ver detalle">
+        <td style="font-weight:700;color:#1d4ed8">OTM_0013</td>
+        <td style="white-space:nowrap">05/01/2026</td>
+        <td style="white-space:nowrap;font-size:11px">ENERO 2026</td>
+        <td title="CS  TUPAC AMARU">CS  TUPAC AMARU</td>
+        <td title="">—</td>
+        <td title="ESTERILIZADOR A CALOR SECO" style="font-weight:600;color:#0d2b5e">ESTERILIZADOR A CALOR SECO</td>
+        <td>MEMMERT</td>
+        <td><span class="b t-eval">EVALUACION</span></td>
+        <td><span class="b ok">Operativo Calibrado</span></td>
+        <td>ALFONSO VARGAS</td>
+      </tr><tr onclick="showDetail(&#39;OTM_0002&#39;)" title="Click para ver detalle">
+        <td style="font-weight:700;color:#1d4ed8">OTM_0002</td>
+        <td style="white-space:nowrap">06/01/2026</td>
+        <td style="white-space:nowrap;font-size:11px">ENERO 2026</td>
+        <td title="CS ENRIQUE MILLA OCHOA">CS ENRIQUE MILLA OCHOA</td>
+        <td title="">—</td>
+        <td title="MICROSCOPIO BINOCULAR" style="font-weight:600;color:#0d2b5e">MICROSCOPIO BINOCULAR</td>
+        <td>PROWAY</td>
+        <td><span class="b t-prev">PREVENTIVO</span></td>
+        <td><span class="b par">Op. Parcial No Calibrado</span></td>
+        <td>ANGEL FLORES</td>
+      </tr><tr onclick="showDetail(&#39;OTM_0003&#39;)" title="Click para ver detalle">
+        <td style="font-weight:700;color:#1d4ed8">OTM_0003</td>
+        <td style="white-space:nowrap">06/01/2026</td>
+        <td style="white-space:nowrap;font-size:11px">ENERO 2026</td>
+        <td title="CS ENRIQUE MILLA OCHOA">CS ENRIQUE MILLA OCHOA</td>
+        <td title="">—</td>
+        <td title="CONTADOR DE CELULAS" style="font-weight:600;color:#0d2b5e">CONTADOR DE CELULAS</td>
+        <td>KACIL</td>
+        <td><span class="b t-eval">EVALUACION</span></td>
+        <td><span class="b baja">Para Baja</span></td>
+        <td>ANGEL FLORES</td>
+      </tr><tr onclick="showDetail(&#39;OTM_0014&#39;)" title="Click para ver detalle">
+        <td style="font-weight:700;color:#1d4ed8">OTM_0014</td>
+        <td style="white-space:nowrap">06/01/2026</td>
+        <td style="white-space:nowrap;font-size:11px">ENERO 2026</td>
+        <td title="CMI  MEXICO">CMI  MEXICO</td>
+        <td title="">—</td>
+        <td title="AUTOCLAVE HORIZONTAL" style="font-weight:600;color:#0d2b5e">AUTOCLAVE HORIZONTAL</td>
+        <td>ICAN CLAVE</td>
+        <td><span class="b t-eval">EVALUACION</span></td>
+        <td><span class="b bad">Inoperativo x Repuestos</span></td>
+        <td>ALFONSO VARGAS</td>
+      </tr><tr onclick="showDetail(&#39;OTM_0015&#39;)" title="Click para ver detalle">
+        <td style="font-weight:700;color:#1d4ed8">OTM_0015</td>
+        <td style="white-space:nowrap">07/01/2026</td>
+        <td style="white-space:nowrap;font-size:11px">ENERO 2026</td>
+        <td title="CMI  SANTA LUZMILA II">CMI  SANTA LUZMILA II</td>
+        <td title="">—</td>
+        <td title="RAYOS X ESTACIONARIO" style="font-weight:600;color:#0d2b5e">RAYOS X ESTACIONARIO</td>
+        <td>DR GEM</td>
+        <td><span class="b t-corr">CORRECTIVO</span></td>
+        <td><span class="b nc">Operativo No Calibrado</span></td>
+        <td>ALFONSO VARGAS</td>
+      </tr><tr onclick="showDetail(&#39;OTM_0004&#39;)" title="Click para ver detalle">
+        <td style="font-weight:700;color:#1d4ed8">OTM_0004</td>
+        <td style="white-space:nowrap">08/01/2026</td>
+        <td style="white-space:nowrap;font-size:11px">ENERO 2026</td>
+        <td title="CS  CARLOS CUETO FERNANDINI">CS  CARLOS CUETO FERNANDINI</td>
+        <td title="">—</td>
+        <td title="UNIDAD DENTAL" style="font-weight:600;color:#0d2b5e">UNIDAD DENTAL</td>
+        <td>DABI ATLANTE</td>
+        <td><span class="b t-corr">CORRECTIVO</span></td>
+        <td><span class="b nc">Operativo No Calibrado</span></td>
+        <td>ANGEL FLORES</td>
+      </tr><tr onclick="showDetail(&#39;OTM_0005&#39;)" title="Click para ver detalle">
+        <td style="font-weight:700;color:#1d4ed8">OTM_0005</td>
+        <td style="white-space:nowrap">08/01/2026</td>
+        <td style="white-space:nowrap;font-size:11px">ENERO 2026</td>
+        <td title="CS  CARLOS CUETO FERNANDINI">CS  CARLOS CUETO FERNANDINI</td>
+        <td title="">—</td>
+        <td title="UNIDAD DENTAL" style="font-weight:600;color:#0d2b5e">UNIDAD DENTAL</td>
+        <td>FONA</td>
+        <td><span class="b t-eval">EVALUACION</span></td>
+        <td><span class="b bad">Inoperativo x Repuestos</span></td>
+        <td>ANGEL FLORES</td>
+      </tr><tr onclick="showDetail(&#39;OTM_0016&#39;)" title="Click para ver detalle">
+        <td style="font-weight:700;color:#1d4ed8">OTM_0016</td>
+        <td style="white-space:nowrap">08/01/2026</td>
+        <td style="white-space:nowrap;font-size:11px">ENERO 2026</td>
+        <td title="LABORATORIO REFERENCIAL">LABORATORIO REFERENCIAL</td>
+        <td title="">—</td>
+        <td title="AUTOCLAVE VERTICAL" style="font-weight:600;color:#0d2b5e">AUTOCLAVE VERTICAL</td>
+        <td>FAITHFUL</td>
+        <td><span class="b t-eval">EVALUACION</span></td>
+        <td><span class="b bad">Inoperativo x Repuestos</span></td>
+        <td>ALFONSO VARGAS</td>
+      </tr><tr onclick="showDetail(&#39;OTM_0017&#39;)" title="Click para ver detalle">
+        <td style="font-weight:700;color:#1d4ed8">OTM_0017</td>
+        <td style="white-space:nowrap">08/01/2026</td>
+        <td style="white-space:nowrap;font-size:11px">ENERO 2026</td>
+        <td title="LABORATORIO REFERENCIAL">LABORATORIO REFERENCIAL</td>
+        <td title="">—</td>
+        <td title="AUTOCLAVE VERTICAL" style="font-weight:600;color:#0d2b5e">AUTOCLAVE VERTICAL</td>
+        <td>FAITHFUL</td>
+        <td><span class="b t-eval">EVALUACION</span></td>
+        <td><span class="b bad">Inoperativo x Repuestos</span></td>
+        <td>ALFONSO VARGAS</td>
+      </tr><tr onclick="showDetail(&#39;OTM_0018&#39;)" title="Click para ver detalle">
+        <td style="font-weight:700;color:#1d4ed8">OTM_0018</td>
+        <td style="white-space:nowrap">08/01/2026</td>
+        <td style="white-space:nowrap;font-size:11px">ENERO 2026</td>
+        <td title="CMI  TAHUANTINSUYO BAJO">CMI  TAHUANTINSUYO BAJO</td>
+        <td title="">—</td>
+        <td title="UNIDAD DENTAL" style="font-weight:600;color:#0d2b5e">UNIDAD DENTAL</td>
+        <td>YOSHIBA</td>
+        <td><span class="b t-eval">EVALUACION</span></td>
+        <td><span class="b bad">Inoperativo x Repuestos</span></td>
+        <td>ALFONSO VARGAS</td>
+      </tr><tr onclick="showDetail(&#39;OTM_0019&#39;)" title="Click para ver detalle">
+        <td style="font-weight:700;color:#1d4ed8">OTM_0019</td>
+        <td style="white-space:nowrap">08/01/2026</td>
+        <td style="white-space:nowrap;font-size:11px">ENERO 2026</td>
+        <td title="CMI  TAHUANTINSUYO BAJO">CMI  TAHUANTINSUYO BAJO</td>
+        <td title="">—</td>
+        <td title="UNIDAD DENTAL" style="font-weight:600;color:#0d2b5e">UNIDAD DENTAL</td>
+        <td>BGR-METAL</td>
+        <td><span class="b t-corr">CORRECTIVO</span></td>
+        <td><span class="b bad">Inoperativo x Repuestos</span></td>
+        <td>ALFONSO VARGAS</td>
+      </tr><tr onclick="showDetail(&#39;OTM_0020&#39;)" title="Click para ver detalle">
+        <td style="font-weight:700;color:#1d4ed8">OTM_0020</td>
+        <td style="white-space:nowrap">09/01/2026</td>
+        <td style="white-space:nowrap;font-size:11px">ENERO 2026</td>
+        <td title="CMI  RIMAC">CMI  RIMAC</td>
+        <td title="">—</td>
+        <td title="AUTOCLAVE HORIZONTAL" style="font-weight:600;color:#0d2b5e">AUTOCLAVE HORIZONTAL</td>
+        <td>ICAN CLAVE</td>
+        <td><span class="b t-corr">CORRECTIVO</span></td>
+        <td><span class="b ok">Operativo Calibrado</span></td>
+        <td>ALFONSO VARGAS</td>
+      </tr><tr onclick="showDetail(&#39;OTM_0007&#39;)" title="Click para ver detalle">
+        <td style="font-weight:700;color:#1d4ed8">OTM_0007</td>
+        <td style="white-space:nowrap">12/01/2026</td>
+        <td style="white-space:nowrap;font-size:11px">ENERO 2026</td>
+        <td title="PS PRIMAVERA">PS PRIMAVERA</td>
+        <td title="">—</td>
+        <td title="UNIDAD DENTAL" style="font-weight:600;color:#0d2b5e">UNIDAD DENTAL</td>
+        <td>OLSEN</td>
+        <td><span class="b t-corr">CORRECTIVO</span></td>
+        <td><span class="b nc">Operativo No Calibrado</span></td>
+        <td>ANGEL FLORES</td>
+      </tr><tr onclick="showDetail(&#39;OTM_0008&#39;)" title="Click para ver detalle">
+        <td style="font-weight:700;color:#1d4ed8">OTM_0008</td>
+        <td style="white-space:nowrap">12/01/2026</td>
+        <td style="white-space:nowrap;font-size:11px">ENERO 2026</td>
+        <td title="PS PRIMAVERA">PS PRIMAVERA</td>
+        <td title="">—</td>
+        <td title="CAMILLA GINECOLOGICA" style="font-weight:600;color:#0d2b5e">CAMILLA GINECOLOGICA</td>
+        <td>S/M</td>
+        <td><span class="b t-eval">EVALUACION</span></td>
+        <td><span class="b bad">Inoperativo x Repuestos</span></td>
+        <td>ANGEL FLORES</td>
+      </tr><tr onclick="showDetail(&#39;OTM_0009&#39;)" title="Click para ver detalle">
+        <td style="font-weight:700;color:#1d4ed8">OTM_0009</td>
+        <td style="white-space:nowrap">12/01/2026</td>
+        <td style="white-space:nowrap;font-size:11px">ENERO 2026</td>
+        <td title="PS DAVID TEJADA RIVERA">PS DAVID TEJADA RIVERA</td>
+        <td title="">—</td>
+        <td title="COMPRESORA DE AIRE" style="font-weight:600;color:#0d2b5e">COMPRESORA DE AIRE</td>
+        <td>DYN AIR</td>
+        <td><span class="b t-corr">CORRECTIVO</span></td>
+        <td><span class="b nc">Operativo No Calibrado</span></td>
+        <td>JOSE ESPINOZA</td>
+      </tr><tr onclick="showDetail(&#39;OTM_0010&#39;)" title="Click para ver detalle">
+        <td style="font-weight:700;color:#1d4ed8">OTM_0010</td>
+        <td style="white-space:nowrap">13/01/2026</td>
+        <td style="white-space:nowrap;font-size:11px">ENERO 2026</td>
+        <td title="CS  RAUL PORRAS BARNECHEA">CS  RAUL PORRAS BARNECHEA</td>
+        <td title="">—</td>
+        <td title="MICROSCOPIO BINOCULAR" style="font-weight:600;color:#0d2b5e">MICROSCOPIO BINOCULAR</td>
+        <td>OLYMPUS</td>
+        <td><span class="b t-eval">EVALUACION</span></td>
+        <td><span class="b bad">Inoperativo x Repuestos</span></td>
+        <td>ANGEL FLORES</td>
+      </tr><tr onclick="showDetail(&#39;OTM_0011&#39;)" title="Click para ver detalle">
+        <td style="font-weight:700;color:#1d4ed8">OTM_0011</td>
+        <td style="white-space:nowrap">13/01/2026</td>
+        <td style="white-space:nowrap;font-size:11px">ENERO 2026</td>
+        <td title="CS  RAUL PORRAS BARNECHEA">CS  RAUL PORRAS BARNECHEA</td>
+        <td title="">—</td>
+        <td title="MICROSCOPIO BINOCULAR" style="font-weight:600;color:#0d2b5e">MICROSCOPIO BINOCULAR</td>
+        <td>OLYMPUS</td>
+        <td><span class="b t-eval">EVALUACION</span></td>
+        <td><span class="b bad">Inoperativo x Repuestos</span></td>
+        <td>ANGEL FLORES</td>
+      </tr></tbody>
+        </table>
+      </div>
+      <!-- Paginación -->
+      <div class="pag">
+        <div class="pag-info" id="pag-info">Página 1 de 44 · 1–20 de 869</div>
+        <button class="pb" id="btn-p" onclick="goPag(-1)" disabled="">‹ Anterior</button>
+        <div id="pag-ns"><button class="pb on" onclick="goPage(1)">1</button><button class="pb" onclick="goPage(2)">2</button><button class="pb" onclick="goPage(3)">3</button></div>
+        <button class="pb" id="btn-n" onclick="goPag(1)">Siguiente ›</button>
+      </div>
+    </div>
+
+  </main>
+</div>
+
+<!-- ════════════════════════════════
+     MODAL — DETALLE OTM
+════════════════════════════════ -->
+<div class="mbg" id="modal" onclick="if(event.target===this)closeM()">
+  <div class="mbox">
+    <div class="m-title" id="m-title">OTM #OTM_0013 — ESTERILIZADOR A CALOR SECO</div>
+    <div class="m-layout">
+      <div class="m-info">
+        <div class="m-grid" id="m-body"><div class="mk">N° OTM</div><div class="mv">OTM_0013</div><div class="mk">Fecha</div><div class="mv">05/01/2026</div><div class="mk">Mes</div><div class="mv">ENERO 2026</div><div class="mk">Establecimiento</div><div class="mv">CS  TUPAC AMARU</div><div class="mk">Servicio</div><div class="mv">—</div><div class="mk">N° Etiqueta</div><div class="mv">02207-19</div><div class="mk">Equipo</div><div class="mv">ESTERILIZADOR A CALOR SECO</div><div class="mk">Marca</div><div class="mv">MEMMERT</div><div class="mk">Modelo</div><div class="mv">SNB 300</div><div class="mk">Serie</div><div class="mv">C311.0584</div><div class="mk">Tipo Mantenimiento</div><div class="mv">EVALUACION</div><div class="mk">Estado Funcional</div><div class="mv">Operativo Calibrado</div><div class="mk">Ejecutor</div><div class="mv">ALFONSO VARGAS</div><div class="mk">Observaciones</div><div class="mv">—</div></div>
+        <div style="display:flex;gap:8px;margin-top:12px;">
+          <button class="btn-edit" onclick="openEdit(currentOtmId)">✏️ Editar</button>
+          <button class="btn-delete" onclick="confirmDelete(currentOtmId)">🗑️ Eliminar</button>
+        </div>
+        <button class="m-close" style="margin-top:8px;width:100%" onclick="closeM()">✕ Cerrar</button>
+      </div>
+      <div class="m-viewer" id="m-viewer">
+      <div class="m-no-pdf">
+        <span style="font-size:36px">📄</span>
+        <span>Sin archivo PDF registrado</span>
+      </div></div>
+    </div>
+  </div>
+</div>
+
+
+<script>
+/* ════════════════════════════════════════════════════════════
+   DATOS
+   PARA ACTUALIZAR: reemplazar el array ALL con los nuevos datos
+   Usar el script Python adjunto para generar el JSON desde Excel
+════════════════════════════════════════════════════════════ */
+const SHEET_URL   = "https://script.google.com/macros/s/AKfycbx4k_VYMUpMgoRwhuqLTmiYDlOVCMRyBGsNNQNKechXTnl6e31g3fnX96IsswdtI7o8YQ/exec";
+const PDF_FOLDER_ID = "1eJUBvy7CKa8S1lHE25AlGHR9U4sdxK6U";  // carpeta Drive con los PDFs
+let ALL = [];
+const rowsPerPage = 15;
+
+// ══════════════════════════════════════════════════════════════
+//  NORMALIZACIÓN
+// ══════════════════════════════════════════════════════════════
+const MES_ES = ['ENERO','FEBRERO','MARZO','ABRIL','MAYO','JUNIO',
+                'JULIO','AGOSTO','SETIEMBRE','OCTUBRE','NOVIEMBRE','DICIEMBRE'];
+const ESTADO_MAP = [
+    ['OpOk','Operativo Calibrado'],['OpNo','Operativo No Calibrado'],
+    ['OpPn','Op. Parcial No Calibrado'],['OpPc','Op. Parcial Calibrado'],
+    ['IpR','Inoperativo x Repuestos'],['IpM','Inoperativo x Mantenimiento'],
+    ['IpC','Inoperativo x Consumibles'],['Rp','Para Baja'],
+];
+function normEstado(v) {
+    v = String(v||'').trim();
+    if (!v) return 'Sin dato';
+    for (const [k,l] of ESTADO_MAP) if (v.startsWith(k)) return l;
+    if (v.includes(':')) return v.split(':')[1].trim();
+    return v;
+}
+function parseFecha(raw) {
+    if (!raw) return '';
+    if (typeof raw==='string' && /^\d{4}-\d{2}-\d{2}/.test(raw)) return raw.slice(0,10);
+    if (typeof raw==='string' && /^\d{2}\/\d{2}\/\d{4}/.test(raw)) {
+        const [d,m,y]=raw.split('/'); return `${y}-${m}-${d}`;
+    }
+    if (typeof raw==='number') {
+        const d=new Date(Math.round((raw-25569)*86400*1000));
+        return isNaN(d)?'':d.toISOString().slice(0,10);
+    }
+    const d=new Date(raw); return isNaN(d)?'':d.toISOString().slice(0,10);
+}
+function fmtDisp(iso){if(!iso)return'';const[y,m,d]=iso.split('-');return`${d}/${m}/${y}`;}
+function mesNombre(iso){if(!iso)return'';const[y,m]=iso.split('-');return`${MES_ES[+m-1]} ${y}`;}
+function limpiar(v){return(v!==null&&v!==undefined&&String(v).trim()!==''&&String(v).trim()!=='undefined')?String(v).trim():'';}
+
+// ══════════════════════════════════════════════════════════════
+//  TIEMPO REAL
+// ══════════════════════════════════════════════════════════════
+const INTERVALO_SEG = 30;
+let timerInterval = null;
+let countdown = INTERVALO_SEG;
+let cargando = false;
+let primeraVez = true;
+
+function setSyncStatus(estado) {
+    const dot=document.getElementById('sync-dot');
+    const txt=document.getElementById('sync-txt');
+    const ico=document.getElementById('refresh-icon');
+    if(!dot)return;
+    if(estado==='loading'){
+        dot.style.background='#facc15';
+        if(txt)txt.textContent='Actualizando...';
+        if(ico)ico.style.animation='spin360 .8s linear infinite';
+    } else if(estado==='ok'){
+        dot.style.background='#4ade80';
+        const t=new Date().toLocaleTimeString('es-PE',{hour:'2-digit',minute:'2-digit',second:'2-digit'});
+        if(txt)txt.textContent=`Actualizado: ${t}`;
+        if(ico){ico.style.animation='none';ico.textContent='🔄';}
+    } else {
+        dot.style.background='#f87171';
+        if(txt)txt.textContent='Error de conexión';
+        if(ico){ico.style.animation='none';ico.textContent='⚠️';}
+    }
+}
+
+function iniciarCountdown(){
+    clearInterval(timerInterval);
+    countdown=INTERVALO_SEG;
+    const el=document.getElementById('countdown');
+    timerInterval=setInterval(()=>{
+        countdown--;
+        if(el)el.textContent=countdown;
+        if(countdown<=0){clearInterval(timerInterval);cargarDatosDesdeDrive();}
+    },1000);
+}
+
+async function refreshManual(){clearInterval(timerInterval);await cargarDatosDesdeDrive();}
+
+function mostrarToast(msg){
+    let t=document.getElementById('toast');
+    if(!t){
+        t=document.createElement('div');t.id='toast';
+        t.style.cssText='position:fixed;bottom:24px;right:24px;background:#0d2b5e;color:#fff;padding:10px 18px;border-radius:10px;font-size:13px;font-weight:600;box-shadow:0 8px 24px rgba(0,0,0,.25);z-index:9999;transition:opacity .3s;opacity:0;pointer-events:none';
+        document.body.appendChild(t);
+    }
+    t.textContent=msg;t.style.opacity='1';
+    setTimeout(()=>t.style.opacity='0',3000);
+}
+
+// ══════════════════════════════════════════════════════════════
+//  CARGA PRINCIPAL
+// ══════════════════════════════════════════════════════════════
+async function cargarDatosDesdeDrive() {
+    if(cargando)return;
+    cargando=true;
+    setSyncStatus('loading');
+    try {
+        const resp = await fetch(SHEET_URL+'?v='+Date.now());
+        if(!resp.ok) throw new Error(`HTTP ${resp.status}`);
+        const datos = await resp.json();
+        if(!datos||datos.length===0) throw new Error('Sin datos');
+
+        // Guardar filtros activos Y página actual
+        const prevPage = page;
+        const prev={
+            otm:   document.getElementById('f-otm')?.value||'',
+            estab: document.getElementById('f-estab')?.value||'',
+            mes:   document.getElementById('f-mes')?.value||'',
+            tipo:  document.getElementById('f-tipo')?.value||'',
+            estado:document.getElementById('f-estado')?.value||'',
+            ejec:  document.getElementById('f-ejec')?.value||'',
+            desde: document.getElementById('f-desde')?.value||'',
+            hasta: document.getElementById('f-hasta')?.value||'',
+            srch:  document.getElementById('srch')?.value||'',
+        };
+
+        // Log de columnas disponibles (solo primera vez)
+        if(primeraVez){
+            console.log('📋 Columnas del Google Sheet:', Object.keys(datos[0]));
+        }
+
+        const nuevos = datos.map((item,idx)=>{
+            // buscar: coincidencia exacta primero, luego parcial, insensible a mayúsculas
+            const keysItem = Object.keys(item);
+            const buscar=(...pats)=>{
+                for(const p of pats){
+                    // 1. Exacto
+                    let key = keysItem.find(k => k.trim() === p.trim());
+                    // 2. Parcial case-insensitive
+                    if(!key) key = keysItem.find(k => k.trim().toLowerCase().includes(p.trim().toLowerCase()));
+                    if(key && item[key]!==null && item[key]!==undefined && String(item[key]).trim()!=='')
+                        return String(item[key]).trim();
+                }
+                return '';
+            };
+            const id=limpiar(buscar('ID','id','OTM N°','N° OTM','OTM'))||String(idx+1);
+            const fechaISO=parseFecha(buscar('FECHA_OTM','FECHA OTM','FECHA'));
+            const obj = {
+                id,
+                fecha: fechaISO,
+                fdisp: fmtDisp(fechaISO),
+                mes:   fechaISO?fechaISO.slice(0,7):'',
+                mes_n: mesNombre(fechaISO),
+                estab: buscar('Nombre de Establecimiento:','Establecimiento','establecimiento'),
+                serv:  buscar('SERVICIO AL QUE PERTENECE:','SERVICIO AL QUE','SERVICIO','servicio'),
+                etiq:  buscar('N° DE ETIQUETA PATRIMONIAL','ETIQUETA','etiqueta','PATRIMONIAL'),
+                equipo:buscar('NOMBRE O DENOMICION DEL EQUIPO:','NOMBRE O DENOMIC','EQUIPO','equipo','DENOMIC'),
+                marca: buscar('MARCA DEL EQUIPO:','MARCA DEL','marca del','MARCA'),
+                modelo:buscar('MODELO DEL EQUIPO','MODELO','modelo'),
+                serie: buscar('SERIE DEL EQUIPO:','SERIE','serie'),
+                tipo:  buscar('TIPO DE MANTENIMIENTO:','TIPO DE MANT','tipo de mant','TIPO'),
+                estado:normEstado(buscar('ESTADO FUNCIONAL FINAL DEL BIEN:','ESTADO FUNCIONAL','ESTADO FUNC','estado')),
+                ejec:  buscar('EJECUTOR DEL MANTENIMIENTO:','EJECUTOR','ejecutor'),
+                obs:   buscar('OBSERVACIONES DEL MANTENIMIENTO:','OBSERVAC','observac').slice(0,220),
+                pdf: (()=>{
+                    // 1. URL directa guardada en la hoja
+                    const pdfUrl = String(item['__pdf_url__'] || '').trim();
+                    if (pdfUrl && pdfUrl.startsWith('http')) return pdfUrl;
+                    const kUrl = keysItem.find(k => {
+                        const s = String(item[k]||'').trim();
+                        return s.startsWith('http') &&
+                               (s.includes('drive.google') || s.toLowerCase().includes('.pdf'));
+                    });
+                    if (kUrl) return String(item[kUrl]).trim();
+                    // 2. Construir URL de búsqueda con el ticket (columna A) en la carpeta Drive
+                    const ticketPdf = limpiar(buscar('N° TICKET','TICKET','ID','id','OTM N°','N° OTM','OTM')) || String(idx+1);
+                    if (ticketPdf) {
+                        const nombrePdf = ticketPdf + '.pdf';
+                        return 'https://drive.google.com/drive/folders/' + PDF_FOLDER_ID + '?search=' + encodeURIComponent(nombrePdf);
+                    }
+                    return '';
+                })(),
+            };
+            // Campo calculado para ordenar por PDF
+            obj.tienePdf = (obj.pdf && (
+                /\/file\/d\/[a-zA-Z0-9_-]+/.test(obj.pdf) ||
+                /[?&]id=[a-zA-Z0-9_-]+/.test(obj.pdf) ||
+                /\/open\?id=[a-zA-Z0-9_-]+/.test(obj.pdf)
+            )) ? 'SI' : 'NO';
+            return obj;
+        });
+
+        const huboNuevos = !primeraVez && nuevos.length !== ALL.length;
+        ALL = nuevos;
+        ALL.sort((a,b)=>{
+            if(a.fecha<b.fecha)return -1;if(a.fecha>b.fecha)return 1;
+            return(+a.id||0)-(+b.id||0);
+        });
+
+        // Repoblar selects conservando selección
+        const mesOrder=['ENERO','FEBRERO','MARZO','ABRIL','MAYO','JUNIO','JULIO','AGOSTO','SEPTIEMBRE','OCTUBRE','NOVIEMBRE','DICIEMBRE'];
+        const uniq=key=>{const vals=[...new Set(ALL.map(r=>r[key]).filter(Boolean))];if(key==='mes_n'){return vals.sort((a,b)=>{const[ma,ya]=a.split(' ');const[mb,yb]=b.split(' ');return(+ya||0)-(+yb||0)||mesOrder.indexOf(ma)-mesOrder.indexOf(mb);});}return vals.sort();};
+        // Repoblar multiselects conservando selección anterior
+        const prevEstabs  = typeof msGetValues==='function' ? msGetValues('f-estab')  : [];
+        const prevMeses   = typeof msGetValues==='function' ? msGetValues('f-mes')    : [];
+        const prevServs   = typeof msGetValues==='function' ? msGetValues('f-serv')   : [];
+        const prevTipos   = typeof msGetValues==='function' ? msGetValues('f-tipo')   : [];
+        const prevEstados = typeof msGetValues==='function' ? msGetValues('f-estado') : [];
+        const prevEjecs   = typeof msGetValues==='function' ? msGetValues('f-ejec')   : [];
+        msRepoblar('f-estab',  uniq('estab'),  prevEstabs);
+        msRepoblar('f-mes',    uniq('mes_n'),  prevMeses);
+        msRepoblar('f-serv',   uniq('serv'),   prevServs);
+        msRepoblar('f-tipo',   uniq('tipo'),   prevTipos);
+        msRepoblar('f-estado', uniq('estado').filter(v=>v!=='Sin dato'), prevEstados);
+        msRepoblar('f-ejec',   uniq('ejec'),   prevEjecs);
+
+        // Restaurar búsqueda libre
+        if(prev.srch&&document.getElementById('srch'))
+            document.getElementById('srch').value=prev.srch;
+
+        applyFilters();
+        // Restaurar página si sigue siendo válida
+        if(!primeraVez && prevPage > 1) {
+            const totalPagesNow = Math.max(1, Math.ceil(filtered.length / PER));
+            page = Math.min(prevPage, totalPagesNow);
+            renderTable();
+        }
+        if(huboNuevos) mostrarToast(`✅ Nuevos datos: ${ALL.length} registros`);
+        setSyncStatus('ok');
+        primeraVez=false;
+        console.log(`✅ ${ALL.length} registros`);
+    } catch(e) {
+        console.error('Error:',e);
+        setSyncStatus('error');
+        if(primeraVez){
+            document.getElementById('tbody').innerHTML=
+                `<tr><td colspan="11" style="text-align:center;padding:40px;color:#dc2626">
+                ⚠️ Error al conectar con Google Drive<br>
+                <small style="color:#94a3b8">${e.message}</small></td></tr>`;
+        }
+    } finally {
+        cargando=false;
+        iniciarCountdown();
+    }
+}
+
+/* ════════════════════════════════════════════════════════════
+   ESTADO DE LA APLICACIÓN
+════════════════════════════════════════════════════════════ */
+let filtered = [...ALL];
+let sortCol  = 'fecha';
+let sortDir  = -1;     // 1=Ascendente, -1=Descendente
+let page     = 1;
+const PER    = 20;     // Registros por página
+
+/* ════════════════════════════════════════════════════════════
+   INICIALIZACIÓN
+   Llena los selects dinámicamente desde los datos
+════════════════════════════════════════════════════════════ */
+function init() {
+    // Los selects se llenan dinámicamente en cargarDatosDesdeDrive()
+}
+
+/* ════════════════════════════════════════════════════════════
+   APLICAR FILTROS
+   Filtra el array ALL según los criterios seleccionados
+════════════════════════════════════════════════════════════ */
+// ════════════════════════════════════════════════════════════
+// MULTISELECT ENGINE
+// ════════════════════════════════════════════════════════════
+function msGetValues(id) {
+    const list = document.getElementById('ms-list-' + id);
+    if (!list) return [];
+    return [...list.querySelectorAll('.ms-option.selected')].map(el => el.dataset.val);
+}
+function msPositionDropdown(id) {
+    const box = document.getElementById('ms-box-' + id);
+    const dd  = document.getElementById('ms-dd-'  + id);
+    // Move to body to escape any overflow:hidden ancestor
+    if (dd.parentElement !== document.body) {
+        document.body.appendChild(dd);
+    }
+    const rect = box.getBoundingClientRect();
+    const ddH  = 280; // max expected height of dropdown
+    const spaceBelow = window.innerHeight - rect.bottom;
+    const spaceAbove = rect.top;
+
+    dd.style.position = 'fixed';
+    dd.style.left     = rect.left + 'px';
+    dd.style.width    = rect.width + 'px';
+    dd.style.zIndex   = '9999';
+    if (spaceBelow >= ddH || spaceBelow >= spaceAbove) {
+        // Open downward
+        dd.style.top    = (rect.bottom + 4) + 'px';
+        dd.style.bottom = 'auto';
+    } else {
+        // Open upward
+        dd.style.bottom = (window.innerHeight - rect.top + 4) + 'px';
+        dd.style.top    = 'auto';
+    }
+}
+function msToggleOpen(id) {
+    const box = document.getElementById('ms-box-' + id);
+    const dd  = document.getElementById('ms-dd-'  + id);
+    const isOpen = dd.classList.contains('open');
+    document.querySelectorAll('.ms-dropdown.open').forEach(el => {
+        if (el.id !== 'ms-dd-' + id) {
+            el.classList.remove('open');
+            document.getElementById(el.id.replace('ms-dd-','ms-box-'))?.classList.remove('open');
+        }
+    });
+    box.classList.toggle('open', !isOpen);
+    dd.classList.toggle('open', !isOpen);
+    if (!isOpen) {
+        msPositionDropdown(id);
+        dd.querySelector('input[type=text]')?.focus();
+    }
+}
+function msToggle(optEl, id) {
+    optEl.classList.toggle('selected');
+    optEl.querySelector('input[type=checkbox]').checked = optEl.classList.contains('selected');
+    msUpdateBox(id);
+    applyFilters();
+}
+function msSelectAll(id) {
+    document.querySelectorAll('#ms-list-' + id + ' .ms-option:not([style*="display: none"])').forEach(el => {
+        el.classList.add('selected');
+        el.querySelector('input[type=checkbox]').checked = true;
+    });
+    msUpdateBox(id); applyFilters();
+}
+function msClear(id) {
+    document.querySelectorAll('#ms-list-' + id + ' .ms-option').forEach(el => {
+        el.classList.remove('selected');
+        el.querySelector('input[type=checkbox]').checked = false;
+    });
+    msUpdateBox(id); applyFilters();
+}
+function msSearch(input, id) {
+    const q = input.value.toLowerCase();
+    const list = document.getElementById('ms-list-' + id);
+    let vis = 0;
+    list.querySelectorAll('.ms-option').forEach(el => {
+        const show = el.dataset.val.toLowerCase().includes(q);
+        el.style.display = show ? '' : 'none';
+        if (show) vis++;
+    });
+    let emp = list.querySelector('.ms-empty');
+    if (!vis) {
+        if (!emp) { emp = document.createElement('div'); emp.className='ms-empty'; emp.textContent='Sin resultados'; list.appendChild(emp); }
+    } else if (emp) emp.remove();
+}
+
+// Búsqueda rápida para Establecimiento (campo visible sin abrir dropdown)
+function estabQuickSearch(val) {
+    const q = val.toLowerCase().trim();
+    // Sync the internal dropdown search too
+    const ddInput = document.querySelector('#ms-dd-f-estab .ms-search input');
+    if (ddInput) { ddInput.value = val; msSearch(ddInput, 'f-estab'); }
+    // If there's text, open the dropdown; if empty, close it
+    const dd  = document.getElementById('ms-dd-f-estab');
+    const box = document.getElementById('ms-box-f-estab');
+    if (q.length > 0) {
+        document.querySelectorAll('.ms-dropdown.open').forEach(el => {
+            if (el.id !== 'ms-dd-f-estab') {
+                el.classList.remove('open');
+                document.getElementById(el.id.replace('ms-dd-','ms-box-'))?.classList.remove('open');
+            }
+        });
+        dd.classList.add('open');
+        box.classList.add('open');
+        msPositionDropdown('f-estab');
+    } else {
+        dd.classList.remove('open');
+        box.classList.remove('open');
+    }
+}
+function msUpdateBox(id) {
+    const box  = document.getElementById('ms-box-' + id);
+    const ph   = document.getElementById('ms-ph-' + id);
+    const vals = msGetValues(id);
+    box.querySelectorAll('.ms-tag,.ms-count').forEach(el => el.remove());
+    if (!vals.length) { ph.style.display = ''; return; }
+    ph.style.display = 'none';
+    const MAX = 2;
+    vals.slice(0, MAX).forEach(v => {
+        const tag = document.createElement('span');
+        tag.className = 'ms-tag';
+        const xBtn = document.createElement("span");
+        xBtn.className = "ms-tag-x";
+        xBtn.textContent = "✕";
+        xBtn.addEventListener("click", function(e){ e.stopPropagation(); msRemoveOne(id, v); });
+        const txtSpan = document.createElement("span");
+        txtSpan.textContent = v;
+        tag.appendChild(txtSpan);
+        tag.appendChild(xBtn);
+        box.insertBefore(tag, box.querySelector('.ms-box-arrow'));
+    });
+    if (vals.length > MAX) {
+        const cnt = document.createElement('span');
+        cnt.className = 'ms-count'; cnt.textContent = '+' + (vals.length - MAX);
+        box.insertBefore(cnt, box.querySelector('.ms-box-arrow'));
+    }
+}
+function msRemoveOne(id, val) {
+    const list = document.getElementById('ms-list-' + id);
+    const opt = [...list.querySelectorAll('.ms-option')].find(el => el.dataset.val === val);
+    if (opt) { opt.classList.remove('selected'); opt.querySelector('input[type=checkbox]').checked = false; }
+    msUpdateBox(id); applyFilters();
+}
+function msRepoblar(id, valores, prevVals) {
+    const list = document.getElementById('ms-list-' + id);
+    if (!list) return;
+    list.innerHTML = '';
+    valores.forEach(v => {
+        const sel = prevVals.includes(v);
+        const div = document.createElement('div');
+        div.className = 'ms-option' + (sel ? ' selected' : '');
+        div.dataset.val = v;
+        div.setAttribute('onclick', "msToggle(this,'" + id + "')");
+        div.innerHTML = '<input type="checkbox"' + (sel?' checked':'') + ' tabindex="-1"><span class="ms-option-label" title="' + v + '">' + v + '</span>';
+        list.appendChild(div);
+    });
+    msUpdateBox(id);
+}
+// msRepoblarDynamic: igual que msRepoblar pero conserva selección activa
+function msRepoblarDynamic(id, valores, prevVals) {
+    msRepoblar(id, valores, prevVals);
+}
+document.addEventListener('click', e => {
+    if (!e.target.closest('.ms-wrap')) {
+        document.querySelectorAll('.ms-dropdown.open').forEach(dd => {
+            dd.classList.remove('open');
+            document.getElementById(dd.id.replace('ms-dd-','ms-box-'))?.classList.remove('open');
+        });
+    }
+});
+
+// ════════════════════════════════════════════════════════════
+// APLICAR FILTROS (multiselección)
+// ════════════════════════════════════════════════════════════
+function applyFilters() {
+  const otm    = document.getElementById('f-otm').value.trim();
+  const desde  = document.getElementById('f-desde').value;
+  const hasta  = document.getElementById('f-hasta').value;
+
+  const estabs  = msGetValues('f-estab');
+  const meses   = msGetValues('f-mes');
+  const servs   = msGetValues('f-serv');
+  const tipos   = msGetValues('f-tipo');
+  const estados = msGetValues('f-estado');
+  const ejecs   = msGetValues('f-ejec');
+  const pdfFilt = (document.getElementById('f-pdf')?.value || '').trim();
+
+  // Función base de filtrado (excluye opcionalmente un campo para repoblado cruzado)
+  const baseFilter = (excludeField) => ALL.filter(r => {
+    if (excludeField !== 'otm'    && otm           && !r.id.toLowerCase().includes(otm.toLowerCase())) return false;
+    if (excludeField !== 'estab'  && estabs.length && !estabs.includes(r.estab))   return false;
+    if (excludeField !== 'mes'    && meses.length  && !meses.includes(r.mes_n))    return false;
+    if (                             desde          && r.fecha < desde)             return false;
+    if (                             hasta          && r.fecha > hasta)             return false;
+    if (excludeField !== 'serv'   && servs.length  && !servs.includes(r.serv))     return false;
+    if (excludeField !== 'tipo'   && tipos.length  && !tipos.includes(r.tipo))     return false;
+    if (excludeField !== 'estado' && estados.length && !estados.includes(r.estado)) return false;
+    if (excludeField !== 'ejec'   && ejecs.length  && !ejecs.includes(r.ejec))     return false;
+    if (excludeField !== 'pdf'    && pdfFilt       && r.tienePdf !== pdfFilt)      return false;
+    return true;
+  });
+
+  filtered = baseFilter(null);
+
+  // Repoblar multiselects con solo los valores disponibles según filtros cruzados
+  const valsFor = (field, excludeField) => {
+    const rows = baseFilter(excludeField);
+    return [...new Set(rows.map(r => r[field]).filter(Boolean))].sort();
+  };
+  msRepoblarDynamic('f-estab',  valsFor('estab',  'estab'),  estabs);
+  msRepoblarDynamic('f-mes',    valsFor('mes_n',  'mes'),    meses);
+  msRepoblarDynamic('f-serv',   valsFor('serv',   'serv'),   servs);
+  msRepoblarDynamic('f-tipo',   valsFor('tipo',   'tipo'),   tipos);
+  msRepoblarDynamic('f-estado', valsFor('estado', 'estado').filter(v=>v!=='Sin dato'), estados);
+  msRepoblarDynamic('f-ejec',   valsFor('ejec',   'ejec'),   ejecs);
+
+  page = 1;
+  renderTags();
+  renderKPIs();
+  renderTable();
+}
+
+/* ════════════════════════════════════════════════════════════
+   LIMPIAR TODOS LOS FILTROS
+════════════════════════════════════════════════════════════ */
+function clearAll() {
+  ['f-otm','f-desde','f-hasta','srch'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) el.value = '';
+  });
+  const pdfEl = document.getElementById('f-pdf');
+  if (pdfEl) pdfEl.value = '';
+  ['f-estab','f-mes','f-serv','f-tipo','f-estado','f-ejec'].forEach(id => msClear(id));
+  filtered = [...ALL];
+  page = 1;
+  renderTags();
+  renderKPIs();
+  renderTable();
+}
+
+/* ════════════════════════════════════════════════════════════
+   TAGS DE FILTROS ACTIVOS (etiquetas sobre la tabla)
+════════════════════════════════════════════════════════════ */
+function renderTags() {
+  const textInputs = [['f-otm','OTM'],['f-desde','Desde'],['f-hasta','Hasta']];
+  const multiIds   = [['f-estab','Establecimiento'],['f-mes','Mes'],['f-serv','Servicio'],['f-tipo','Tipo'],['f-estado','Estado'],['f-ejec','Ejecutor']];
+  let tags = '';
+  textInputs.forEach(([id,lbl]) => {
+    const v = document.getElementById(id)?.value;
+    if (v) tags += `<span class="tag">${lbl}: <b>${v}</b> <span class="tag-x" onclick="clearTextFilter('${id}')">✕</span></span>`;
+  });
+  multiIds.forEach(([id,lbl]) => {
+    const vals = msGetValues(id);
+    if (vals.length === 1) tags += `<span class="tag">${lbl}: <b>${vals[0]}</b> <span class="tag-x" onclick="msClear('${id}')">✕</span></span>`;
+    else if (vals.length > 1) tags += `<span class="tag">${lbl}: <b>${vals.length} seleccionados</b> <span class="tag-x" onclick="msClear('${id}')">✕</span></span>`;
+  });
+  document.getElementById('tags').innerHTML = tags;
+}
+function clearTextFilter(id) { document.getElementById(id).value=''; applyFilters(); }
+
+function clearOne(id) {
+  document.getElementById(id).value = '';
+  applyFilters();
+}
+
+/* ════════════════════════════════════════════════════════════
+   KPIs (tarjetas numéricas de resumen)
+════════════════════════════════════════════════════════════ */
+function renderKPIs() {
+  const t    = filtered.length;
+  const okC  = filtered.filter(r => r.estado === 'Operativo Calibrado').length;
+  const okNC = filtered.filter(r => r.estado === 'Operativo No Calibrado').length;
+  const inop = filtered.filter(r => r.estado && r.estado.startsWith('Inoperativo')).length;
+  const baja = filtered.filter(r => r.estado === 'Para Baja').length;
+  const prev = filtered.filter(r => r.tipo   === 'PREVENTIVO').length;
+  const corr = filtered.filter(r => r.tipo   === 'CORRECTIVO').length;
+  const nEst = new Set(filtered.map(r => r.estab).filter(Boolean)).size;
+
+  document.getElementById('hdr-total').textContent = t;
+  document.getElementById('kpis').innerHTML = [
+    {v:t,    l:'Total atenciones',  c:'#1d4ed8'},
+    {v:okC,  l:'Op. Calibrado',     c:'#15803d'},
+    {v:okNC, l:'Op. No Calibrado',  c:'#0369a1'},
+    {v:inop, l:'Inoperativos',      c:'#dc2626'},
+    {v:baja, l:'Para Baja',         c:'#9d174d'},
+    {v:prev, l:'Preventivos',       c:'#0f766e'},
+    {v:corr, l:'Correctivos',       c:'#b45309'},
+    {v:nEst, l:'Establecimientos',  c:'#7c3aed'},
+  ].map(k => `<div class="kpi" style="border-left-color:${k.c}">
+    <div class="kpi-v" style="color:${k.c}">${k.v}</div>
+    <div class="kpi-l">${k.l}</div>
+  </div>`).join('');
+}
+
+/* ════════════════════════════════════════════════════════════
+   BADGES DE COLOR
+════════════════════════════════════════════════════════════ */
+function bEstado(e) {
+  if (!e || e === 'Sin dato') return `<span class="b gray">${e||'—'}</span>`;
+  const map = {
+    'Operativo Calibrado'       : 'ok',
+    'Operativo No Calibrado'    : 'nc',
+    'Op. Parcial Calibrado'     : 'par',
+    'Op. Parcial No Calibrado'  : 'par',
+    'Inoperativo x Repuestos'   : 'bad',
+    'Inoperativo x Mantenimiento': 'mt',
+    'Inoperativo x Consumibles' : 'cons',
+    'Para Baja'                 : 'baja',
+  };
+  return `<span class="b ${map[e]||'gray'}">${e}</span>`;
+}
+
+function bTipo(t) {
+  const map = {
+    PREVENTIVO:'t-prev', CORRECTIVO:'t-corr',
+    EVALUACION:'t-eval', CAPACITACION:'t-cap', SUPERVISION:'t-sup'
+  };
+  return `<span class="b ${map[t]||'gray'}">${t||'—'}</span>`;
+}
+
+function bPdf(r) {
+  // Tiene PDF si la URL guardada contiene un fileId directo de Drive
+  const hasPdf = r.pdf && (
+    /\/file\/d\/[a-zA-Z0-9_-]+/.test(r.pdf) ||
+    /[?&]id=[a-zA-Z0-9_-]+/.test(r.pdf) ||
+    /\/open\?id=[a-zA-Z0-9_-]+/.test(r.pdf)
+  );
+  return hasPdf
+    ? `<span class="b pdf-si">✔ Sí</span>`
+    : `<span class="b pdf-no">✘ No</span>`;
+}
+
+/* ════════════════════════════════════════════════════════════
+   RENDERIZAR TABLA
+════════════════════════════════════════════════════════════ */
+function renderTable() {
+  const srch = (document.getElementById('srch').value || '').toLowerCase();
+
+  // Búsqueda libre (equipo, marca, servicio, obs)
+  let rows = filtered;
+  if (srch) {
+    rows = rows.filter(r =>
+      [r.id, r.equipo, r.marca, r.serv, r.etiq, r.obs, r.modelo, r.estab, r.ejec]
+        .join(' ').toLowerCase().includes(srch)
+    );
+  }
+
+  // Ordenar
+  rows = [...rows].sort((a, b) => {
+    let va = a[sortCol] || '', vb = b[sortCol] || '';
+    if (sortCol === 'id') { va = +va || 0; vb = +vb || 0; }
+    const cmp = (va < vb ? -1 : va > vb ? 1 : 0) * sortDir;
+    if (cmp !== 0) return cmp;
+    // Desempate: si columna principal empata, ordenar por fecha luego por id
+    if (sortCol !== 'fecha') {
+      const fd = (a.fecha || '') < (b.fecha || '') ? -1 : (a.fecha || '') > (b.fecha || '') ? 1 : 0;
+      if (fd !== 0) return fd;
+    }
+    return (+a.id || 0) - (+b.id || 0);
+  });
+
+  const total      = rows.length;
+  const totalPages = Math.max(1, Math.ceil(total / PER));
+  if (page > totalPages) page = totalPages;
+  const slice = rows.slice((page - 1) * PER, page * PER);
+
+  document.getElementById('srch-cnt').textContent =
+    `${total} resultado${total !== 1 ? 's' : ''}`;
+
+  // Filas vacías
+  if (total === 0) {
+    document.getElementById('tbody').innerHTML =
+      `<tr><td colspan="11" style="text-align:center;padding:60px;color:#94a3b8">
+        <div style="font-size:48px;margin-bottom:12px">🔍</div>
+        <div style="font-size:16px;font-weight:600">Sin resultados</div>
+        <div style="font-size:13px;margin-top:6px">Intente con otros filtros</div>
+      </td></tr>`;
+  } else {
+    // Renderizar filas
+    document.getElementById('tbody').innerHTML = slice.map(r =>
+      `<tr onclick="showDetail('${r.id}')" title="Click para ver detalle">
+        <td style="font-weight:700;color:#1d4ed8">${r.id}</td>
+        <td style="white-space:nowrap">${r.fdisp || '—'}</td>
+        <td style="white-space:nowrap;font-size:11px">${r.mes_n || '—'}</td>
+        <td title="${r.estab}">${r.estab || '—'}</td>
+        <td title="${r.serv}">${r.serv || '—'}</td>
+        <td title="${r.equipo}" style="font-weight:600;color:#0d2b5e">${r.equipo || '—'}</td>
+        <td>${r.marca || '—'}</td>
+        <td>${bPdf(r)}</td>
+        <td>${bTipo(r.tipo)}</td>
+        <td>${bEstado(r.estado)}</td>
+        <td>${r.ejec || '—'}</td>
+      </tr>`
+    ).join('');
+  }
+
+  // Paginación
+  document.getElementById('btn-p').disabled = page <= 1;
+  document.getElementById('btn-n').disabled = page >= totalPages;
+  document.getElementById('pag-info').textContent =
+    `Página ${page} de ${totalPages} · ${(page-1)*PER+1}–${Math.min(page*PER, total)} de ${total}`;
+
+  // Números de página
+  const nums = [];
+  for (let p = Math.max(1, page-2); p <= Math.min(totalPages, page+2); p++)
+    nums.push(`<button class="pb${p===page?' on':''}" onclick="goPage(${p})">${p}</button>`);
+  document.getElementById('pag-ns').innerHTML = nums.join('');
+
+  // Indicadores de columna ordenada
+  document.querySelectorAll('th[data-c]').forEach(th => {
+    const c = th.dataset.c;
+    th.className = c === sortCol ? (sortDir === 1 ? 'asc' : 'desc') : '';
+  });
+}
+
+/* ════════════════════════════════════════════════════════════
+   ORDENAR COLUMNAS
+════════════════════════════════════════════════════════════ */
+function sortBy(col) {
+  sortDir = (sortCol === col) ? -sortDir : 1;
+  sortCol = col;
+  renderTable();
+}
+
+/* ════════════════════════════════════════════════════════════
+   PAGINACIÓN
+════════════════════════════════════════════════════════════ */
+function goPag(d) { page += d; renderTable(); }
+function goPage(p) { page = p;  renderTable(); }
+
+/* ════════════════════════════════════════════════════════════
+   MODAL — DETALLE COMPLETO
+════════════════════════════════════════════════════════════ */
+
+// Cache de fileIds ya resueltos para no repetir búsquedas
+const _pdfCache = {};
+
+function mostrarVisorPDF(mViewer, fileId, nombrePdf) {
+  const dlUrl     = `https://drive.google.com/uc?export=download&id=${fileId}`;
+  const iframeSrc = `https://drive.google.com/file/d/${fileId}/preview`;
+  const uid = 'pdf_' + fileId.slice(-8);
+  mViewer.innerHTML = `
+    <div class="m-viewer-label">ARCHIVO PDF — ${nombrePdf}</div>
+    <div class="m-viewer-bar">
+      <a class="btn-dl" href="${dlUrl}" target="_blank" download>⬇️ Descargar PDF</a>
+    </div>
+    <div style="position:relative;width:100%;height:520px;border:1.5px solid #e2e8f0;border-radius:10px;overflow:hidden;background:#f8fafc;">
+      <div id="pdf-loading-${uid}" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:10px;background:#f8fafc;z-index:2;">
+        <div style="width:36px;height:36px;border:4px solid #dbeafe;border-top-color:#1d4ed8;border-radius:50%;animation:spin360 .8s linear infinite;"></div>
+        <span style="font-size:13px;color:#64748b;font-weight:600;">Cargando PDF...</span>
+      </div>
+      <iframe src="${iframeSrc}" id="pdf-iframe-${uid}"
+        style="position:absolute;inset:0;width:100%;height:100%;border:none;opacity:0;transition:opacity .3s;"
+        allow="autoplay" allowfullscreen
+        onload="document.getElementById('pdf-loading-${uid}').style.display='none';this.style.opacity='1';"></iframe>
+      <div id="pdf-err-${uid}"
+        style="display:none;position:absolute;inset:0;align-items:center;justify-content:center;flex-direction:column;gap:12px;background:#f8fafc;text-align:center;padding:24px;z-index:3;">
+        <span style="font-size:44px">📄</span>
+        <b style="color:#0d2b5e;font-size:15px">No se puede previsualizar</b>
+        <span style="font-size:12px;color:#64748b;max-width:260px;">El navegador bloqueó la vista previa. Usa el botón para descargar el archivo.</span>
+        <a href="${dlUrl}" target="_blank" download
+          style="margin-top:6px;padding:11px 28px;background:#1d4ed8;color:#fff;border-radius:9px;font-weight:700;text-decoration:none;font-size:14px;">
+          ⬇️ Descargar PDF
+        </a>
+      </div>
+    </div>`;
+  // Detectar si el iframe no cargó correctamente
+  setTimeout(() => {
+    const fr = document.getElementById('pdf-iframe-' + uid);
+    if (!fr) return;
+    fr.addEventListener('error', () => {
+      document.getElementById('pdf-loading-' + uid).style.display = 'none';
+      document.getElementById('pdf-err-' + uid).style.display = 'flex';
+    });
+    // Timeout de seguridad: si en 8s el loading sigue visible → mostrar error con descarga
+    setTimeout(() => {
+      const ld = document.getElementById('pdf-loading-' + uid);
+      if (ld && ld.style.display !== 'none') {
+        ld.style.display = 'none';
+        document.getElementById('pdf-err-' + uid).style.display = 'flex';
+      }
+    }, 8000);
+  }, 100);
+}
+
+async function buscarFileIdEnDrive(nombrePdf) {
+  // El Apps Script ya resuelve las URLs en __pdf_url__ al cargar los datos.
+  // Esta función es fallback: busca en ALL si hay algún registro con ese nombre de PDF
+  // cuya URL ya fue resuelta (por si el modal se abrió antes de cargar datos).
+  if (_pdfCache[nombrePdf]) return _pdfCache[nombrePdf];
+  // Buscar en ALL un registro que tenga URL resuelta para ese PDF
+  const nombre = nombrePdf.replace('.pdf','').toUpperCase();
+  const registro = ALL.find(r => r.id && r.id.toUpperCase() === nombre && r.pdf);
+  if (registro && registro.pdf) {
+    const m1 = registro.pdf.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
+    const m2 = registro.pdf.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+    const found = m1 || m2;
+    if (found) {
+      _pdfCache[nombrePdf] = found[1];
+      return found[1];
+    }
+  }
+  return null;
+}
+
+function showDetail(id) {
+  const r = ALL.find(x => x.id === String(id));
+  if (!r) return;
+  document.getElementById('m-title').textContent =
+    `OTM #${r.id} — ${r.equipo || 'Sin equipo'}`;
+  document.getElementById('m-body').innerHTML = [
+    ['N° OTM', r.id], ['Fecha', r.fdisp], ['Mes', r.mes_n],
+    ['Establecimiento', r.estab], ['Servicio', r.serv],
+    ['N° Etiqueta', r.etiq], ['Equipo', r.equipo],
+    ['Marca', r.marca], ['Modelo', r.modelo], ['Serie', r.serie],
+    ['Tipo Mantenimiento', r.tipo], ['Estado Funcional', r.estado],
+    ['Ejecutor', r.ejec], ['Observaciones', r.obs],
+  ].map(([k, v]) =>
+    `<div class="mk">${k}</div><div class="mv">${v || '—'}</div>`
+  ).join('');
+
+  const mViewer = document.getElementById('m-viewer');
+  const nombrePdf = r.id + '.pdf';
+
+  // Intentar extraer fileId de la URL guardada (cualquier formato de Drive)
+  let fileId = null;
+  if (r.pdf) {
+    const m1 = r.pdf.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
+    const m2 = r.pdf.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+    const m3 = r.pdf.match(/\/open\?id=([a-zA-Z0-9_-]+)/);
+    const found = m1 || m2 || m3;
+    if (found) fileId = found[1];
+  }
+
+  if (fileId) {
+    // Tenemos fileId directo — mostrar visor inmediatamente
+    mostrarVisorPDF(mViewer, fileId, nombrePdf);
+  } else {
+    // Sin fileId — buscar en Drive por nombre del archivo usando el Apps Script
+    mViewer.innerHTML = `
+      <div class="m-viewer-label">ARCHIVO PDF — ${nombrePdf}</div>
+      <div style="width:100%;padding:32px 20px;text-align:center;border:1.5px solid #e2e8f0;border-radius:10px;background:#f8fafc;">
+        <div style="width:36px;height:36px;border:4px solid #dbeafe;border-top-color:#1d4ed8;border-radius:50%;animation:spin360 .8s linear infinite;margin:0 auto 12px;"></div>
+        <span style="font-size:13px;color:#64748b;font-weight:600;">Buscando PDF en Drive...</span>
+      </div>`;
+    buscarFileIdEnDrive(nombrePdf).then(fid => {
+      if (!document.getElementById('modal').classList.contains('open')) return;
+      if (fid) {
+        mostrarVisorPDF(mViewer, fid, nombrePdf);
+      } else {
+        mViewer.innerHTML = `
+          <div class="m-viewer-label">ARCHIVO PDF — ${nombrePdf}</div>
+          <div class="m-no-pdf">
+            <span style="font-size:36px">📄</span>
+            <span style="color:#64748b;font-size:13px;">PDF no encontrado o aún no subido</span>
+          </div>`;
+      }
+    });
+  }
+
+  document.getElementById('modal').classList.add('open');
+}
+function closeM() {
+  document.getElementById('modal').classList.remove('open');
+}
+
+/* ════════════════════════════════════════════════════════════
+   EVENTOS
+════════════════════════════════════════════════════════════ */
+// Botones principales
+document.getElementById('btn-apply').addEventListener('click', applyFilters);
+document.getElementById('btn-reset').addEventListener('click', clearAll);
+
+// Búsqueda libre en tiempo real
+document.getElementById('srch').addEventListener('input', () => {
+  page = 1;
+  renderTable();
+});
+
+// Los multiselects ya llaman applyFilters() directamente en msToggle()
+
+// N° OTM: filtrar en tiempo real mientras escribe
+document.getElementById('f-otm').addEventListener('input', () => {
+  applyFilters();
+});
+
+// Fechas: filtrar al presionar Enter
+['f-desde','f-hasta'].forEach(id =>
+  document.getElementById(id).addEventListener('keydown', e => {
+    if (e.key === 'Enter') applyFilters();
+  })
+);
+
+// Cerrar modal con Escape
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeM();
+});
+
+/* ════════════════════════════════════════════════════════════
+   ARRANCAR
+════════════════════════════════════════════════════════════ */
+renderKPIs();
+renderTable();
+// ── ARRANQUE ─────────────────────────────────────────────────
+// La primera carga ocurre inmediatamente al abrir la página.
+// Luego se repite automáticamente cada 30 segundos.
+window.addEventListener('DOMContentLoaded', () => {
+    cargarDatosDesdeDrive();
+});
+</script>
+
+
+<div id="toast" style="position: fixed; bottom: 24px; right: 24px; background: rgb(13, 43, 94); color: rgb(255, 255, 255); padding: 10px 18px; border-radius: 10px; font-size: 13px; font-weight: 600; box-shadow: rgba(0, 0, 0, 0.25) 0px 8px 24px; z-index: 9999; transition: opacity 0.3s; opacity: 0; pointer-events: none;">✅ Nuevos datos: 869 registros</div><script>
+/* ════════════════════════════════════════════════════════════
+   GRÁFICAS — Chart.js
+════════════════════════════════════════════════════════════ */
+// Registrar el plugin de datalabels UNA SOLA VEZ de forma global
+Chart.register(ChartDataLabels);
+
+let chartInstances = {};
+let chartsVisible  = false;
+
+function toggleCharts() {
+  chartsVisible = !chartsVisible;
+  const panel = document.getElementById('charts-panel');
+  const btn   = document.getElementById('btn-charts');
+  panel.style.display = chartsVisible ? 'block' : 'none';
+  btn.style.background = chartsVisible
+    ? 'linear-gradient(135deg,#15803d,#16a34a)'
+    : 'linear-gradient(135deg,#0d2b5e,#1d4ed8)';
+  btn.textContent = chartsVisible ? '✕ Cerrar Gráficas' : '📊 Gráficas';
+  if (chartsVisible) renderCharts();
+}
+
+function renderCharts() {
+  const data = filtered; // usa siempre los datos filtrados actuales
+  if (!data || !data.length) return;
+
+  destroyCharts();
+
+  const CHART_DEFAULTS = {
+    plugins: { legend: { labels: { font: { family: "'Segoe UI',Arial,sans-serif", size: 11 } } } },
+    animation: { duration: 400 }
+  };
+
+  // ── 1. Estado Funcional — Dona ──────────────────────────────
+  const estadoMap = {};
+  data.forEach(r => { const e = r.estado || 'Sin dato'; estadoMap[e] = (estadoMap[e]||0) + 1; });
+  const estadoColors = {
+    'Operativo Calibrado'       : '#15803d',
+    'Operativo No Calibrado'    : '#0369a1',
+    'Op. Parcial Calibrado'     : '#0891b2',
+    'Op. Parcial No Calibrado'  : '#7c3aed',
+    'Inoperativo x Repuestos'   : '#dc2626',
+    'Inoperativo x Mantenimiento': '#ea580c',
+    'Inoperativo x Consumibles' : '#d97706',
+    'Para Baja'                 : '#9d174d',
+    'Sin dato'                  : '#94a3b8',
+  };
+  chartInstances.estado = new Chart(document.getElementById('chart-estado'), {
+    type: 'doughnut',
+    data: {
+      labels: Object.keys(estadoMap),
+      datasets: [{
+        data: Object.values(estadoMap),
+        backgroundColor: Object.keys(estadoMap).map(k => estadoColors[k] || '#94a3b8'),
+        borderWidth: 2, borderColor: '#f8fafc',
+      }]
+    },
+    options: {
+      cutout: '58%',
+      animation: { duration: 400 },
+      layout: { padding: 20 },
+      plugins: {
+        legend: { position: 'right', labels: { font: { size: 10 }, boxWidth: 12, padding: 8 } },
+        datalabels: {
+          display: (ctx) => ctx.dataset.data[ctx.dataIndex] > 0,
+          color: '#fff',
+          font: { size: 11, weight: 'bold' },
+          textShadowBlur: 4,
+          textShadowColor: 'rgba(0,0,0,0.4)',
+          formatter: (value) => value,
+          clamp: true,
+        }
+      }
+    }
+  });
+
+  // ── 2. Tipo de Mantenimiento — Barras ──────────────────────
+  const tipoMap = {};
+  data.forEach(r => { const t = r.tipo || 'Sin dato'; tipoMap[t] = (tipoMap[t]||0) + 1; });
+  const tipoColors = ['#1d4ed8','#0f766e','#b45309','#7c3aed','#dc2626','#94a3b8'];
+  chartInstances.tipo = new Chart(document.getElementById('chart-tipo'), {
+    type: 'bar',
+    data: {
+      labels: Object.keys(tipoMap),
+      datasets: [{
+        label: 'OTMs',
+        data: Object.values(tipoMap),
+        backgroundColor: tipoColors,
+        borderRadius: 6, borderSkipped: false,
+      }]
+    },
+    options: {
+      indexAxis: 'x',
+      animation: { duration: 400 },
+      layout: { padding: { top: 24 } },
+      scales: {
+        x: { ticks: { font: { size: 10 } } },
+        y: { beginAtZero: true, ticks: { stepSize: 1, font: { size: 10 } } }
+      },
+      plugins: {
+        legend: { display: false },
+        datalabels: {
+          anchor: 'end', align: 'top',
+          color: '#0d2b5e',
+          font: { size: 11, weight: 'bold' },
+          formatter: (value) => value,
+          clip: false,
+        }
+      }
+    }
+  });
+
+  // ── 3. OTMs por Mes — Línea ────────────────────────────────
+  const mesOrder = ['ENERO','FEBRERO','MARZO','ABRIL','MAYO','JUNIO',
+                    'JULIO','AGOSTO','SEPTIEMBRE','OCTUBRE','NOVIEMBRE','DICIEMBRE'];
+  const mesMap = {};
+  data.forEach(r => {
+    if (!r.mes_n) return;
+    const base = r.mes_n.split(' ')[0].toUpperCase();
+    mesMap[base] = (mesMap[base]||0) + 1;
+  });
+  const mesLabels = mesOrder.filter(m => mesMap[m]);
+  const mesVals   = mesLabels.map(m => mesMap[m]);
+  chartInstances.mes = new Chart(document.getElementById('chart-mes'), {
+    type: 'line',
+    data: {
+      labels: mesLabels,
+      datasets: [{
+        label: 'OTMs',
+        data: mesVals,
+        borderColor: '#1d4ed8', backgroundColor: 'rgba(29,78,216,.10)',
+        fill: true, tension: 0.4, pointRadius: 5, pointBackgroundColor: '#1d4ed8',
+        borderWidth: 2.5,
+      }]
+    },
+    options: {
+      animation: { duration: 400 },
+      layout: { padding: { top: 24, right: 24 } },
+      scales: {
+        x: { ticks: { font: { size: 10 } } },
+        y: { beginAtZero: true, ticks: { stepSize: 1, font: { size: 10 } } }
+      },
+      plugins: {
+        legend: { display: false },
+        datalabels: {
+          anchor: 'end', align: 'top',
+          color: '#1d4ed8',
+          font: { size: 11, weight: 'bold' },
+          formatter: (value) => value,
+          clip: false,
+        }
+      }
+    }
+  });
+
+  // ── 4. Top 8 Establecimientos — Barras horizontales ────────
+  const estabMap = {};
+  data.forEach(r => { const e = r.estab || 'Sin dato'; estabMap[e] = (estabMap[e]||0) + 1; });
+  const estabSorted = Object.entries(estabMap).sort((a,b) => b[1]-a[1]).slice(0, 8);
+  chartInstances.estab = new Chart(document.getElementById('chart-estab'), {
+    type: 'bar',
+    data: {
+      labels: estabSorted.map(([k]) => k.length > 28 ? k.slice(0,26)+'…' : k),
+      datasets: [{
+        label: 'OTMs',
+        data: estabSorted.map(([,v]) => v),
+        backgroundColor: 'rgba(29,78,216,.75)',
+        borderRadius: 4, borderSkipped: false,
+      }]
+    },
+    options: {
+      indexAxis: 'y',
+      animation: { duration: 400 },
+      layout: { padding: { right: 40 } },
+      scales: {
+        x: { beginAtZero: true, ticks: { stepSize: 1, font: { size: 10 } } },
+        y: { ticks: { font: { size: 9 } } }
+      },
+      plugins: {
+        legend: { display: false },
+        datalabels: {
+          anchor: 'end', align: 'right',
+          color: '#0d2b5e',
+          font: { size: 11, weight: 'bold' },
+          formatter: (value) => value,
+          clip: false,
+        }
+      }
+    }
+  });
+
+  // ── 5. OTMs por Ejecutor — Barras horizontales ─────────────
+  const ejecMap = {};
+  data.forEach(r => { const e = r.ejec || 'Sin asignar'; ejecMap[e] = (ejecMap[e]||0) + 1; });
+  const ejecSorted = Object.entries(ejecMap).sort((a,b) => b[1]-a[1]);
+  const ejecColors = ['#1d4ed8','#0f766e','#b45309','#7c3aed','#dc2626','#0369a1','#15803d','#9d174d','#ea580c','#0891b2'];
+  chartInstances.ejec = new Chart(document.getElementById('chart-ejec'), {
+    type: 'bar',
+    data: {
+      labels: ejecSorted.map(([k]) => k.length > 30 ? k.slice(0,28)+'…' : k),
+      datasets: [{
+        label: 'OTMs',
+        data: ejecSorted.map(([,v]) => v),
+        backgroundColor: ejecSorted.map((_,i) => ejecColors[i % ejecColors.length]),
+        borderRadius: 5, borderSkipped: false,
+      }]
+    },
+    options: {
+      indexAxis: 'y',
+      animation: { duration: 400 },
+      layout: { padding: { right: 40 } },
+      scales: {
+        x: { beginAtZero: true, ticks: { stepSize: 1, font: { size: 10 } } },
+        y: { ticks: { font: { size: 10 } } }
+      },
+      plugins: {
+        legend: { display: false },
+        datalabels: {
+          anchor: 'end', align: 'right',
+          color: '#0d2b5e',
+          font: { size: 11, weight: 'bold' },
+          formatter: (value) => value,
+          clip: false,
+        }
+      }
+    }
+  });
+}
+
+function destroyCharts() {
+  Object.values(chartInstances).forEach(c => { try { c.destroy(); } catch(e){} });
+  chartInstances = {};
+}
+
+// ── EXPORTAR INFORME PDF — 3 PÁGINAS ─────────────────────────────────────────
+async function printPDFReport() {
+  const btn = document.getElementById('btn-print-pdf');
+  const originalText = btn.innerHTML;
+  btn.innerHTML = '⏳ Generando informe…';
+  btn.disabled = true;
+
+  try {
+    // ── 1. Renderizar gráficas ────────────────────────────────────
+    if (!chartsVisible) {
+      chartsVisible = true;
+      document.getElementById('charts-panel').style.display = 'block';
+      renderCharts();
+      await new Promise(r => setTimeout(r, 800));
+    }
+
+    // ── 2. Capturar imágenes de los canvas ────────────────────────
+    const imgs = {};
+    for (const id of ['chart-estado','chart-tipo','chart-mes','chart-estab','chart-ejec']) {
+      const c = document.getElementById(id);
+      if (c) imgs[id] = c.toDataURL('image/png', 1.0);
+    }
+
+    // ── 3. Calcular estadísticas ──────────────────────────────────
+    const data  = filtered;
+    const total = data.length;
+
+    const estadoMap={}, tipoMap={}, ejecMap={}, estabMap={}, mesMap={};
+    data.forEach(r => {
+      const e=r.estado||'Sin dato'; estadoMap[e]=(estadoMap[e]||0)+1;
+      const t=r.tipo||'Sin dato';   tipoMap[t]=(tipoMap[t]||0)+1;
+      const ej=r.ejec||'Sin asignar'; ejecMap[ej]=(ejecMap[ej]||0)+1;
+      const es=r.estab||'Sin dato'; estabMap[es]=(estabMap[es]||0)+1;
+      if(r.mes_n){ const b=r.mes_n.split(' ')[0].toUpperCase(); mesMap[b]=(mesMap[b]||0)+1; }
+    });
+
+    const operativos  = (estadoMap['Operativo Calibrado']||0)+(estadoMap['Operativo No Calibrado']||0)
+                       +(estadoMap['Op. Parcial Calibrado']||0)+(estadoMap['Op. Parcial No Calibrado']||0);
+    const inoperativos = data.filter(r=>r.estado&&r.estado.startsWith('Inoperativo')).length;
+    const paraBaja     = estadoMap['Para Baja']||0;
+    const pctOp   = total ? Math.round(operativos/total*100)   : 0;
+    const pctInop = total ? Math.round(inoperativos/total*100) : 0;
+    const pctBaja = total ? Math.round(paraBaja/total*100)     : 0;
+
+    const tipoEntries  = Object.entries(tipoMap).sort((a,b)=>b[1]-a[1]);
+    const estabEntries = Object.entries(estabMap).sort((a,b)=>b[1]-a[1]);
+    const ejecEntries  = Object.entries(ejecMap).sort((a,b)=>b[1]-a[1]);
+    const mesEntries   = Object.entries(mesMap).sort((a,b)=>b[1]-a[1]);
+
+    const tipoTop  = tipoEntries[0]  || ['—',0];
+    const tipoTop2 = tipoEntries[1]  || ['—',0];
+    const estabTop = estabEntries[0] || ['—',0];
+    const estabTop2= estabEntries[1] || ['—',0];
+    const ejecTop  = ejecEntries[0]  || ['—',0];
+    const ejecTop2 = ejecEntries[1]  || ['—',0];
+    const mesPico  = mesEntries[0]   || ['—',0];
+    const mesMin   = mesEntries[mesEntries.length-1] || ['—',0];
+    const nEstabs  = Object.keys(estabMap).filter(k=>k!=='Sin dato').length;
+    const nEjec    = Object.keys(ejecMap).filter(k=>k!=='Sin asignar').length;
+    const prev     = tipoMap['PREVENTIVO']||0;
+    const corr     = tipoMap['CORRECTIVO']||0;
+    const eval_    = tipoMap['EVALUACION']||0;
+    const nMeses   = Object.keys(mesMap).length;
+    const promMes  = nMeses ? Math.round(total/nMeses) : 0;
+
+    const activeTags = Array.from(document.querySelectorAll('#tags .tag'))
+      .map(t=>t.textContent.replace(/[×✕]/g,'').trim()).filter(Boolean);
+    const filtrosTxt = activeTags.length ? activeTags.join('  |  ') : 'Sin filtros — universo completo';
+
+    const kpis = Array.from(document.querySelectorAll('#kpis .kpi')).map(n=>({
+      value: n.querySelector('.kpi-v').textContent.trim(),
+      label: n.querySelector('.kpi-l').textContent.trim(),
+      color: n.style.borderLeftColor || '#1d4ed8',
+    }));
+
+    // ── 4. Configurar jsPDF ───────────────────────────────────────
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ orientation:'landscape', unit:'mm', format:'a4' });
+    const PW=297, PH=210, M=12;
+    const now  = new Date().toLocaleDateString('es-PE',{day:'2-digit',month:'2-digit',year:'numeric'});
+    const hora = new Date().toLocaleTimeString('es-PE',{hour:'2-digit',minute:'2-digit'});
+
+    // Helpers de color
+    function hex2rgb(h){ h=h.replace('#',''); if(h.length===3)h=h.split('').map(c=>c+c).join(''); const n=parseInt(h,16); return [n>>16&255,n>>8&255,n&255]; }
+    const sf=h=>{const[r,g,b]=hex2rgb(h);doc.setFillColor(r,g,b);};
+    const ss=h=>{const[r,g,b]=hex2rgb(h);doc.setDrawColor(r,g,b);};
+    const st=h=>{const[r,g,b]=hex2rgb(h);doc.setTextColor(r,g,b);};
+
+    // Helper: cabecera común en páginas 2 y 3
+    function cabecera(pag) {
+      sf('#0d2b5e'); doc.rect(0,0,PW,13,'F');
+      sf('#1d4ed8'); doc.rect(0,0,5,13,'F');
+      doc.setFont('helvetica','bold'); st('#ffffff'); doc.setFontSize(9);
+      doc.text('INFORME DE GESTIÓN BIOMÉDICA — OTMs Atenciones', M+2, 8);
+      st('#93c5fd'); doc.setFont('helvetica','normal'); doc.setFontSize(6.5);
+      doc.text('Red de Salud · Unidad de Ingeniería Biomédica · Enero–Mayo 2026', M+2, 12);
+      st('#cbd5e1'); doc.text(`${now} ${hora}  ·  Pág. ${pag} de 3`, PW-M, 10, {align:'right'});
+    }
+
+    // Helper: pie de página
+    function pie(pag) {
+      ss('#cbd5e1'); doc.setLineWidth(0.25); doc.line(M,PH-9,PW-M,PH-9);
+      st('#94a3b8'); doc.setFont('helvetica','normal'); doc.setFontSize(6);
+      doc.text('Red de Salud — Unidad de Ingeniería Biomédica  |  Generado automáticamente. No requiere firma.', M, PH-5);
+      doc.text(`Pág. ${pag} de 3`, PW-M, PH-5, {align:'right'});
+    }
+
+    // Helper: dibuja una caja de análisis [gráfica izq + texto der]
+    function cajaAnalisis(imgId, titulo, texto, y, h, chartW) {
+      const analX = M + chartW + 5;
+      const analW = PW - M - analX;
+      // Marco gráfica
+      sf('#f8fafc'); ss('#e2e8f0'); doc.setLineWidth(0.3);
+      doc.roundedRect(M, y, chartW, h, 2, 2, 'FD');
+      sf('#0d2b5e'); doc.roundedRect(M, y, chartW, 6.5, 2, 2, 'F');
+      doc.setFont('helvetica','bold'); st('#ffffff'); doc.setFontSize(7);
+      doc.text(titulo, M+3, y+4.7);
+      if(imgs[imgId]) doc.addImage(imgs[imgId],'PNG', M+2, y+7.5, chartW-4, h-9);
+      // Panel texto
+      sf('#f8fafc'); ss('#e2e8f0'); doc.setLineWidth(0.3);
+      doc.roundedRect(analX, y, analW, h, 2, 2, 'FD');
+      sf('#1d4ed8'); doc.rect(analX, y, 3, h, 'F');
+      // Texto
+      const lines = doc.splitTextToSize(texto, analW-8);
+      doc.setFont('helvetica','normal'); st('#1e293b'); doc.setFontSize(7.5);
+      doc.text(lines, analX+5, y+6);
+    }
+
+    // ════════════════════════════════════════════════════════════
+    //  PÁGINA 1 — RESUMEN EJECUTIVO + KPIs
+    // ════════════════════════════════════════════════════════════
+
+    // Cabecera azul grande
+    sf('#0d2b5e'); doc.rect(0,0,PW,26,'F');
+    sf('#1d4ed8'); doc.rect(0,0,6,26,'F');
+    doc.setFont('helvetica','bold'); st('#ffffff'); doc.setFontSize(15);
+    doc.text('INFORME DE GESTIÓN BIOMÉDICA', M+4, 11);
+    doc.setFont('helvetica','normal'); st('#93c5fd'); doc.setFontSize(8.5);
+    doc.text('Registro y Análisis de Órdenes de Trabajo de Mantenimiento (OTMs)  ·  Enero–Mayo 2026', M+4, 18);
+    st('#cbd5e1'); doc.setFontSize(7);
+    doc.text(`Generado: ${now}  ${hora}`, PW-M, 10, {align:'right'});
+    doc.text(`Total analizado: ${total} OTMs`, PW-M, 17, {align:'right'});
+
+    // Banda de filtros
+    let y=27;
+    sf('#eff6ff'); ss('#bfdbfe'); doc.setLineWidth(0.25);
+    doc.roundedRect(M, y, PW-2*M, 9, 1.5, 1.5, 'FD');
+    sf('#1d4ed8'); doc.rect(M, y, 3, 9, 'F');
+    doc.setFont('helvetica','bold'); st('#0d2b5e'); doc.setFontSize(7);
+    doc.text('FILTROS APLICADOS:', M+5, y+5.8);
+    doc.setFont('helvetica','normal'); st('#334155'); doc.setFontSize(7);
+    const fLines = doc.splitTextToSize(filtrosTxt, PW-2*M-48);
+    doc.text(fLines.slice(0,1), M+46, y+5.8);
+    y+=11;
+
+    // KPIs — fila de 8 tarjetas
+    const KH=17, KW=(PW-2*M)/8;
+    kpis.slice(0,8).forEach((k,i)=>{
+      const kx=M+i*KW;
+      sf('#ffffff'); ss('#e2e8f0'); doc.setLineWidth(0.25);
+      doc.roundedRect(kx, y, KW-1, KH, 2, 2, 'FD');
+      try{sf(k.color);}catch(e){sf('#1d4ed8');}
+      doc.rect(kx, y, 3, KH, 'F');
+      try{st(k.color);}catch(e){st('#1d4ed8');}
+      doc.setFont('helvetica','bold'); doc.setFontSize(14);
+      doc.text(k.value, kx+5, y+10.5);
+      st('#64748b'); doc.setFont('helvetica','normal'); doc.setFontSize(5.5);
+      doc.text(k.label.toUpperCase(), kx+5, y+14.5);
+    });
+    y+=19;
+
+    // Título sección
+    sf('#0d2b5e'); doc.roundedRect(M, y, PW-2*M, 7, 1.5,1.5,'F');
+    doc.setFont('helvetica','bold'); st('#ffffff'); doc.setFontSize(7.5);
+    doc.text('RESUMEN EJECUTIVO', M+4, y+5);
+    y+=9;
+
+    // 4 bloques de análisis en 2×2
+    const bW=(PW-2*M-5)/2, bH=32;
+    const bloques=[
+      {
+        titulo:'Estado Funcional de Equipos',
+        color:'#15803d',
+        texto:[
+          `Total de OTMs analizadas: ${total}`,
+          `· Equipos con algún grado de operatividad: ${operativos} (${pctOp}%)`,
+          `· Equipos inoperativos: ${inoperativos} (${pctInop}%)`,
+          `· Equipos recomendados para baja: ${paraBaja} (${pctBaja}%)`,
+          `El ${pctOp}% de los equipos intervenidos quedó operativo al`,
+          `cierre de la OTM. Se deben gestionar los ${inoperativos} inoperativos.`,
+        ]
+      },
+      {
+        titulo:'Tipo de Mantenimiento Ejecutado',
+        color:'#b45309',
+        texto:[
+          `Tipo predominante: ${tipoTop[0]} con ${tipoTop[1]} OTMs`,
+          tipoTop2[0]!=='—' ? `Segundo lugar: ${tipoTop2[0]} con ${tipoTop2[1]} OTMs` : '',
+          `· Preventivos: ${prev}   · Correctivos: ${corr}   · Evaluaciones: ${eval_}`,
+          `La relación Preventivo/Correctivo es ${prev}/${corr}.`,
+          prev>=corr
+            ? 'Positivo: predomina el mantenimiento proactivo.'
+            : 'Se recomienda incrementar la frecuencia preventiva.',
+        ].filter(Boolean)
+      },
+      {
+        titulo:'Evolución Mensual de Intervenciones',
+        color:'#1d4ed8',
+        texto:[
+          `Período cubierto: ${nMeses} mes${nMeses!==1?'es':''} analizados`,
+          `Promedio mensual: ${promMes} OTMs`,
+          `· Mes con mayor actividad: ${mesPico[0]} (${mesPico[1]} OTMs)`,
+          nMeses>1 ? `· Mes con menor actividad: ${mesMin[0]} (${mesMin[1]} OTMs)` : '',
+          `Variación entre pico y mínimo: ${mesPico[1]-mesMin[1]} OTMs.`,
+          `Útil para planificar recursos técnicos por temporada.`,
+        ].filter(Boolean)
+      },
+      {
+        titulo:'Cobertura y Productividad',
+        color:'#7c3aed',
+        texto:[
+          `Establecimientos atendidos: ${nEstabs}`,
+          `· Mayor demanda: ${(estabTop[0]||'').slice(0,38)} (${estabTop[1]} OTMs)`,
+          estabTop2[0]!=='—' ? `· Segundo: ${(estabTop2[0]||'').slice(0,35)} (${estabTop2[1]})` : '',
+          `Ejecutores registrados: ${nEjec}`,
+          `· Ejecutor líder: ${(ejecTop[0]||'').slice(0,30)} (${ejecTop[1]} OTMs)`,
+          ejecTop2[0]!=='—' ? `· Segundo: ${(ejecTop2[0]||'').slice(0,28)} (${ejecTop2[1]})` : '',
+        ].filter(Boolean)
+      },
+    ];
+
+    bloques.forEach((b,i)=>{
+      const bx = M + (i%2)*(bW+5);
+      const by = y + Math.floor(i/2)*(bH+4);
+      sf('#ffffff'); ss('#e2e8f0'); doc.setLineWidth(0.3);
+      doc.roundedRect(bx, by, bW, bH, 2, 2, 'FD');
+      try{sf(b.color);}catch(e){sf('#1d4ed8');}
+      doc.roundedRect(bx, by, bW, 7, 2, 2, 'F');
+      doc.setFont('helvetica','bold'); st('#ffffff'); doc.setFontSize(7);
+      doc.text(b.titulo, bx+4, by+4.8);
+      doc.setFont('helvetica','normal'); st('#1e293b'); doc.setFontSize(6.8);
+      b.texto.forEach((ln,li)=>{ doc.text(ln, bx+4, by+10+li*3.4); });
+    });
+
+    pie(1);
+
+    // ════════════════════════════════════════════════════════════
+    //  PÁGINA 2 — GRÁFICAS 1 y 2 con análisis
+    // ════════════════════════════════════════════════════════════
+    doc.addPage();
+    cabecera(2);
+
+    const CHART_W = 128;  // ancho fijo para gráficas
+    let y2 = 16;
+
+    // Gráfica 1 — Estado Funcional
+    const txt1 = [
+      `Se registran ${total} OTMs en el período. El ${pctOp}% de los equipos`,
+      `presenta algún grado de operatividad al cierre de la atención.`,
+      ``,
+      `· Operativos (calibrado + no calibrado + parciales): ${operativos} equipos`,
+      `· Inoperativos (por repuestos, mantenimiento o consumibles): ${inoperativos}`,
+      `· Para baja patrimonial: ${paraBaja} equipos (${pctBaja}%)`,
+      ``,
+      `El estado "${(Object.entries(estadoMap).sort((a,b)=>b[1]-a[1])[0]||['—'])[0]}" es el más frecuente.`,
+      `Se recomienda priorizar la gestión de los ${inoperativos} equipos`,
+      `inoperativos para garantizar la continuidad asistencial.`,
+    ].join('\n');
+    const h1 = 85;
+    cajaAnalisis('chart-estado','1. Estado Funcional de Equipos Biomédicos', txt1, y2, h1, CHART_W);
+    y2 += h1 + 5;
+
+    // Gráfica 2 — Tipo de Mantenimiento
+    const txt2 = [
+      `El tipo de mantenimiento predominante es "${tipoTop[0]}"`,
+      `con ${tipoTop[1]} intervenciones.`,
+      ``,
+      `· Preventivos: ${prev} OTMs`,
+      `· Correctivos: ${corr} OTMs`,
+      `· Evaluaciones técnicas: ${eval_} OTMs`,
+      tipoTop2[0]!=='—' ? `· ${tipoTop2[0]}: ${tipoTop2[1]} OTMs` : '',
+      ``,
+      prev>=corr
+        ? `La proporción Prev./Corr. (${prev}/${corr}) es favorable.`
+        : `Se sugiere aumentar la frecuencia preventiva para`,
+      prev>=corr
+        ? `Refleja una estrategia proactiva de mantenimiento.`
+        : `reducir los correctivos no planificados (${corr} registrados).`,
+    ].filter(Boolean).join('\n');
+    const h2 = PH - y2 - 12;
+    cajaAnalisis('chart-tipo','2. Distribución por Tipo de Mantenimiento', txt2, y2, h2, CHART_W);
+
+    pie(2);
+
+    // ════════════════════════════════════════════════════════════
+    //  PÁGINA 3 — GRÁFICAS 3, 4 y 5 con análisis
+    // ════════════════════════════════════════════════════════════
+    doc.addPage();
+    cabecera(3);
+
+    let y3 = 16;
+    const h3each = Math.floor((PH - y3 - 14 - 8) / 3);
+    const CW3 = 115;
+
+    // Gráfica 3 — Evolución Mensual
+    const txt3 = [
+      `Se analizan ${nMeses} mes${nMeses!==1?'es':''} con un promedio de ${promMes} OTMs/mes.`,
+      `· Mes pico: ${mesPico[0]} con ${mesPico[1]} OTMs`,
+      nMeses>1 ? `· Menor actividad: ${mesMin[0]} con ${mesMin[1]} OTMs` : '',
+      `La evolución permite planificar la capacidad técnica`,
+      `en los meses de mayor demanda.`,
+    ].filter(Boolean).join('\n');
+    cajaAnalisis('chart-mes','3. Evolución Mensual de OTMs', txt3, y3, h3each, CW3);
+    y3 += h3each + 4;
+
+    // Gráfica 4 — Top Establecimientos
+    const txt4 = [
+      `Cobertura: ${nEstabs} establecimiento${nEstabs!==1?'s':''} de salud atendidos.`,
+      `· Mayor demanda: ${(estabTop[0]||'').slice(0,35)}`,
+      `  con ${estabTop[1]} OTMs (${total?Math.round(estabTop[1]/total*100):0}% del total)`,
+      estabTop2[0]!=='—' ? `· Segundo: ${(estabTop2[0]||'').slice(0,32)} (${estabTop2[1]})` : '',
+      `Evaluar asignación de recursos según carga por sede.`,
+    ].filter(Boolean).join('\n');
+    cajaAnalisis('chart-estab','4. Establecimientos con Mayor Actividad', txt4, y3, h3each, CW3);
+    y3 += h3each + 4;
+
+    // Gráfica 5 — Ejecutores
+    const txt5 = [
+      `Participaron ${nEjec} ejecutor${nEjec!==1?'es':''} técnico${nEjec!==1?'s':''}.`,
+      `Promedio: ${nEjec?Math.round(total/nEjec):0} OTMs por ejecutor.`,
+      `· Ejecutor líder: ${(ejecTop[0]||'').slice(0,30)}`,
+      `  con ${ejecTop[1]} OTMs (${total?Math.round(ejecTop[1]/total*100):0}% del total)`,
+      ejecTop2[0]!=='—' ? `· Segundo: ${(ejecTop2[0]||'').slice(0,28)} (${ejecTop2[1]})` : '',
+      `Revisar distribución de carga para evitar sobrecarga.`,
+    ].filter(Boolean).join('\n');
+    cajaAnalisis('chart-ejec','5. Producción por Ejecutor', txt5, y3, h3each, CW3);
+
+    pie(3);
+
+    // ── 5. Guardar ────────────────────────────────────────────────
+    doc.save(`Informe_OTMs_${now.replace(/\//g,'-')}.pdf`);
+
+  } catch(err) {
+    console.error('Error PDF:', err);
+    alert('Error al generar el informe. Verifique la conexión a internet.');
+  }
+
+  btn.innerHTML = originalText;
+  btn.disabled = false;
+}
+
+
+// Re-renderizar gráficas cuando se aplican filtros
+const _origApply = applyFilters;
+applyFilters = function() {
+  _origApply();
+  if (chartsVisible) setTimeout(renderCharts, 100);
+};
+const _origClear = clearAll;
+clearAll = function() {
+  _origClear();
+  if (chartsVisible) setTimeout(renderCharts, 100);
+};
+</script>
+
+<!-- ════════════════════════════════
+     MODAL — EDITAR OTM
+════════════════════════════════ -->
+<div class="edit-bg" id="modal-edit" onclick="if(event.target===this)closeEdit()">
+  <div class="edit-box">
+    <div class="edit-title">
+      <span style="font-size:22px">✏️</span>
+      <span id="edit-title-text">Editar OTM</span>
+    </div>
+    <div class="edit-grid">
+      <div>
+        <label class="edit-lbl">N° OTM</label>
+        <input class="edit-inp" id="edit-id" readonly>
+      </div>
+      <div>
+        <label class="edit-lbl">Fecha (DD/MM/AAAA)</label>
+        <input class="edit-inp" id="edit-fecha" type="text" placeholder="DD/MM/AAAA">
+      </div>
+      <div class="full">
+        <label class="edit-lbl">Establecimiento</label>
+        <input class="edit-inp" id="edit-estab">
+      </div>
+      <div>
+        <label class="edit-lbl">Servicio</label>
+        <input class="edit-inp" id="edit-serv">
+      </div>
+      <div>
+        <label class="edit-lbl">N° Etiqueta</label>
+        <input class="edit-inp" id="edit-etiq">
+      </div>
+      <div class="full">
+        <label class="edit-lbl">Equipo</label>
+        <input class="edit-inp" id="edit-equipo">
+      </div>
+      <div>
+        <label class="edit-lbl">Marca</label>
+        <input class="edit-inp" id="edit-marca">
+      </div>
+      <div>
+        <label class="edit-lbl">Modelo</label>
+        <input class="edit-inp" id="edit-modelo">
+      </div>
+      <div>
+        <label class="edit-lbl">Serie</label>
+        <input class="edit-inp" id="edit-serie">
+      </div>
+      <div>
+        <label class="edit-lbl">Tipo Mantenimiento</label>
+        <select class="edit-inp" id="edit-tipo">
+          <option value="PREVENTIVO">PREVENTIVO</option>
+          <option value="CORRECTIVO">CORRECTIVO</option>
+          <option value="EVALUACION">EVALUACION</option>
+          <option value="CAPACITACION">CAPACITACION</option>
+          <option value="SUPERVISION">SUPERVISION</option>
+        </select>
+      </div>
+      <div>
+        <label class="edit-lbl">Estado Funcional</label>
+        <select class="edit-inp" id="edit-estado">
+          <option value="Operativo Calibrado">Operativo Calibrado</option>
+          <option value="Operativo No Calibrado">Operativo No Calibrado</option>
+          <option value="Op. Parcial Calibrado">Op. Parcial Calibrado</option>
+          <option value="Op. Parcial No Calibrado">Op. Parcial No Calibrado</option>
+          <option value="Inoperativo x Repuestos">Inoperativo x Repuestos</option>
+          <option value="Inoperativo x Mantenimiento">Inoperativo x Mantenimiento</option>
+          <option value="Inoperativo x Consumibles">Inoperativo x Consumibles</option>
+          <option value="Para Baja">Para Baja</option>
+        </select>
+      </div>
+      <div>
+        <label class="edit-lbl">Ejecutor</label>
+        <select class="edit-inp" id="edit-ejec">
+          <option>ALFONSO VARGAS</option>
+          <option>ANGEL FLORES</option>
+          <option>DANNY CORREA</option>
+          <option>JEAN MAGUIÑA</option>
+          <option>JOSE ESPINOZA</option>
+          <option>JOSE LUIS CAMPOS</option>
+          <option>JULIO VEGA</option>
+          <option>KEVIN BLANCO</option>
+          <option>WAGNER ROJAS</option>
+        </select>
+      </div>
+      <div class="full">
+        <label class="edit-lbl">Observaciones</label>
+        <textarea class="edit-inp" id="edit-obs" rows="3" style="resize:vertical"></textarea>
+      </div>
+    </div>
+    <div id="edit-msg" class="edit-msg"></div>
+    <div class="edit-footer">
+      <button class="btn-save" id="btn-save-edit" onclick="guardarEdicion()">💾 Guardar cambios</button>
+      <button class="btn-cancel-edit" onclick="closeEdit()">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════════════════════════════════
+     MODAL — CONFIRMAR ELIMINACIÓN
+════════════════════════════════ -->
+<div class="edit-bg" id="modal-confirm" onclick="if(event.target===this)closeConfirm()">
+  <div class="edit-box" style="max-width:400px;text-align:center;">
+    <div style="font-size:52px;margin-bottom:12px">⚠️</div>
+    <div style="font-size:17px;font-weight:800;color:#7f1d1d;margin-bottom:8px">¿Eliminar esta OTM?</div>
+    <div style="font-size:13px;color:#64748b;margin-bottom:6px" id="confirm-msg">Esta acción eliminará el registro del Google Sheet y no se puede deshacer.</div>
+    <div style="font-size:14px;font-weight:700;color:#0d2b5e;margin-bottom:20px" id="confirm-otm-id"></div>
+    <div id="delete-msg" class="edit-msg"></div>
+    <div class="edit-footer">
+      <button class="btn-delete" id="btn-confirm-delete" onclick="ejecutarEliminar()">🗑️ Sí, eliminar</button>
+      <button class="btn-cancel-edit" onclick="closeConfirm()">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ════════════════════════════════════════════════════════════
+   EDITAR / ELIMINAR OTMs — sincronización con Google Sheet
+════════════════════════════════════════════════════════════ */
+
+let currentOtmId = null;   // ID de la OTM actualmente abierta en el modal detalle
+let editingOtmId = null;   // ID de la OTM en proceso de edición
+
+// ── Guardar qué OTM está abierta en el modal detalle ──────────
+const _origShowDetail = showDetail;
+showDetail = function(id) {
+  currentOtmId = String(id);
+  _origShowDetail(id);
+};
+
+// ════════════════════════════════════════
+//  ABRIR MODAL DE EDICIÓN
+// ════════════════════════════════════════
+function openEdit(id) {
+  const r = ALL.find(x => x.id === String(id));
+  if (!r) return;
+  editingOtmId = r.id;
+
+  document.getElementById('edit-title-text').textContent = `Editar OTM #${r.id}`;
+  document.getElementById('edit-id').value     = r.id;
+  document.getElementById('edit-fecha').value  = r.fdisp || '';
+  document.getElementById('edit-estab').value  = r.estab || '';
+  document.getElementById('edit-serv').value   = r.serv  || '';
+  document.getElementById('edit-etiq').value   = r.etiq  || '';
+  document.getElementById('edit-equipo').value = r.equipo|| '';
+  document.getElementById('edit-marca').value  = r.marca || '';
+  document.getElementById('edit-modelo').value = r.modelo|| '';
+  document.getElementById('edit-serie').value  = r.serie || '';
+  document.getElementById('edit-obs').value    = r.obs   || '';
+
+  // Selects
+  setSelectVal('edit-tipo',   r.tipo);
+  setSelectVal('edit-estado', r.estado);
+  setSelectVal('edit-ejec',   r.ejec);
+
+  const msgEl = document.getElementById('edit-msg');
+  msgEl.className = 'edit-msg';
+  msgEl.textContent = '';
+  document.getElementById('btn-save-edit').disabled = false;
+
+  document.getElementById('modal-edit').classList.add('open');
+}
+
+function setSelectVal(selectId, val) {
+  const sel = document.getElementById(selectId);
+  for (let i = 0; i < sel.options.length; i++) {
+    if (sel.options[i].value === val) { sel.selectedIndex = i; return; }
+  }
+  // Si no existe el valor, añadirlo dinámicamente
+  if (val) {
+    const opt = document.createElement('option');
+    opt.value = val; opt.textContent = val;
+    sel.appendChild(opt);
+    sel.value = val;
+  }
+}
+
+function closeEdit() {
+  document.getElementById('modal-edit').classList.remove('open');
+}
+
+// ════════════════════════════════════════
+//  GUARDAR EDICIÓN → POST al Apps Script
+// ════════════════════════════════════════
+async function guardarEdicion() {
+  const btn   = document.getElementById('btn-save-edit');
+  const msgEl = document.getElementById('edit-msg');
+  btn.disabled = true;
+  btn.textContent = '⏳ Guardando...';
+  msgEl.className = 'edit-msg';
+  msgEl.textContent = '';
+
+  // Construir payload
+  const fechaRaw = document.getElementById('edit-fecha').value.trim();
+  // Convertir DD/MM/AAAA → YYYY-MM-DD si es necesario
+  let fechaISO = fechaRaw;
+  if (/^\d{2}\/\d{2}\/\d{4}$/.test(fechaRaw)) {
+    const [d,m,y] = fechaRaw.split('/');
+    fechaISO = `${y}-${m}-${d}`;
+  }
+
+  const payload = {
+    action:  'editarOTM',
+    id:      editingOtmId,
+    fecha:   fechaISO,
+    estab:   document.getElementById('edit-estab').value.trim(),
+    serv:    document.getElementById('edit-serv').value.trim(),
+    etiq:    document.getElementById('edit-etiq').value.trim(),
+    equipo:  document.getElementById('edit-equipo').value.trim(),
+    marca:   document.getElementById('edit-marca').value.trim(),
+    modelo:  document.getElementById('edit-modelo').value.trim(),
+    serie:   document.getElementById('edit-serie').value.trim(),
+    tipo:    document.getElementById('edit-tipo').value,
+    estado:  document.getElementById('edit-estado').value,
+    ejec:    document.getElementById('edit-ejec').value,
+    obs:     document.getElementById('edit-obs').value.trim(),
+  };
+
+  try {
+    const resp = await fetch(SHEET_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify(payload),
+    });
+    const txt = await resp.text();
+    let data;
+    try { data = JSON.parse(txt); } catch(e) { data = { ok: txt.includes('ok') || txt.includes('OK') }; }
+
+    if (data.ok || data.success || data.status === 'ok') {
+      msgEl.className = 'edit-msg ok';
+      msgEl.textContent = '✅ Registro actualizado en Google Sheet';
+      btn.textContent = '✅ Guardado';
+      // Actualizar en el array local sin esperar el siguiente sync
+      const r = ALL.find(x => x.id === editingOtmId);
+      if (r) {
+        r.fecha  = fechaISO;
+        r.fdisp  = fmtDisp(fechaISO);
+        r.mes    = fechaISO.slice(0,7);
+        r.mes_n  = mesNombre(fechaISO);
+        r.estab  = payload.estab;
+        r.serv   = payload.serv;
+        r.etiq   = payload.etiq;
+        r.equipo = payload.equipo;
+        r.marca  = payload.marca;
+        r.modelo = payload.modelo;
+        r.serie  = payload.serie;
+        r.tipo   = payload.tipo;
+        r.estado = payload.estado;
+        r.ejec   = payload.ejec;
+        r.obs    = payload.obs;
+      }
+      setTimeout(() => {
+        closeEdit();
+        // Refrescar el modal detalle si sigue abierto
+        if (document.getElementById('modal').classList.contains('open')) {
+          showDetail(editingOtmId);
+        }
+        applyFilters();
+        mostrarToast('✅ OTM editada correctamente');
+        btn.textContent = '💾 Guardar cambios';
+        btn.disabled = false;
+      }, 1200);
+    } else {
+      throw new Error(data.error || data.message || 'Respuesta inesperada del servidor');
+    }
+  } catch(e) {
+    msgEl.className = 'edit-msg err';
+    msgEl.textContent = '❌ Error: ' + e.message;
+    btn.textContent = '💾 Guardar cambios';
+    btn.disabled = false;
+  }
+}
+
+// ════════════════════════════════════════
+//  CONFIRMAR ELIMINACIÓN
+// ════════════════════════════════════════
+function confirmDelete(id) {
+  const r = ALL.find(x => x.id === String(id));
+  if (!r) return;
+  document.getElementById('confirm-otm-id').textContent =
+    `OTM #${r.id} — ${r.equipo || ''} (${r.estab || ''})`;
+  const msgEl = document.getElementById('delete-msg');
+  msgEl.className = 'edit-msg';
+  msgEl.textContent = '';
+  document.getElementById('btn-confirm-delete').disabled = false;
+  document.getElementById('btn-confirm-delete').textContent = '🗑️ Sí, eliminar';
+  document.getElementById('modal-confirm').classList.add('open');
+}
+
+function closeConfirm() {
+  document.getElementById('modal-confirm').classList.remove('open');
+}
+
+// ════════════════════════════════════════
+//  EJECUTAR ELIMINACIÓN → POST al Apps Script
+// ════════════════════════════════════════
+async function ejecutarEliminar() {
+  const btn   = document.getElementById('btn-confirm-delete');
+  const msgEl = document.getElementById('delete-msg');
+  btn.disabled = true;
+  btn.textContent = '⏳ Eliminando...';
+  msgEl.className = 'edit-msg';
+  msgEl.textContent = '';
+
+  const payload = { action: 'eliminarOTM', id: currentOtmId };
+
+  try {
+    const resp = await fetch(SHEET_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'text/plain' },
+      body: JSON.stringify(payload),
+    });
+    const txt = await resp.text();
+    let data;
+    try { data = JSON.parse(txt); } catch(e) { data = { ok: txt.includes('ok') || txt.includes('OK') }; }
+
+    if (data.ok || data.success || data.status === 'ok') {
+      msgEl.className = 'edit-msg ok';
+      msgEl.textContent = '✅ Registro eliminado del Google Sheet';
+      // Eliminar del array local
+      const idx = ALL.findIndex(x => x.id === currentOtmId);
+      if (idx !== -1) ALL.splice(idx, 1);
+      setTimeout(() => {
+        closeConfirm();
+        closeM();
+        applyFilters();
+        mostrarToast('🗑️ OTM eliminada correctamente');
+        btn.textContent = '🗑️ Sí, eliminar';
+        btn.disabled = false;
+      }, 1000);
+    } else {
+      throw new Error(data.error || data.message || 'Respuesta inesperada del servidor');
+    }
+  } catch(e) {
+    msgEl.className = 'edit-msg err';
+    msgEl.textContent = '❌ Error: ' + e.message;
+    btn.textContent = '🗑️ Sí, eliminar';
+    btn.disabled = false;
+  }
+}
+
+// Cerrar modales con Escape
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') { closeEdit(); closeConfirm(); }
+});
+</script>
+</body></html>
