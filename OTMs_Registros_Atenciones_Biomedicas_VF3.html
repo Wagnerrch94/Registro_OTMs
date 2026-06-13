@@ -865,17 +865,17 @@ function verificarAcceso() {
         <!-- Grid de gráficas -->
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
 
-          <!-- Gráfica 1: Estado Funcional (Dona) -->
+          <!-- Gráfica: OTMs por Ejecutor (Barras horizontales) -->
           <div style="background:#f8fafc;border-radius:10px;padding:16px">
             <div style="font-size:12px;font-weight:700;color:#0d2b5e;margin-bottom:12px;text-transform:uppercase;letter-spacing:.04em">
-              Estado Funcional
+              OTMs por Ejecutor
             </div>
             <div style="position:relative;height:220px">
-              <canvas id="chart-estado" style="box-sizing: border-box; display: block; height: 220px; width: 220px;" width="275" height="275"></canvas>
+              <canvas id="chart-ejec" style="box-sizing: border-box; display: block; height: 220px; width: 440px;" width="550" height="275"></canvas>
             </div>
           </div>
 
-          <!-- Gráfica 2: Tipo de Mantenimiento (Barras) -->
+          <!-- Gráfica: Tipo de Mantenimiento (Barras) -->
           <div style="background:#f8fafc;border-radius:10px;padding:16px">
             <div style="font-size:12px;font-weight:700;color:#0d2b5e;margin-bottom:12px;text-transform:uppercase;letter-spacing:.04em">
               Tipo de Mantenimiento
@@ -885,17 +885,7 @@ function verificarAcceso() {
             </div>
           </div>
 
-          <!-- Gráfica 3: OTMs por Mes (Línea) -->
-          <div style="background:#f8fafc;border-radius:10px;padding:16px">
-            <div style="font-size:12px;font-weight:700;color:#0d2b5e;margin-bottom:12px;text-transform:uppercase;letter-spacing:.04em">
-              OTMs por Mes
-            </div>
-            <div style="position:relative;height:220px">
-              <canvas id="chart-mes" style="box-sizing: border-box; display: block; height: 220px; width: 440px;" width="550" height="275"></canvas>
-            </div>
-          </div>
-
-          <!-- Gráfica 4: Top 8 Establecimientos (Barras horizontales) -->
+          <!-- Gráfica: Top 8 Establecimientos (Barras horizontales) -->
           <div style="background:#f8fafc;border-radius:10px;padding:16px">
             <div style="font-size:12px;font-weight:700;color:#0d2b5e;margin-bottom:12px;text-transform:uppercase;letter-spacing:.04em">
               Top Establecimientos
@@ -905,13 +895,43 @@ function verificarAcceso() {
             </div>
           </div>
 
-          <!-- Gráfica 5: OTMs por Ejecutor (Barras horizontales) -->
-          <div style="background:#f8fafc;border-radius:10px;padding:16px;grid-column:1/-1">
+          <!-- Gráfica: OTMs por Servicio (Barras) -->
+          <div style="background:#f8fafc;border-radius:10px;padding:16px">
             <div style="font-size:12px;font-weight:700;color:#0d2b5e;margin-bottom:12px;text-transform:uppercase;letter-spacing:.04em">
-              OTMs por Ejecutor
+              OTMs por Servicio
             </div>
-            <div style="position:relative;height:240px">
-              <canvas id="chart-ejec" style="box-sizing: border-box; display: block; height: 240px; width: 480px;" width="600" height="300"></canvas>
+            <div style="position:relative;height:220px">
+              <canvas id="chart-servicio" style="box-sizing: border-box; display: block; height: 220px; width: 440px;" width="550" height="275"></canvas>
+            </div>
+          </div>
+
+          <!-- Gráfica: OTMs por Mes (Línea) -->
+          <div style="background:#f8fafc;border-radius:10px;padding:16px">
+            <div style="font-size:12px;font-weight:700;color:#0d2b5e;margin-bottom:12px;text-transform:uppercase;letter-spacing:.04em">
+              OTMs por Mes
+            </div>
+            <div style="position:relative;height:220px">
+              <canvas id="chart-mes" style="box-sizing: border-box; display: block; height: 220px; width: 440px;" width="550" height="275"></canvas>
+            </div>
+          </div>
+
+          <!-- Gráfica: OTMs por Día (Línea) -->
+          <div style="background:#f8fafc;border-radius:10px;padding:16px">
+            <div style="font-size:12px;font-weight:700;color:#0d2b5e;margin-bottom:12px;text-transform:uppercase;letter-spacing:.04em">
+              OTMs por Día
+            </div>
+            <div style="position:relative;height:220px">
+              <canvas id="chart-semana" style="box-sizing: border-box; display: block; height: 220px; width: 440px;" width="550" height="275"></canvas>
+            </div>
+          </div>
+
+          <!-- Gráfica: Estado Funcional (Dona) -->
+          <div style="background:#f8fafc;border-radius:10px;padding:16px">
+            <div style="font-size:12px;font-weight:700;color:#0d2b5e;margin-bottom:12px;text-transform:uppercase;letter-spacing:.04em">
+              Estado Funcional
+            </div>
+            <div style="position:relative;height:220px">
+              <canvas id="chart-estado" style="box-sizing: border-box; display: block; height: 220px; width: 440px;" width="550" height="275"></canvas>
             </div>
           </div>
 
@@ -2083,6 +2103,7 @@ window.addEventListener('DOMContentLoaded', () => {
 ════════════════════════════════════════════════════════════ */
 // Registrar el plugin de datalabels UNA SOLA VEZ de forma global
 Chart.register(ChartDataLabels);
+Chart.defaults.devicePixelRatio = 3;
 
 let chartInstances = {};
 let chartsVisible  = false;
@@ -2135,11 +2156,21 @@ function renderCharts() {
       }]
     },
     options: {
-      cutout: '58%',
+      cutout: '50%',
       animation: { duration: 400 },
-      layout: { padding: 20 },
+      layout: { padding: 4 },
       plugins: {
-        legend: { position: 'right', labels: { font: { size: 10 }, boxWidth: 12, padding: 8 } },
+        legend: {
+          position: 'right',
+          labels: {
+            font: { size: 9 }, boxWidth: 10, padding: 5,
+            generateLabels: (chart) => {
+              const orig = Chart.overrides.doughnut.plugins.legend.labels.generateLabels(chart);
+              orig.forEach(l => { if (l.text.length > 16) l.text = l.text.slice(0,14)+'…'; });
+              return orig;
+            }
+          }
+        },
         datalabels: {
           display: (ctx) => ctx.dataset.data[ctx.dataIndex] > 0,
           color: '#fff',
@@ -2304,6 +2335,90 @@ function renderCharts() {
       }
     }
   });
+
+  // ── Gráfica: OTMs por Servicio — Barras ────────────────────
+  const servMap = {};
+  data.forEach(r => { const s = r.serv || 'Sin dato'; servMap[s] = (servMap[s]||0) + 1; });
+  const servSorted = Object.entries(servMap).sort((a,b) => b[1]-a[1]).slice(0, 8);
+  const servColors = ['#1d4ed8','#0f766e','#b45309','#7c3aed','#dc2626','#0369a1','#15803d','#9d174d'];
+  chartInstances.servicio = new Chart(document.getElementById('chart-servicio'), {
+    type: 'bar',
+    data: {
+      labels: servSorted.map(([k]) => k.length > 22 ? k.slice(0,20)+'…' : k),
+      datasets: [{
+        label: 'OTMs',
+        data: servSorted.map(([,v]) => v),
+        backgroundColor: servSorted.map((_,i) => servColors[i % servColors.length]),
+        borderRadius: 5, borderSkipped: false,
+      }]
+    },
+    options: {
+      animation: { duration: 400 },
+      layout: { padding: { top: 24 } },
+      scales: {
+        x: { ticks: { font: { size: 9 } } },
+        y: { beginAtZero: true, ticks: { stepSize: 1, font: { size: 10 } } }
+      },
+      plugins: {
+        legend: { display: false },
+        datalabels: {
+          anchor: 'end', align: 'top',
+          color: '#0d2b5e',
+          font: { size: 11, weight: 'bold' },
+          formatter: (value) => value,
+          clip: false,
+        }
+      }
+    }
+  });
+
+  // ── 6. OTMs por Día — Línea ─────────────────────────────────
+  const diaMap = {};
+  data.forEach(r => {
+    if (!r.fecha) return;
+    const d = new Date(r.fecha + 'T00:00:00');
+    if (isNaN(d)) return;
+    diaMap[r.fecha] = (diaMap[r.fecha]||0) + 1;
+  });
+  const diaNombres = ['Dom','Lun','Mar','Mié','Jue','Vie','Sáb'];
+  const diaKeys = Object.keys(diaMap).sort();
+  const diaLabels = diaKeys.map(k => {
+    const d = new Date(k + 'T00:00:00');
+    const [y,m,dd] = k.split('-');
+    return `${diaNombres[d.getDay()]} ${dd}/${m}`;
+  });
+  const diaVals = diaKeys.map(k => diaMap[k]);
+  chartInstances.semana = new Chart(document.getElementById('chart-semana'), {
+    type: 'line',
+    data: {
+      labels: diaLabels,
+      datasets: [{
+        label: 'OTMs',
+        data: diaVals,
+        borderColor: '#0f766e', backgroundColor: 'rgba(15,118,110,.10)',
+        fill: true, tension: 0.35, pointRadius: 4, pointBackgroundColor: '#0f766e',
+        borderWidth: 2.5,
+      }]
+    },
+    options: {
+      animation: { duration: 400 },
+      layout: { padding: { top: 24, right: 24 } },
+      scales: {
+        x: { ticks: { font: { size: 10 } }, title: { display: true, text: 'Día', font: { size: 10 } } },
+        y: { beginAtZero: true, ticks: { stepSize: 1, font: { size: 10 } } }
+      },
+      plugins: {
+        legend: { display: false },
+        datalabels: {
+          anchor: 'end', align: 'top',
+          color: '#0f766e',
+          font: { size: 11, weight: 'bold' },
+          formatter: (value) => value,
+          clip: false,
+        }
+      }
+    }
+  });
 }
 
 function destroyCharts() {
@@ -2329,7 +2444,7 @@ async function printPDFReport() {
 
     // ── 2. Capturar imágenes de los canvas ────────────────────────
     const imgs = {};
-    for (const id of ['chart-estado','chart-tipo','chart-mes','chart-estab','chart-ejec']) {
+    for (const id of ['chart-estado','chart-tipo','chart-mes','chart-estab','chart-ejec','chart-servicio','chart-semana']) {
       const c = document.getElementById(id);
       if (c) imgs[id] = c.toDataURL('image/png', 1.0);
     }
@@ -2401,13 +2516,15 @@ async function printPDFReport() {
 
     // Helper: cabecera común en páginas 2 y 3
     function cabecera(pag) {
-      sf('#0d2b5e'); doc.rect(0,0,PW,13,'F');
-      sf('#1d4ed8'); doc.rect(0,0,5,13,'F');
+      sf('#0d2b5e'); doc.rect(0,0,PW,17,'F');
+      sf('#1d4ed8'); doc.rect(0,0,5,17,'F');
       doc.setFont('helvetica','bold'); st('#ffffff'); doc.setFontSize(9);
       doc.text('INFORME DE GESTIÓN BIOMÉDICA — OTMs Atenciones', M+2, 8);
-      st('#93c5fd'); doc.setFont('helvetica','normal'); doc.setFontSize(6.5);
-      doc.text('Red de Salud · Unidad de Ingeniería Biomédica · Enero–Mayo 2026', M+2, 12);
       st('#cbd5e1'); doc.text(`${now} ${hora}  ·  Pág. ${pag} de 3`, PW-M, 10, {align:'right'});
+      // Línea de filtros aplicados (resumen) en cabecera de pág. 2 y 3
+      st('#bfdbfe'); doc.setFont('helvetica','italic'); doc.setFontSize(6);
+      const fResumen = doc.splitTextToSize(`Filtros: ${filtrosTxt}`, PW-2*M-40)[0];
+      doc.text(fResumen, M+2, 16);
     }
 
     // Helper: pie de página
@@ -2449,7 +2566,11 @@ async function printPDFReport() {
     doc.setFont('helvetica','bold'); st('#ffffff'); doc.setFontSize(15);
     doc.text('INFORME DE GESTIÓN BIOMÉDICA', M+4, 11);
     doc.setFont('helvetica','normal'); st('#93c5fd'); doc.setFontSize(8.5);
-    doc.text('Registro y Análisis de Órdenes de Trabajo de Mantenimiento (OTMs)  ·  Enero–Mayo 2026', M+4, 18);
+    const subtitulo = activeTags.length
+      ? `Filtros aplicados: ${filtrosTxt}`
+      : 'Registro y Análisis de Órdenes de Trabajo de Mantenimiento (OTMs)  ·  Enero–Mayo 2026  ·  Sin filtros — universo completo';
+    const subLines = doc.splitTextToSize(subtitulo, PW-2*M-60);
+    doc.text(subLines[0], M+4, 18);
     st('#cbd5e1'); doc.setFontSize(7);
     doc.text(`Generado: ${now}  ${hora}`, PW-M, 10, {align:'right'});
     doc.text(`Total analizado: ${total} OTMs`, PW-M, 17, {align:'right'});
@@ -2564,7 +2685,7 @@ async function printPDFReport() {
     cabecera(2);
 
     const CHART_W = 128;  // ancho fijo para gráficas
-    let y2 = 16;
+    let y2 = 20;
 
     // Gráfica 1 — Estado Funcional
     const txt1 = [
@@ -2611,7 +2732,7 @@ async function printPDFReport() {
     doc.addPage();
     cabecera(3);
 
-    let y3 = 16;
+    let y3 = 20;
     const h3each = Math.floor((PH - y3 - 14 - 8) / 3);
     const CW3 = 115;
 
