@@ -516,6 +516,7 @@ tr:hover td { background: var(--azul-suave); cursor: pointer; }
 @media(max-width:720px){.m-layout{flex-direction:column}.m-info{flex:none;width:100%}}
 </style>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.2.0/dist/chartjs-plugin-datalabels.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 </head>
@@ -842,7 +843,8 @@ function verificarAcceso() {
         <input type="text" id="srch" placeholder="Buscar por equipo, marca, servicio, observaciones…">
         <div class="sbar-cnt" id="srch-cnt">869 resultados</div>
       </div>
-      <button id="btn-charts" onclick="toggleCharts()" style="display: flex; align-items: center; gap: 8px; padding: 0px 20px; background: linear-gradient(135deg, rgb(13, 43, 94), rgb(29, 78, 216)); color: rgb(255, 255, 255); border-width: medium; border-style: none; border-color: currentcolor; border-image: initial; border-radius: 12px; font-size: 13px; font-weight: 700; cursor: pointer; white-space: nowrap; box-shadow: rgba(29, 78, 216, 0.25) 0px 2px 8px; transition: opacity 0.2s; font-family: inherit;">📊 Gráficas</button>
+    <button id="btn-charts" onclick="toggleCharts()" style="display: flex; align-items: center; gap: 8px; padding: 0px 20px; background: linear-gradient(135deg, rgb(13, 43, 94), rgb(29, 78, 216)); color: rgb(255, 255, 255); border-width: medium; border-style: none; border-color: currentcolor; border-image: initial; border-radius: 12px; font-size: 13px; font-weight: 700; cursor: pointer; white-space: nowrap; box-shadow: rgba(29, 78, 216, 0.25) 0px 2px 8px; transition: opacity 0.2s; font-family: inherit;">📊 Gráficas</button>
+      <button id="btn-export-xlsx" onclick="exportarExcel()" style="display:flex;align-items:center;gap:8px;padding:0 20px;background:linear-gradient(135deg,#15803d,#16a34a);color:#fff;border:none;border-radius:12px;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;box-shadow:0 2px 8px rgba(21,128,61,.25);transition:opacity .2s;font-family:inherit;">📥 Exportar Excel</button>
     </div>
 
     <!-- Panel de Gráficas -->
@@ -1829,7 +1831,7 @@ function bPdf(r) {
 /* ════════════════════════════════════════════════════════════
    RENDERIZAR TABLA
 ════════════════════════════════════════════════════════════ */
-function renderTable() {
+function getRowsFiltradasOrdenadas() {
   const srch = (document.getElementById('srch').value || '').toLowerCase();
 
   // Búsqueda libre (equipo, marca, servicio, obs)
@@ -1855,6 +1857,54 @@ function renderTable() {
     return (+a.id || 0) - (+b.id || 0);
   });
 
+  return rows;
+}
+  function exportarExcel() {
+  const rows = getRowsFiltradasOrdenadas();
+
+  if (!rows.length) {
+    alert('No hay registros para exportar con los filtros/búsqueda actuales.');
+    return;
+  }
+
+  const data = rows.map(r => ({
+    'N° OTM'             : r.id,
+    'Fecha'              : r.fdisp,
+    'Mes'                : r.mes_n,
+    'Establecimiento'    : r.estab,
+    'Servicio'           : r.serv,
+    'N° Etiqueta'        : r.etiq,
+    'Equipo'             : r.equipo,
+    'Marca'              : r.marca,
+    'Modelo'             : r.modelo,
+    'Serie'              : r.serie,
+    'Tipo Mantenimiento' : r.tipo,
+    'Estado Funcional'   : r.estado,
+    'Ejecutor'           : r.ejec,
+    'PDF Adjunto'        : r.tienePdf === 'SI' ? 'Sí' : 'No',
+    'Observaciones'      : r.obs,
+  }));
+
+  const ws = XLSX.utils.json_to_sheet(data);
+  ws['!cols'] = [
+    {wch:10},{wch:12},{wch:14},{wch:34},{wch:22},{wch:14},
+    {wch:30},{wch:16},{wch:16},{wch:16},{wch:16},{wch:26},
+    {wch:20},{wch:12},{wch:45}
+  ];
+
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'OTMs Filtradas');
+
+  const now = new Date();
+  const fechaStr = now.toLocaleDateString('es-PE').replace(/\//g,'-');
+  const horaStr  = now.toLocaleTimeString('es-PE',{hour:'2-digit',minute:'2-digit'}).replace(':','');
+  XLSX.writeFile(wb, `OTMs_Filtrado_${fechaStr}_${horaStr}.xlsx`);
+
+  mostrarToast(`📥 Exportadas ${rows.length} OTMs a Excel`);
+}
+
+function renderTable() {
+  const rows = getRowsFiltradasOrdenadas();
   const total      = rows.length;
   const totalPages = Math.max(1, Math.ceil(total / PER));
   if (page > totalPages) page = totalPages;
