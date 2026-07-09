@@ -1745,25 +1745,9 @@ if (excludeField !== 'estab'  && estabs.length  && !estabs.includes(r.estab))   
   filtered = baseFilter(null);
 
  // Repoblar multiselects con solo los valores disponibles según filtros cruzados
-  const mesOrderF = ['ENERO','FEBRERO','MARZO','ABRIL','MAYO','JUNIO','JULIO','AGOSTO','SEPTIEMBRE','OCTUBRE','NOVIEMBRE','DICIEMBRE'];
   const valsFor = (field, excludeField) => {
     const rows = baseFilter(excludeField);
-    const vals = [...new Set(rows.map(r => r[field]).filter(Boolean))];
-    if (field === 'mes_n') {
-      return vals.sort((a,b) => {
-        const [ma,ya] = a.split(' ');
-        const [mb,yb] = b.split(' ');
-        return (+ya||0) - (+yb||0) || mesOrderF.indexOf(ma) - mesOrderF.indexOf(mb);
-      });
-    }
-    if (field === 'semana_n') {
-      return vals.sort((a,b) => {
-        const na = parseInt(a.match(/\d+/)[0]);
-        const nb = parseInt(b.match(/\d+/)[0]);
-        return na - nb;
-      });
-    }
-    return vals.sort();
+    return [...new Set(rows.map(r => r[field]).filter(Boolean))].sort();
   };
   };
   
