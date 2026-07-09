@@ -1744,13 +1744,12 @@ if (excludeField !== 'estab'  && estabs.length  && !estabs.includes(r.estab))   
 
   filtered = baseFilter(null);
 
- // Repoblar multiselects con solo los valores disponibles según filtros cruzados
+  // Repoblar multiselects con solo los valores disponibles según filtros cruzados
   const valsFor = (field, excludeField) => {
     const rows = baseFilter(excludeField);
     return [...new Set(rows.map(r => r[field]).filter(Boolean))].sort();
   };
  
-  
 msRepoblarDynamic('f-estab',  valsFor('estab',  'estab'),  estabs);
   msRepoblarDynamic('f-mes',    valsFor('mes_n',  'mes'),    meses);
   msRepoblarDynamic('f-semana', valsFor('semana_n','semana'), semanas);
