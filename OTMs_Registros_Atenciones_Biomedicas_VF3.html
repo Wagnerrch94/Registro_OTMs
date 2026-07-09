@@ -590,7 +590,15 @@ function verificarAcceso() {
     <span id="sync-dot" style="width: 8px; height: 8px; border-radius: 50%; background: rgb(250, 204, 21); flex-shrink: 0; transition: background 0.3s;"></span>
     <span id="sync-txt" style="font-size:11px;color:rgba(255,255,255,.55);white-space:nowrap">Actualizando...</span>
   </div>
-
+<!-- Botón ir a base de datos Excel/Drive -->
+<button onclick="window.open(SHEET_XLSX_URL, '_blank')" title="Abrir base de datos en Google Sheets"
+        style="background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.25);color:#fff;
+               border-radius:8px;padding:6px 13px;font-size:12px;font-weight:600;cursor:pointer;
+               display:flex;align-items:center;gap:6px;margin-right:10px;font-family:inherit;
+               transition:background .15s" onmouseover="this.style.background='rgba(255,255,255,.22)'" onmouseout="this.style.background='rgba(255,255,255,.12)'">
+  <span style="font-size:13px">📊</span>
+  <span>Base de datos</span>
+</button>
   <!-- Botón refresh manual -->
   <button id="btn-refresh" onclick="refreshManual()" title="Actualizar ahora" style="background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.25);color:#fff;
            border-radius:8px;padding:6px 13px;font-size:12px;font-weight:600;cursor:pointer;
@@ -1225,6 +1233,7 @@ function verificarAcceso() {
    Usar el script Python adjunto para generar el JSON desde Excel
 ════════════════════════════════════════════════════════════ */
 const SHEET_URL   = "https://script.google.com/macros/s/AKfycbx4k_VYMUpMgoRwhuqLTmiYDlOVCMRyBGsNNQNKechXTnl6e31g3fnX96IsswdtI7o8YQ/exec";
+const SHEET_XLSX_URL = "https://docs.google.com/spreadsheets/d/1wjz8_z0XKa_B0ujPQ4CKTKnNoUxMiXdRzjBo1GIhJcc/edit?gid=949223292#gid=949223292";
 const PDF_FOLDER_ID = "1eJUBvy7CKa8S1lHE25AlGHR9U4sdxK6U";  // carpeta Drive con los PDFs
 let ALL = [];
 const rowsPerPage = 15;
