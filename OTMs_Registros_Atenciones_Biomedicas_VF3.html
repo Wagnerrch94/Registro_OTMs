@@ -702,7 +702,33 @@ function verificarAcceso() {
   </div>
 </div>
       </div>
+<!-- Filtro: Semana -->
+      <div class="fg">
+        <label class="fl">🗓️ Semana</label>
+        <div class="ms-wrap" id="ms-wrap-f-semana">
+          <div class="ms-box" id="ms-box-f-semana" onclick="msToggleOpen('f-semana')">
+            <span class="ms-placeholder" id="ms-ph-f-semana">— Todas —</span>
+            <span class="ms-box-arrow">▾</span>
+          </div>
+          <div class="ms-dropdown" id="ms-dd-f-semana">
+            <div class="ms-search">
+              <span class="ms-search-icon">🔍</span>
+              <input type="text" placeholder="Buscar..." oninput="msSearch(this,'f-semana')">
+            </div>
+            <div class="ms-actions">
+              <button class="ms-action-btn" onclick="msSelectAll('f-semana')">☑ Seleccionar todo</button>
+              <button class="ms-action-btn" onclick="msClear('f-semana')">✕ Limpiar</button>
+            </div>
+            <div class="ms-list" id="ms-list-f-semana"></div>
+          </div>
+        </div>
+      </div>
 
+      <!-- Filtro 4: Fecha desde -->
+      <div class="fg">
+        <label class="fl">📅 Fecha desde</label>
+        <input class="fc" id="f-desde" type="date">
+      </div>
       <!-- Filtro 4: Fecha desde -->
       <div class="fg">
         <label class="fl">📅 Fecha desde</label>
@@ -1272,6 +1298,19 @@ function parseFecha(raw) {
 }
 function fmtDisp(iso){if(!iso)return'';const[y,m,d]=iso.split('-');return`${d}/${m}/${y}`;}
 function mesNombre(iso){if(!iso)return'';const[y,m]=iso.split('-');return`${MES_ES[+m-1]} ${y}`;}
+  function semanaISO(iso){
+    if(!iso) return '';
+    const d = new Date(iso + 'T00:00:00');
+    if (isNaN(d)) return '';
+    const target = new Date(d.valueOf());
+    const dayNr = (d.getDay() + 6) % 7; // Lunes=0
+    target.setDate(target.getDate() - dayNr + 3);
+    const firstThursday = target.valueOf();
+    target.setMonth(0, 1);
+    if (target.getDay() !== 4) target.setMonth(0, 1 + ((4 - target.getDay()) + 7) % 7);
+    const week = 1 + Math.ceil((firstThursday - target) / (7*24*3600*1000));
+    return `SEMANA ${String(week).padStart(2,'0')} - ${d.getFullYear()}`;
+}
 function limpiar(v){return(v!==null&&v!==undefined&&String(v).trim()!==''&&String(v).trim()!=='undefined')?String(v).trim():'';}
 
 // ══════════════════════════════════════════════════════════════
@@ -1380,8 +1419,9 @@ async function cargarDatosDesdeDrive() {
                 id,
                 fecha: fechaISO,
                 fdisp: fmtDisp(fechaISO),
-                mes:   fechaISO?fechaISO.slice(0,7):'',
+               mes:   fechaISO?fechaISO.slice(0,7):'',
                 mes_n: mesNombre(fechaISO),
+                semana_n: semanaISO(fechaISO),
                 estab: buscar('Nombre de Establecimiento:','Establecimiento','establecimiento'),
                 serv:  buscar('SERVICIO AL QUE PERTENECE:','SERVICIO AL QUE','SERVICIO','servicio'),
                 etiq:  buscar('N° DE ETIQUETA PATRIMONIAL','ETIQUETA','etiqueta','PATRIMONIAL'),
@@ -1430,16 +1470,23 @@ async function cargarDatosDesdeDrive() {
 
         // Repoblar selects conservando selección
         const mesOrder=['ENERO','FEBRERO','MARZO','ABRIL','MAYO','JUNIO','JULIO','AGOSTO','SEPTIEMBRE','OCTUBRE','NOVIEMBRE','DICIEMBRE'];
-        const uniq=key=>{const vals=[...new Set(ALL.map(r=>r[key]).filter(Boolean))];if(key==='mes_n'){return vals.sort((a,b)=>{const[ma,ya]=a.split(' ');const[mb,yb]=b.split(' ');return(+ya||0)-(+yb||0)||mesOrder.indexOf(ma)-mesOrder.indexOf(mb);});}return vals.sort();};
+        const uniq=key=>{
+            const vals=[...new Set(ALL.map(r=>r[key]).filter(Boolean))];
+            if(key==='mes_n'){return vals.sort((a,b)=>{const[ma,ya]=a.split(' ');const[mb,yb]=b.split(' ');return(+ya||0)-(+yb||0)||mesOrder.indexOf(ma)-mesOrder.indexOf(mb);});}
+            if(key==='semana_n'){return vals.sort((a,b)=>{const na=parseInt(a.match(/\d+/)[0]);const nb=parseInt(b.match(/\d+/)[0]);return na-nb;});}
+            return vals.sort();
+        };
         // Repoblar multiselects conservando selección anterior
         const prevEstabs  = typeof msGetValues==='function' ? msGetValues('f-estab')  : [];
         const prevMeses   = typeof msGetValues==='function' ? msGetValues('f-mes')    : [];
+        const prevSemanas = typeof msGetValues==='function' ? msGetValues('f-semana') : [];
         const prevServs   = typeof msGetValues==='function' ? msGetValues('f-serv')   : [];
         const prevTipos   = typeof msGetValues==='function' ? msGetValues('f-tipo')   : [];
         const prevEstados = typeof msGetValues==='function' ? msGetValues('f-estado') : [];
         const prevEjecs   = typeof msGetValues==='function' ? msGetValues('f-ejec')   : [];
         msRepoblar('f-estab',  uniq('estab'),  prevEstabs);
         msRepoblar('f-mes',    uniq('mes_n'),  prevMeses);
+        msRepoblar('f-semana', uniq('semana_n'), prevSemanas);
         msRepoblar('f-serv',   uniq('serv'),   prevServs);
         msRepoblar('f-tipo',   uniq('tipo'),   prevTipos);
         msRepoblar('f-estado', uniq('estado').filter(v=>v!=='Sin dato'), prevEstados);
@@ -1677,6 +1724,7 @@ function applyFilters() {
 
   const estabs  = msGetValues('f-estab');
   const meses   = msGetValues('f-mes');
+  const semanas = msGetValues('f-semana');
   const servs   = msGetValues('f-serv');
   const tipos   = msGetValues('f-tipo');
   const estados = msGetValues('f-estado');
@@ -1686,8 +1734,9 @@ function applyFilters() {
   // Función base de filtrado (excluye opcionalmente un campo para repoblado cruzado)
   const baseFilter = (excludeField) => ALL.filter(r => {
     if (excludeField !== 'otm'    && otm           && !r.id.toLowerCase().includes(otm.toLowerCase())) return false;
-    if (excludeField !== 'estab'  && estabs.length && !estabs.includes(r.estab))   return false;
-    if (excludeField !== 'mes'    && meses.length  && !meses.includes(r.mes_n))    return false;
+if (excludeField !== 'estab'  && estabs.length  && !estabs.includes(r.estab))   return false;
+    if (excludeField !== 'mes'    && meses.length   && !meses.includes(r.mes_n))    return false;
+    if (excludeField !== 'semana' && semanas.length && !semanas.includes(r.semana_n)) return false;
     if (                             desde          && r.fecha < desde)             return false;
     if (                             hasta          && r.fecha > hasta)             return false;
     if (excludeField !== 'serv'   && servs.length  && !servs.includes(r.serv))     return false;
@@ -1705,8 +1754,10 @@ function applyFilters() {
     const rows = baseFilter(excludeField);
     return [...new Set(rows.map(r => r[field]).filter(Boolean))].sort();
   };
-  msRepoblarDynamic('f-estab',  valsFor('estab',  'estab'),  estabs);
+  
+msRepoblarDynamic('f-estab',  valsFor('estab',  'estab'),  estabs);
   msRepoblarDynamic('f-mes',    valsFor('mes_n',  'mes'),    meses);
+  msRepoblarDynamic('f-semana', valsFor('semana_n','semana'), semanas);
   msRepoblarDynamic('f-serv',   valsFor('serv',   'serv'),   servs);
   msRepoblarDynamic('f-tipo',   valsFor('tipo',   'tipo'),   tipos);
   msRepoblarDynamic('f-estado', valsFor('estado', 'estado').filter(v=>v!=='Sin dato'), estados);
@@ -1728,7 +1779,7 @@ function clearAll() {
   });
   const pdfEl = document.getElementById('f-pdf');
   if (pdfEl) pdfEl.value = '';
-  ['f-estab','f-mes','f-serv','f-tipo','f-estado','f-ejec'].forEach(id => msClear(id));
+  ['f-estab','f-mes','f-semana','f-serv','f-tipo','f-estado','f-ejec'].forEach(id => msClear(id));
   filtered = [...ALL];
   page = 1;
   renderTags();
@@ -1741,7 +1792,7 @@ function clearAll() {
 ════════════════════════════════════════════════════════════ */
 function renderTags() {
   const textInputs = [['f-otm','OTM'],['f-desde','Desde'],['f-hasta','Hasta']];
-  const multiIds   = [['f-estab','Establecimiento'],['f-mes','Mes'],['f-serv','Servicio'],['f-tipo','Tipo'],['f-estado','Estado'],['f-ejec','Ejecutor']];
+  const multiIds   = [['f-estab','Establecimiento'],['f-mes','Mes'],['f-semana','Semana'],['f-serv','Servicio'],['f-tipo','Tipo'],['f-estado','Estado'],['f-ejec','Ejecutor']];
   let tags = '';
   textInputs.forEach(([id,lbl]) => {
     const v = document.getElementById(id)?.value;
@@ -1871,6 +1922,7 @@ function getRowsFiltradasOrdenadas() {
     'N° OTM'             : r.id,
     'Fecha'              : r.fdisp,
     'Mes'                : r.mes_n,
+    'Semana'             : r.semana_n,
     'Establecimiento'    : r.estab,
     'Servicio'           : r.serv,
     'N° Etiqueta'        : r.etiq,
