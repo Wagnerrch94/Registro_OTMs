@@ -1749,7 +1749,7 @@ if (excludeField !== 'estab'  && estabs.length  && !estabs.includes(r.estab))   
     const rows = baseFilter(excludeField);
     return [...new Set(rows.map(r => r[field]).filter(Boolean))].sort();
   };
-  };
+ 
   
 msRepoblarDynamic('f-estab',  valsFor('estab',  'estab'),  estabs);
   msRepoblarDynamic('f-mes',    valsFor('mes_n',  'mes'),    meses);
