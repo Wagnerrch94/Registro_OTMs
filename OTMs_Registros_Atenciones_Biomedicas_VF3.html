@@ -423,16 +423,6 @@ tr:hover td { background: var(--azul-suave); cursor: pointer; }
 .edit-msg.err { background:#fee2e2; color:#7f1d1d; display:block; }
 
 /* Paginación */
-/* Sub-pestañas del panel de Inventario */
-.inv-tab-btn {
-  padding: 8px 16px; background: none; border: none;
-  font-size: 12.5px; font-weight: 700; color: var(--texto-dim);
-  cursor: pointer; border-bottom: 3px solid transparent;
-  margin-bottom: -2px; font-family: inherit; transition: color .15s, border-color .15s;
-}
-.inv-tab-btn.on { color: var(--azul); border-bottom-color: var(--azul); }
-.inv-tab-btn:hover:not(.on) { color: #334155; }
-
 .pag {
   padding: 11px 16px; display: flex; align-items: center;
   gap: 7px; border-top: 1px solid #f0f4f8;
@@ -870,72 +860,8 @@ function verificarAcceso() {
         <div class="sbar-cnt" id="srch-cnt">869 resultados</div>
       </div>
     <button id="btn-charts" onclick="toggleCharts()" style="display: flex; align-items: center; gap: 8px; padding: 0px 20px; background: linear-gradient(135deg, rgb(13, 43, 94), rgb(29, 78, 216)); color: rgb(255, 255, 255); border-width: medium; border-style: none; border-color: currentcolor; border-image: initial; border-radius: 12px; font-size: 13px; font-weight: 700; cursor: pointer; white-space: nowrap; box-shadow: rgba(29, 78, 216, 0.25) 0px 2px 8px; transition: opacity 0.2s; font-family: inherit;">📊 Gráficas</button>
-      <button id="btn-inventario" onclick="toggleInventario()" style="display:flex;align-items:center;gap:8px;padding:0 20px;background:linear-gradient(135deg,#7c3aed,#6d28d9);color:#fff;border:none;border-radius:12px;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;box-shadow:0 2px 8px rgba(124,58,237,.25);transition:opacity .2s;font-family:inherit;">📦 Inventario</button>
+      <button id="btn-reporte-consumo" onclick="generarReporteConsumo()" style="display:flex;align-items:center;gap:8px;padding:0 20px;background:linear-gradient(135deg,#7c3aed,#6d28d9);color:#fff;border:none;border-radius:12px;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;box-shadow:0 2px 8px rgba(124,58,237,.25);transition:opacity .2s;font-family:inherit;">🧰 Reporte de Consumo</button>
       <button id="btn-export-xlsx" onclick="exportarExcel()" style="display:flex;align-items:center;gap:8px;padding:0 20px;background:linear-gradient(135deg,#15803d,#16a34a);color:#fff;border:none;border-radius:12px;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;box-shadow:0 2px 8px rgba(21,128,61,.25);transition:opacity .2s;font-family:inherit;">📥 Exportar Excel</button>
-    </div>
-
-    <!-- Panel de Control de Inventario de Insumos -->
-    <div id="inventario-panel" style="display:none;margin-top:14px;">
-      <div style="background:#fff;border-radius:14px;padding:22px 24px;box-shadow:0 2px 12px rgba(0,0,0,.07);border:1px solid #e2e8f0">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
-          <div>
-            <div style="font-size:15px;font-weight:800;color:#0d2b5e">📦 Control de Inventario de Insumos</div>
-            <div style="font-size:11px;color:#94a3b8;margin-top:2px">Stock actual del catálogo y kardex de movimientos por OTM</div>
-          </div>
-          <div style="display:flex;gap:8px;align-items:center">
-            <button onclick="refrescarInventario()" style="background:#f1f5f9;border:1px solid #e2e8f0;border-radius:8px;padding:6px 14px;font-size:12px;font-weight:700;cursor:pointer;color:#334155;font-family:inherit;display:flex;align-items:center;gap:6px">🔄 Actualizar</button>
-            <button onclick="toggleInventario()" style="background:#f1f5f9;border:1px solid #e2e8f0;border-radius:8px;padding:6px 12px;font-size:12px;cursor:pointer;color:#64748b;font-family:inherit">✕ Cerrar</button>
-          </div>
-        </div>
-
-        <div class="kpis" id="inv-kpis" style="margin-bottom:16px"></div>
-
-        <div style="display:flex;gap:6px;margin-bottom:14px;border-bottom:2px solid #f1f5f9">
-          <button id="inv-tab-stock" onclick="cambiarTabInventario('stock')" class="inv-tab-btn on">📋 Stock Actual</button>
-          <button id="inv-tab-mov" onclick="cambiarTabInventario('mov')" class="inv-tab-btn">🧾 Historial de Movimientos</button>
-        </div>
-
-        <!-- Vista: Stock actual -->
-        <div id="inv-view-stock">
-          <input id="inv-buscar-stock" type="text" placeholder="Buscar por código, servicio o descripción..." oninput="renderInventarioStock()"
-            style="width:100%;padding:8px 12px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:13px;margin-bottom:10px;font-family:inherit;outline:none">
-          <div style="overflow-x:auto;max-height:420px;overflow-y:auto;border:1px solid #f0f4f8;border-radius:10px">
-            <table style="width:100%;border-collapse:collapse;min-width:640px">
-              <thead style="position:sticky;top:0;z-index:1">
-                <tr style="background:#0d2b5e">
-                  <th style="padding:9px 12px;text-align:left;font-size:10.5px;text-transform:uppercase;color:#fff;letter-spacing:.04em">Código</th>
-                  <th style="padding:9px 12px;text-align:left;font-size:10.5px;text-transform:uppercase;color:#fff;letter-spacing:.04em">Servicio</th>
-                  <th style="padding:9px 12px;text-align:left;font-size:10.5px;text-transform:uppercase;color:#fff;letter-spacing:.04em">Descripción</th>
-                  <th style="padding:9px 12px;text-align:right;font-size:10.5px;text-transform:uppercase;color:#fff;letter-spacing:.04em">Stock</th>
-                  <th style="padding:9px 12px;text-align:left;font-size:10.5px;text-transform:uppercase;color:#fff;letter-spacing:.04em">Unidad</th>
-                </tr>
-              </thead>
-              <tbody id="inv-tbody-stock"></tbody>
-            </table>
-          </div>
-        </div>
-
-        <!-- Vista: Historial de movimientos -->
-        <div id="inv-view-mov" style="display:none">
-          <input id="inv-buscar-mov" type="text" placeholder="Buscar por N° OTM, establecimiento, insumo o ejecutor..." oninput="renderInventarioMovimientos()"
-            style="width:100%;padding:8px 12px;border:1.5px solid #e2e8f0;border-radius:8px;font-size:13px;margin-bottom:10px;font-family:inherit;outline:none">
-          <div style="overflow-x:auto;max-height:420px;overflow-y:auto;border:1px solid #f0f4f8;border-radius:10px">
-            <table style="width:100%;border-collapse:collapse;min-width:760px">
-              <thead style="position:sticky;top:0;z-index:1">
-                <tr style="background:#0d2b5e">
-                  <th style="padding:9px 12px;text-align:left;font-size:10.5px;text-transform:uppercase;color:#fff;letter-spacing:.04em">Fecha</th>
-                  <th style="padding:9px 12px;text-align:left;font-size:10.5px;text-transform:uppercase;color:#fff;letter-spacing:.04em">N° OTM</th>
-                  <th style="padding:9px 12px;text-align:left;font-size:10.5px;text-transform:uppercase;color:#fff;letter-spacing:.04em">Establecimiento</th>
-                  <th style="padding:9px 12px;text-align:left;font-size:10.5px;text-transform:uppercase;color:#fff;letter-spacing:.04em">Insumo</th>
-                  <th style="padding:9px 12px;text-align:right;font-size:10.5px;text-transform:uppercase;color:#fff;letter-spacing:.04em">Cant.</th>
-                  <th style="padding:9px 12px;text-align:left;font-size:10.5px;text-transform:uppercase;color:#fff;letter-spacing:.04em">Ejecutor</th>
-                </tr>
-              </thead>
-              <tbody id="inv-tbody-mov"></tbody>
-            </table>
-          </div>
-        </div>
-      </div>
     </div>
 
     <!-- Panel de Gráficas -->
@@ -3098,103 +3024,206 @@ document.addEventListener('click', e => {
 });
 
 // ════════════════════════════════════════
-//  PANEL DE CONTROL DE INVENTARIO
+//  REPORTE DE CONSUMO DE INSUMOS (PDF)
 // ════════════════════════════════════════
-let inventarioVisible = false;
-const STOCK_MINIMO = 5; // umbral para marcar "stock bajo" — ajusta a tu criterio
+async function generarReporteConsumo() {
+  const btn = document.getElementById('btn-reporte-consumo');
+  const originalHTML = btn.innerHTML;
+  btn.innerHTML = '⏳ Generando…';
+  btn.disabled = true;
 
-function toggleInventario() {
-  inventarioVisible = !inventarioVisible;
-  document.getElementById('inventario-panel').style.display = inventarioVisible ? 'block' : 'none';
-  const btn = document.getElementById('btn-inventario');
-  btn.style.background = inventarioVisible
-    ? 'linear-gradient(135deg,#15803d,#16a34a)'
-    : 'linear-gradient(135deg,#7c3aed,#6d28d9)';
-  btn.textContent = inventarioVisible ? '✕ Cerrar Inventario' : '📦 Inventario';
-  if (inventarioVisible) refrescarInventario();
-}
+  try {
+    // Asegurar datos frescos de catálogo y kardex
+    await Promise.all([cargarCatalogoInsumos(), cargarMovimientosInsumos()]);
 
-function cambiarTabInventario(tab) {
-  document.getElementById('inv-tab-stock').classList.toggle('on', tab === 'stock');
-  document.getElementById('inv-tab-mov').classList.toggle('on', tab === 'mov');
-  document.getElementById('inv-view-stock').style.display = tab === 'stock' ? 'block' : 'none';
-  document.getElementById('inv-view-mov').style.display   = tab === 'mov'   ? 'block' : 'none';
-}
+    if (!MOVIMIENTOS_INSUMOS.length) {
+      alert('Todavía no hay movimientos de insumos registrados.');
+      return;
+    }
 
-async function refrescarInventario() {
-  await Promise.all([cargarCatalogoInsumos(), cargarMovimientosInsumos()]);
-  renderInventarioKPIs();
-  renderInventarioStock();
-  renderInventarioMovimientos();
-}
+    // ── Agregaciones ──────────────────────────────────────────
+    const consumoPorInsumo = {}; // codigo -> {descripcion, unidad, total}
+    const consumoPorEstab  = {}; // establecimiento -> total unidades
+    let totalUnidades = 0;
 
-function renderInventarioKPIs() {
-  const total = CATALOGO_INSUMOS.length;
-  const bajos = CATALOGO_INSUMOS.filter(i => i.cantidad <= STOCK_MINIMO).length;
-  const movs  = MOVIMIENTOS_INSUMOS.length;
-  document.getElementById('inv-kpis').innerHTML = [
-    { v: total, l: 'Insumos en catálogo',              c: '#1d4ed8' },
-    { v: bajos, l: 'Con stock bajo (≤ ' + STOCK_MINIMO + ')', c: '#dc2626' },
-    { v: movs,  l: 'Movimientos registrados',          c: '#7c3aed' },
-  ].map(k => `<div class="kpi" style="border-left-color:${k.c}">
-    <div class="kpi-v" style="color:${k.c}">${k.v}</div>
-    <div class="kpi-l">${k.l}</div>
-  </div>`).join('');
-}
+    MOVIMIENTOS_INSUMOS.forEach(m => {
+      const key = m.codigo || m.descripcion;
+      if (!consumoPorInsumo[key]) {
+        const cat = CATALOGO_INSUMOS.find(c => c.codigo === m.codigo);
+        consumoPorInsumo[key] = { codigo: m.codigo, descripcion: m.descripcion, unidad: cat ? cat.unidad : '', total: 0, usos: 0 };
+      }
+      consumoPorInsumo[key].total += m.cantidad;
+      consumoPorInsumo[key].usos  += 1;
+      totalUnidades += m.cantidad;
 
-function renderInventarioStock() {
-  const q = (document.getElementById('inv-buscar-stock').value || '').toLowerCase().trim();
-  let rows = CATALOGO_INSUMOS;
-  if (q) rows = rows.filter(i => (i.codigo + ' ' + i.servicio + ' ' + i.descripcion).toLowerCase().includes(q));
-  rows = [...rows].sort((a, b) => a.cantidad - b.cantidad); // stock más bajo primero
+      const estabKey = m.estab || 'Sin dato';
+      consumoPorEstab[estabKey] = (consumoPorEstab[estabKey] || 0) + m.cantidad;
+    });
 
-  const tbody = document.getElementById('inv-tbody-stock');
-  if (!rows.length) {
-    tbody.innerHTML = `<tr><td colspan="5" style="text-align:center;padding:30px;color:#94a3b8;font-size:13px">
-      ${CATALOGO_INSUMOS.length ? 'Sin resultados' : 'Sin catálogo cargado — crea la pestaña "Inventario de Insumos"'}
-    </td></tr>`;
-    return;
+    const topInsumos = Object.values(consumoPorInsumo).sort((a,b) => b.total - a.total).slice(0, 12);
+    const topEstabs  = Object.entries(consumoPorEstab).sort((a,b) => b[1]-a[1]).slice(0, 10);
+    const STOCK_MIN  = 5;
+    const stockBajo  = CATALOGO_INSUMOS.filter(i => i.cantidad <= STOCK_MIN).sort((a,b) => a.cantidad - b.cantidad);
+
+    const otmsConInsumo = new Set(MOVIMIENTOS_INSUMOS.map(m => m.otmId)).size;
+    const nInsumosDistintos = Object.keys(consumoPorInsumo).length;
+
+    // ── PDF ───────────────────────────────────────────────────
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
+    const PW = 210, PH = 297, M = 14;
+    const now  = new Date().toLocaleDateString('es-PE',{day:'2-digit',month:'2-digit',year:'numeric'});
+    const hora = new Date().toLocaleTimeString('es-PE',{hour:'2-digit',minute:'2-digit'});
+
+    function hex2rgb(h){ h=h.replace('#',''); if(h.length===3)h=h.split('').map(c=>c+c).join(''); const n=parseInt(h,16); return [n>>16&255,n>>8&255,n&255]; }
+    const sf=h=>{const[r,g,b]=hex2rgb(h);doc.setFillColor(r,g,b);};
+    const ss=h=>{const[r,g,b]=hex2rgb(h);doc.setDrawColor(r,g,b);};
+    const st=h=>{const[r,g,b]=hex2rgb(h);doc.setTextColor(r,g,b);};
+
+    // Cabecera
+    sf('#0d2b5e'); doc.rect(0,0,PW,24,'F');
+    sf('#7c3aed'); doc.rect(0,0,6,24,'F');
+    doc.setFont('helvetica','bold'); st('#ffffff'); doc.setFontSize(14);
+    doc.text('INFORME DE CONSUMO DE INSUMOS', M+4, 10);
+    doc.setFont('helvetica','normal'); st('#c4b5fd'); doc.setFontSize(8);
+    doc.text('Control de Inventario Biomédico — Consumo actual registrado', M+4, 16.5);
+    st('#cbd5e1'); doc.setFontSize(7);
+    doc.text(`Generado: ${now}  ${hora}`, PW-M, 10, {align:'right'});
+    doc.text(`${otmsConInsumo} OTMs con insumo registrado`, PW-M, 16.5, {align:'right'});
+
+    let y = 30;
+
+    // KPIs
+    const kpis = [
+      { v: String(nInsumosDistintos), l: 'Insumos distintos usados', c: '#7c3aed' },
+      { v: String(totalUnidades),     l: 'Unidades consumidas',      c: '#1d4ed8' },
+      { v: String(otmsConInsumo),     l: 'OTMs con insumo',          c: '#15803d' },
+      { v: String(stockBajo.length),  l: 'Insumos con stock bajo',   c: '#dc2626' },
+    ];
+    const KW = (PW-2*M-9)/4;
+    kpis.forEach((k,i)=>{
+      const kx = M + i*(KW+3);
+      sf('#f8fafc'); ss('#e2e8f0'); doc.setLineWidth(0.3);
+      doc.roundedRect(kx, y, KW, 20, 2, 2, 'FD');
+      sf(k.c); doc.rect(kx, y, 3, 20, 'F');
+      st(k.c); doc.setFont('helvetica','bold'); doc.setFontSize(16);
+      doc.text(k.v, kx+6, y+11);
+      st('#64748b'); doc.setFont('helvetica','normal'); doc.setFontSize(6);
+      doc.text(doc.splitTextToSize(k.l.toUpperCase(), KW-8), kx+6, y+16);
+    });
+    y += 27;
+
+    // Tabla: Top insumos más consumidos
+    sf('#0d2b5e'); doc.roundedRect(M, y, PW-2*M, 7, 1.5, 1.5, 'F');
+    doc.setFont('helvetica','bold'); st('#ffffff'); doc.setFontSize(8);
+    doc.text('INSUMOS MÁS CONSUMIDOS', M+4, y+4.8);
+    y += 9;
+
+    const colX = [M, M+95, M+130, M+160];
+    doc.setFont('helvetica','bold'); st('#64748b'); doc.setFontSize(6.5);
+    doc.text('DESCRIPCIÓN', colX[0]+2, y+3.5);
+    doc.text('CÓDIGO', colX[1]+2, y+3.5);
+    doc.text('USOS', colX[2]+2, y+3.5);
+    doc.text('CANT. TOTAL', colX[3]+2, y+3.5);
+    y += 5;
+    ss('#e2e8f0'); doc.setLineWidth(0.2); doc.line(M, y, PW-M, y);
+    y += 1;
+
+    doc.setFont('helvetica','normal'); st('#1e293b'); doc.setFontSize(7);
+    topInsumos.forEach((ins, i) => {
+      if (i % 2 === 0) { sf('#f8fafc'); doc.rect(M, y, PW-2*M, 6, 'F'); }
+      st('#1e293b');
+      doc.text((ins.descripcion || '—').slice(0, 52), colX[0]+2, y+4);
+      st('#64748b'); doc.setFontSize(6.5);
+      doc.text(ins.codigo || '—', colX[1]+2, y+4);
+      doc.text(String(ins.usos), colX[2]+2, y+4);
+      doc.setFont('helvetica','bold'); st('#7c3aed'); doc.setFontSize(7);
+      doc.text(String(ins.total) + (ins.unidad ? ' ' + ins.unidad : ''), colX[3]+2, y+4);
+      doc.setFont('helvetica','normal'); doc.setFontSize(7);
+      y += 6;
+    });
+    y += 6;
+
+    // Tabla: Consumo por establecimiento
+    sf('#0d2b5e'); doc.roundedRect(M, y, PW-2*M, 7, 1.5, 1.5, 'F');
+    doc.setFont('helvetica','bold'); st('#ffffff'); doc.setFontSize(8);
+    doc.text('CONSUMO POR ESTABLECIMIENTO (TOP 10)', M+4, y+4.8);
+    y += 9;
+
+    doc.setFont('helvetica','bold'); st('#64748b'); doc.setFontSize(6.5);
+    doc.text('ESTABLECIMIENTO', M+2, y+3.5);
+    doc.text('UNIDADES CONSUMIDAS', PW-M-40, y+3.5);
+    y += 5;
+    ss('#e2e8f0'); doc.line(M, y, PW-M, y);
+    y += 1;
+
+    doc.setFont('helvetica','normal'); st('#1e293b'); doc.setFontSize(7);
+    topEstabs.forEach(([estab, total], i) => {
+      if (i % 2 === 0) { sf('#f8fafc'); doc.rect(M, y, PW-2*M, 6, 'F'); }
+      st('#1e293b');
+      doc.text((estab || '—').slice(0, 55), M+2, y+4);
+      doc.setFont('helvetica','bold'); st('#1d4ed8');
+      doc.text(String(total), PW-M-40, y+4);
+      doc.setFont('helvetica','normal');
+      y += 6;
+    });
+    y += 6;
+
+    // Nueva página si no hay espacio para la tabla de stock bajo
+    if (y > PH - 70) { doc.addPage(); y = 20; }
+
+    // Tabla: Insumos con stock bajo
+    sf('#dc2626'); doc.roundedRect(M, y, PW-2*M, 7, 1.5, 1.5, 'F');
+    doc.setFont('helvetica','bold'); st('#ffffff'); doc.setFontSize(8);
+    doc.text(`INSUMOS CON STOCK BAJO (≤ ${STOCK_MIN} unidades)`, M+4, y+4.8);
+    y += 9;
+
+    if (!stockBajo.length) {
+      doc.setFont('helvetica','normal'); st('#15803d'); doc.setFontSize(7.5);
+      doc.text('✔ Ningún insumo está por debajo del umbral de stock mínimo.', M+2, y+5);
+      y += 10;
+    } else {
+      doc.setFont('helvetica','bold'); st('#64748b'); doc.setFontSize(6.5);
+      doc.text('DESCRIPCIÓN', M+2, y+3.5);
+      doc.text('CÓDIGO', M+95, y+3.5);
+      doc.text('STOCK', PW-M-25, y+3.5);
+      y += 5;
+      ss('#e2e8f0'); doc.line(M, y, PW-M, y);
+      y += 1;
+      doc.setFont('helvetica','normal'); st('#1e293b'); doc.setFontSize(7);
+      stockBajo.forEach((ins, i) => {
+        if (y > PH - 20) { doc.addPage(); y = 20; }
+        if (i % 2 === 0) { sf('#fef2f2'); doc.rect(M, y, PW-2*M, 6, 'F'); }
+        st('#1e293b');
+        doc.text((ins.descripcion || '—').slice(0, 52), M+2, y+4);
+        st('#64748b');
+        doc.text(ins.codigo || '—', M+95, y+4);
+        doc.setFont('helvetica','bold'); st('#dc2626');
+        doc.text(String(ins.cantidad) + (ins.unidad ? ' ' + ins.unidad : ''), PW-M-25, y+4);
+        doc.setFont('helvetica','normal');
+        y += 6;
+      });
+    }
+
+    // Pie de página en todas las páginas
+    const totalPages = doc.internal.getNumberOfPages();
+    for (let p = 1; p <= totalPages; p++) {
+      doc.setPage(p);
+      ss('#cbd5e1'); doc.setLineWidth(0.25); doc.line(M, PH-12, PW-M, PH-12);
+      st('#94a3b8'); doc.setFont('helvetica','normal'); doc.setFontSize(6.5);
+      doc.text('Red de Salud — Unidad de Ingeniería Biomédica  |  Generado automáticamente.', M, PH-7);
+      doc.text(`Pág. ${p} de ${totalPages}`, PW-M, PH-7, {align:'right'});
+    }
+
+    doc.save(`Reporte_Consumo_Insumos_${now.replace(/\//g,'-')}.pdf`);
+
+  } catch(err) {
+    console.error('Error generando reporte de consumo:', err);
+    alert('Error al generar el reporte de consumo.');
+  } finally {
+    btn.innerHTML = originalHTML;
+    btn.disabled = false;
   }
-  tbody.innerHTML = rows.map(i => `
-    <tr style="border-bottom:1px solid #f0f4f8">
-      <td style="padding:8px 12px;font-size:12px;font-weight:700;color:#1d4ed8;white-space:nowrap">${i.codigo}</td>
-      <td style="padding:8px 12px;font-size:12px">${i.servicio || '—'}</td>
-      <td style="padding:8px 12px;font-size:12px">${i.descripcion || '—'}</td>
-      <td style="padding:8px 12px;font-size:12px;text-align:right;font-weight:700;color:${i.cantidad <= STOCK_MINIMO ? '#dc2626' : '#15803d'}">${i.cantidad}</td>
-      <td style="padding:8px 12px;font-size:12px;white-space:nowrap">${i.unidad || '—'}</td>
-    </tr>
-  `).join('');
-}
-
-function renderInventarioMovimientos() {
-  const q = (document.getElementById('inv-buscar-mov').value || '').toLowerCase().trim();
-  let rows = MOVIMIENTOS_INSUMOS;
-  if (q) rows = rows.filter(m => (m.otmId + ' ' + m.estab + ' ' + m.descripcion + ' ' + m.ejecutor).toLowerCase().includes(q));
-  rows = [...rows].reverse(); // más recientes primero (se registran en orden cronológico)
-
-  const tbody = document.getElementById('inv-tbody-mov');
-  if (!rows.length) {
-    tbody.innerHTML = `<tr><td colspan="6" style="text-align:center;padding:30px;color:#94a3b8;font-size:13px">Sin movimientos registrados todavía</td></tr>`;
-    return;
-  }
-  tbody.innerHTML = rows.map(m => `
-    <tr style="border-bottom:1px solid #f0f4f8">
-      <td style="padding:8px 12px;font-size:12px;white-space:nowrap">${m.fecha || '—'}</td>
-      <td style="padding:8px 12px;font-size:12px;font-weight:700;color:#1d4ed8;white-space:nowrap">${m.otmId || '—'}</td>
-      <td style="padding:8px 12px;font-size:12px">${m.estab || '—'}</td>
-      <td style="padding:8px 12px;font-size:12px">${m.descripcion || '—'}</td>
-      <td style="padding:8px 12px;font-size:12px;text-align:right;font-weight:700">${m.cantidad}</td>
-      <td style="padding:8px 12px;font-size:12px">${m.ejecutor || '—'}</td>
-    </tr>
-  `).join('');
-}
-
-/* Refresca la vista del panel de Inventario si está abierta (llamar tras guardar/eliminar una OTM) */
-function refrescarVistaInventarioSiAbierta() {
-  if (!inventarioVisible) return;
-  renderInventarioKPIs();
-  renderInventarioStock();
-  renderInventarioMovimientos();
 }
 
 // ════════════════════════════════════════
@@ -3337,9 +3366,9 @@ async function guardarEdicion() {
         r.usoInsumo  = payload.insumos.length ? 'SI' : 'NO';
         r.insumoDesc = payload.insumos.map(i => `${i.descripcion} (x${i.cantidad})`).join('; ');
       }
-      // Refrescar catálogo (el stock cambió) y kardex
-      cargarCatalogoInsumos().then(refrescarVistaInventarioSiAbierta);
-      cargarMovimientosInsumos().then(refrescarVistaInventarioSiAbierta);
+      // Refrescar catálogo y kardex en segundo plano (por si se abre otro modal luego)
+      cargarCatalogoInsumos();
+      cargarMovimientosInsumos();
       setTimeout(() => {
         closeEdit();
         // Refrescar el modal detalle si sigue abierto
@@ -3412,8 +3441,8 @@ async function ejecutarEliminar() {
       const idx = ALL.findIndex(x => x.id === currentOtmId);
       if (idx !== -1) ALL.splice(idx, 1);
       // El backend revierte el stock consumido por esta OTM: refrescar catálogo/kardex
-      cargarCatalogoInsumos().then(refrescarVistaInventarioSiAbierta);
-      cargarMovimientosInsumos().then(refrescarVistaInventarioSiAbierta);
+      cargarCatalogoInsumos();
+      cargarMovimientosInsumos();
       setTimeout(() => {
         closeConfirm();
         closeM();
