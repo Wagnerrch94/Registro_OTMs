@@ -600,6 +600,15 @@ function verificarAcceso() {
   <span style="font-size:13px">📊</span>
   <span>Base de datos</span>
 </button>
+<!-- Botón verificar OTMs con insumos usados (control) -->
+<button id="btn-ver-insumos" onclick="toggleFiltroInsumos()" title="Ver solo OTMs donde se usó insumo"
+        style="background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.25);color:#fff;
+               border-radius:8px;padding:6px 13px;font-size:12px;font-weight:600;cursor:pointer;
+               display:flex;align-items:center;gap:6px;margin-right:10px;font-family:inherit;
+               transition:background .15s" onmouseover="if(!this.classList.contains('activo'))this.style.background='rgba(255,255,255,.22)'" onmouseout="if(!this.classList.contains('activo'))this.style.background='rgba(255,255,255,.12)'">
+  <span style="font-size:13px">🧰</span>
+  <span>Con Insumos</span>
+</button>
   <!-- Botón refresh manual -->
   <button id="btn-refresh" onclick="refreshManual()" title="Actualizar ahora" style="background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.25);color:#fff;
            border-radius:8px;padding:6px 13px;font-size:12px;font-weight:600;cursor:pointer;
@@ -1193,8 +1202,8 @@ async function cargarDatosDesdeDrive() {
                 serie: buscar('SERIE DEL EQUIPO:','SERIE','serie'),
                 tipo:  buscar('TIPO DE MANTENIMIENTO:','TIPO DE MANT','tipo de mant','TIPO'),
                 estado:normEstado(buscar('ESTADO FUNCIONAL FINAL DEL BIEN:','ESTADO FUNCIONAL','ESTADO FUNC','estado')),
-                usoInsumo: (buscar('USO DE INSUMO','USO INSUMO','¿SE USÓ INSUMO?','SE USO INSUMO') || 'NO').toUpperCase(),
-                insumoDesc: buscar('DESCRIPCION DE INSUMOS','DESCRIPCIÓN DE INSUMOS','DESCRIPCION INSUMO','DESCRIPCION DE INSUMO'),
+                usoInsumo: (buscar('USO DE INSUMO','USO INSUMO','¿SE USÓ INSUMO?','SE USO INSUMO','Columna 1') || 'NO').toUpperCase(),
+                insumoDesc: buscar('DESCRIPCION DE INSUMOS','DESCRIPCIÓN DE INSUMOS','DESCRIPCION INSUMO','DESCRIPCION DE INSUMO','Columna 2'),
                 ejec:  buscar('EJECUTOR DEL MANTENIMIENTO:','EJECUTOR','ejecutor'),
                 obs:   buscar('OBSERVACIONES DEL MANTENIMIENTO:','OBSERVAC','observac').slice(0,220),
                 pdf: (()=>{
@@ -1549,6 +1558,37 @@ msRepoblarDynamic('f-estab',  valsFor('estab',  'estab'),  estabs);
   renderTags();
   renderKPIs();
   renderTable();
+  sincronizarBotonInsumos();
+}
+
+/* ════════════════════════════════════════════════════════════
+   BOTÓN "CON INSUMOS" — control rápido de OTMs con insumo usado
+════════════════════════════════════════════════════════════ */
+function toggleFiltroInsumos() {
+  const sel = document.getElementById('f-insumo');
+  if (sel.value === 'SI') {
+    sel.value = '';
+  } else {
+    sel.value = 'SI';
+  }
+  applyFilters();
+  document.querySelector('.main')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+function sincronizarBotonInsumos() {
+  const btn = document.getElementById('btn-ver-insumos');
+  const sel = document.getElementById('f-insumo');
+  if (!btn || !sel) return;
+  const activo = sel.value === 'SI';
+  btn.classList.toggle('activo', activo);
+  if (activo) {
+    btn.style.background = '#16a34a';
+    btn.style.borderColor = '#16a34a';
+    btn.innerHTML = '<span style="font-size:13px">✔</span><span>Con Insumos (' + filtered.length + ')</span>';
+  } else {
+    btn.style.background = 'rgba(255,255,255,.12)';
+    btn.style.borderColor = 'rgba(255,255,255,.25)';
+    btn.innerHTML = '<span style="font-size:13px">🧰</span><span>Con Insumos</span>';
+  }
 }
 
 /* ════════════════════════════════════════════════════════════
@@ -1569,6 +1609,7 @@ function clearAll() {
   renderTags();
   renderKPIs();
   renderTable();
+  sincronizarBotonInsumos();
 }
 
 /* ════════════════════════════════════════════════════════════
@@ -1999,6 +2040,7 @@ renderTable();
 // Luego se repite automáticamente cada 30 segundos.
 window.addEventListener('DOMContentLoaded', () => {
     cargarDatosDesdeDrive();
+    cargarCatalogoInsumos();
 });
 </script>
 
@@ -2773,13 +2815,6 @@ clearAll = function() {
         </select>
       </div>
       <div>
-        <label class="edit-lbl">Uso de Insumo</label>
-        <select class="edit-inp" id="edit-uso-insumo" onchange="toggleEditInsumo(this.value)">
-          <option value="NO">NO</option>
-          <option value="SI">SÍ</option>
-        </select>
-      </div>
-      <div>
         <label class="edit-lbl">Ejecutor</label>
         <select class="edit-inp" id="edit-ejec">
           <option>ALFONSO VARGAS</option>
@@ -2793,9 +2828,14 @@ clearAll = function() {
           <option>WAGNER ROJAS</option>
         </select>
       </div>
-      <div class="full" id="edit-insumo-desc-wrap" style="display:none;">
-        <label class="edit-lbl">Descripción de Insumos</label>
-        <textarea class="edit-inp" id="edit-insumo-desc" rows="2" style="resize:vertical"></textarea>
+      <div class="full" id="edit-insumos-wrap">
+        <label class="edit-lbl">🧰 Insumos Usados <span id="edit-insumo-badge" style="text-transform:none;font-weight:700;padding:1px 8px;border-radius:10px;font-size:10px;background:#fee2e2;color:#7f1d1d;margin-left:4px;">NO</span></label>
+        <div style="position:relative;">
+          <input class="edit-inp" id="edit-insumo-buscar" type="text" placeholder="Buscar insumo por código o nombre..." autocomplete="off" oninput="buscarInsumoEnCatalogo(this.value)" onfocus="buscarInsumoEnCatalogo(this.value)">
+          <div id="edit-insumo-sugerencias" style="display:none;position:absolute;z-index:50;top:100%;left:0;right:0;background:#fff;border:1.5px solid #1d4ed8;border-radius:8px;max-height:220px;overflow-y:auto;box-shadow:0 8px 24px rgba(0,0,0,.15);margin-top:2px;"></div>
+        </div>
+        <div id="edit-insumos-lista" style="margin-top:8px;display:flex;flex-direction:column;gap:6px;"></div>
+        <div id="edit-insumos-vacio" style="font-size:12px;color:#94a3b8;margin-top:6px;">Sin insumos agregados</div>
       </div>
       <div class="full">
         <label class="edit-lbl">Observaciones</label>
@@ -2834,6 +2874,7 @@ clearAll = function() {
 
 let currentOtmId = null;   // ID de la OTM actualmente abierta en el modal detalle
 let editingOtmId = null;   // ID de la OTM en proceso de edición
+let editingInsumos = [];   // [{codigo, descripcion, unidad, cantidad}] — insumos de la OTM en edición
 
 // ── Guardar qué OTM está abierta en el modal detalle ──────────
 const _origShowDetail = showDetail;
@@ -2842,15 +2883,149 @@ showDetail = function(id) {
   _origShowDetail(id);
 };
 
-function toggleEditInsumo(val) {
-  const wrap = document.getElementById('edit-insumo-desc-wrap');
-  wrap.style.display = (val === 'SI') ? 'block' : 'none';
+// ════════════════════════════════════════
+//  CATÁLOGO DE INSUMOS Y KARDEX
+// ════════════════════════════════════════
+let CATALOGO_INSUMOS    = []; // [{codigo, servicio, descripcion, cantidad, unidad}]
+let MOVIMIENTOS_INSUMOS = []; // [{fecha, otmId, estab, codigo, descripcion, cantidad, ejecutor}]
+
+function leerCampo(item, keys, ...pats) {
+  for (const p of pats) {
+    let k = keys.find(kk => kk.trim().toLowerCase() === p.toLowerCase());
+    if (!k) k = keys.find(kk => kk.trim().toLowerCase().includes(p.toLowerCase()));
+    if (k && item[k] !== undefined && item[k] !== null && String(item[k]).trim() !== '') return String(item[k]).trim();
+  }
+  return '';
 }
+
+async function cargarCatalogoInsumos() {
+  try {
+    const resp = await fetch(SHEET_URL + '?action=catalogoInsumos&v=' + Date.now());
+    const datos = await resp.json();
+    CATALOGO_INSUMOS = (datos || []).map(item => {
+      const keys = Object.keys(item);
+      return {
+        codigo:      leerCampo(item, keys, 'Código', 'Codigo'),
+        servicio:    leerCampo(item, keys, 'Servicio'),
+        descripcion: leerCampo(item, keys, 'Descripción', 'Descripcion'),
+        cantidad:    Number(leerCampo(item, keys, 'Cantidad')) || 0,
+        unidad:      leerCampo(item, keys, 'Unidad de Despacho', 'Unidad'),
+      };
+    }).filter(i => i.codigo);
+  } catch(e) { console.error('Error cargando catálogo de insumos:', e); }
+}
+
+async function cargarMovimientosInsumos() {
+  try {
+    const resp = await fetch(SHEET_URL + '?action=movimientosInsumos&v=' + Date.now());
+    const datos = await resp.json();
+    MOVIMIENTOS_INSUMOS = (datos || []).map(item => {
+      const keys = Object.keys(item);
+      return {
+        fecha:       leerCampo(item, keys, 'Fecha'),
+        otmId:       leerCampo(item, keys, 'N° OTM', 'OTM'),
+        estab:       leerCampo(item, keys, 'Establecimiento'),
+        codigo:      leerCampo(item, keys, 'Código Insumo', 'Codigo Insumo'),
+        descripcion: leerCampo(item, keys, 'Descripción', 'Descripcion'),
+        cantidad:    Number(leerCampo(item, keys, 'Cantidad Usada', 'Cantidad')) || 0,
+        ejecutor:    leerCampo(item, keys, 'Ejecutor'),
+      };
+    });
+  } catch(e) { console.error('Error cargando movimientos de insumos:', e); }
+}
+
+function renderListaInsumosEdit() {
+  const cont  = document.getElementById('edit-insumos-lista');
+  const vacio = document.getElementById('edit-insumos-vacio');
+  const badge = document.getElementById('edit-insumo-badge');
+
+  badge.textContent = editingInsumos.length ? 'SÍ' : 'NO';
+  badge.style.background = editingInsumos.length ? '#dcfce7' : '#fee2e2';
+  badge.style.color      = editingInsumos.length ? '#14532d' : '#7f1d1d';
+
+  if (!editingInsumos.length) {
+    cont.innerHTML = '';
+    vacio.style.display = 'block';
+    return;
+  }
+  vacio.style.display = 'none';
+  cont.innerHTML = editingInsumos.map((ins, idx) => `
+    <div style="display:flex;align-items:center;gap:8px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:6px 10px;">
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:12.5px;font-weight:600;color:#0d2b5e;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${ins.descripcion}">${ins.descripcion}</div>
+        <div style="font-size:10.5px;color:#94a3b8;">Código: ${ins.codigo}${ins.unidad ? ' · ' + ins.unidad : ''}</div>
+      </div>
+      <input type="number" min="0.01" step="any" value="${ins.cantidad}"
+        style="width:70px;padding:5px 7px;border:1.5px solid #e2e8f0;border-radius:6px;font-size:12px;font-family:inherit;"
+        onchange="actualizarCantidadInsumo(${idx}, this.value)">
+      <span style="cursor:pointer;color:#dc2626;font-size:16px;padding:2px 4px;" onclick="quitarInsumoEdit(${idx})" title="Quitar">✕</span>
+    </div>
+  `).join('');
+}
+
+function buscarInsumoEnCatalogo(q) {
+  const cont = document.getElementById('edit-insumo-sugerencias');
+  q = (q || '').trim().toLowerCase();
+  if (!q) { cont.style.display = 'none'; cont.innerHTML = ''; return; }
+
+  const yaAgregados = new Set(editingInsumos.map(i => i.codigo));
+  const matches = CATALOGO_INSUMOS.filter(i =>
+    !yaAgregados.has(i.codigo) &&
+    (i.codigo.toLowerCase().includes(q) || i.descripcion.toLowerCase().includes(q))
+  ).slice(0, 12);
+
+  if (!CATALOGO_INSUMOS.length) {
+    cont.innerHTML = '<div style="padding:10px;font-size:12px;color:#94a3b8;">Cargando catálogo...</div>';
+    cont.style.display = 'block';
+    return;
+  }
+  if (!matches.length) {
+    cont.innerHTML = '<div style="padding:10px;font-size:12px;color:#94a3b8;">Sin resultados</div>';
+    cont.style.display = 'block';
+    return;
+  }
+  cont.innerHTML = matches.map(i => `
+    <div style="padding:8px 10px;cursor:pointer;font-size:12px;border-bottom:1px solid #f1f5f9;"
+      onmouseover="this.style.background='#eff6ff'" onmouseout="this.style.background='#fff'"
+      onclick="agregarInsumoEdit('${i.codigo.replace(/'/g,"\\'")}')">
+      <div style="font-weight:600;color:#0d2b5e;">${i.descripcion}</div>
+      <div style="font-size:10.5px;color:#94a3b8;">Código: ${i.codigo} · Stock: ${i.cantidad} ${i.unidad || ''}</div>
+    </div>
+  `).join('');
+  cont.style.display = 'block';
+}
+
+function agregarInsumoEdit(codigo) {
+  const item = CATALOGO_INSUMOS.find(i => i.codigo === codigo);
+  if (!item) return;
+  editingInsumos.push({ codigo: item.codigo, descripcion: item.descripcion, unidad: item.unidad, cantidad: 1 });
+  document.getElementById('edit-insumo-buscar').value = '';
+  document.getElementById('edit-insumo-sugerencias').style.display = 'none';
+  renderListaInsumosEdit();
+}
+
+function actualizarCantidadInsumo(idx, val) {
+  const n = Number(val);
+  editingInsumos[idx].cantidad = n > 0 ? n : 1;
+}
+
+function quitarInsumoEdit(idx) {
+  editingInsumos.splice(idx, 1);
+  renderListaInsumosEdit();
+}
+
+// Cerrar sugerencias al hacer click afuera del buscador
+document.addEventListener('click', e => {
+  if (!e.target.closest('#edit-insumos-wrap')) {
+    const cont = document.getElementById('edit-insumo-sugerencias');
+    if (cont) cont.style.display = 'none';
+  }
+});
 
 // ════════════════════════════════════════
 //  ABRIR MODAL DE EDICIÓN
 // ════════════════════════════════════════
-function openEdit(id) {
+async function openEdit(id) {
   const r = ALL.find(x => x.id === String(id));
   if (!r) return;
   editingOtmId = r.id;
@@ -2866,21 +3041,34 @@ function openEdit(id) {
   document.getElementById('edit-modelo').value = r.modelo|| '';
   document.getElementById('edit-serie').value  = r.serie || '';
   document.getElementById('edit-obs').value    = r.obs   || '';
-  document.getElementById('edit-insumo-desc').value = r.insumoDesc || '';
 
   // Selects
   setSelectVal('edit-tipo',   r.tipo);
   setSelectVal('edit-estado', r.estado);
   setSelectVal('edit-ejec',   r.ejec);
-  setSelectVal('edit-uso-insumo', r.usoInsumo === 'SI' ? 'SI' : 'NO');
-  toggleEditInsumo(r.usoInsumo === 'SI' ? 'SI' : 'NO');
 
   const msgEl = document.getElementById('edit-msg');
   msgEl.className = 'edit-msg';
   msgEl.textContent = '';
   document.getElementById('btn-save-edit').disabled = false;
 
+  // Insumos: mostrar estado previo mientras se cargan del kardex
+  editingInsumos = [];
+  document.getElementById('edit-insumos-lista').innerHTML = '';
+  document.getElementById('edit-insumos-vacio').textContent = 'Cargando insumos...';
+  document.getElementById('edit-insumos-vacio').style.display = 'block';
+
   document.getElementById('modal-edit').classList.add('open');
+
+  if (!CATALOGO_INSUMOS.length) cargarCatalogoInsumos();
+  await cargarMovimientosInsumos();
+
+  editingInsumos = MOVIMIENTOS_INSUMOS
+    .filter(m => m.otmId === r.id)
+    .map(m => ({ codigo: m.codigo, descripcion: m.descripcion, cantidad: m.cantidad, unidad: '' }));
+
+  document.getElementById('edit-insumos-vacio').textContent = 'Sin insumos agregados';
+  renderListaInsumosEdit();
 }
 
 function setSelectVal(selectId, val) {
@@ -2921,8 +3109,6 @@ async function guardarEdicion() {
     fechaISO = `${y}-${m}-${d}`;
   }
 
-  const usoInsumoVal = document.getElementById('edit-uso-insumo').value;
-
   const payload = {
     action:  'editarOTM',
     id:      editingOtmId,
@@ -2938,8 +3124,7 @@ async function guardarEdicion() {
     estado:  document.getElementById('edit-estado').value,
     ejec:    document.getElementById('edit-ejec').value,
     obs:     document.getElementById('edit-obs').value.trim(),
-    usoInsumo:  usoInsumoVal,
-    insumoDesc: usoInsumoVal === 'SI' ? document.getElementById('edit-insumo-desc').value.trim() : '',
+    insumos: editingInsumos.map(i => ({ codigo: i.codigo, descripcion: i.descripcion, cantidad: i.cantidad })),
   };
 
   try {
@@ -2974,9 +3159,12 @@ async function guardarEdicion() {
         r.estado = payload.estado;
         r.ejec   = payload.ejec;
         r.obs    = payload.obs;
-        r.usoInsumo  = payload.usoInsumo;
-        r.insumoDesc = payload.insumoDesc;
+        r.usoInsumo  = payload.insumos.length ? 'SI' : 'NO';
+        r.insumoDesc = payload.insumos.map(i => `${i.descripcion} (x${i.cantidad})`).join('; ');
       }
+      // Refrescar catálogo (el stock cambió) y kardex
+      cargarCatalogoInsumos();
+      cargarMovimientosInsumos();
       setTimeout(() => {
         closeEdit();
         // Refrescar el modal detalle si sigue abierto
@@ -3048,6 +3236,9 @@ async function ejecutarEliminar() {
       // Eliminar del array local
       const idx = ALL.findIndex(x => x.id === currentOtmId);
       if (idx !== -1) ALL.splice(idx, 1);
+      // El backend revierte el stock consumido por esta OTM: refrescar catálogo/kardex
+      cargarCatalogoInsumos();
+      cargarMovimientosInsumos();
       setTimeout(() => {
         closeConfirm();
         closeM();
