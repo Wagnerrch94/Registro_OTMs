@@ -600,15 +600,6 @@ function verificarAcceso() {
   <span style="font-size:13px">📊</span>
   <span>Base de datos</span>
 </button>
-<!-- Botón verificar OTMs con insumos usados (control) -->
-<button id="btn-ver-insumos" onclick="toggleFiltroInsumos()" title="Ver solo OTMs donde se usó insumo"
-        style="background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.25);color:#fff;
-               border-radius:8px;padding:6px 13px;font-size:12px;font-weight:600;cursor:pointer;
-               display:flex;align-items:center;gap:6px;margin-right:10px;font-family:inherit;
-               transition:background .15s" onmouseover="if(!this.classList.contains('activo'))this.style.background='rgba(255,255,255,.22)'" onmouseout="if(!this.classList.contains('activo'))this.style.background='rgba(255,255,255,.12)'">
-  <span style="font-size:13px">🧰</span>
-  <span>Con Insumos</span>
-</button>
   <!-- Botón refresh manual -->
   <button id="btn-refresh" onclick="refreshManual()" title="Actualizar ahora" style="background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.25);color:#fff;
            border-radius:8px;padding:6px 13px;font-size:12px;font-weight:600;cursor:pointer;
@@ -1202,8 +1193,8 @@ async function cargarDatosDesdeDrive() {
                 serie: buscar('SERIE DEL EQUIPO:','SERIE','serie'),
                 tipo:  buscar('TIPO DE MANTENIMIENTO:','TIPO DE MANT','tipo de mant','TIPO'),
                 estado:normEstado(buscar('ESTADO FUNCIONAL FINAL DEL BIEN:','ESTADO FUNCIONAL','ESTADO FUNC','estado')),
-                usoInsumo: (buscar('USO DE INSUMO','USO INSUMO','¿SE USÓ INSUMO?','SE USO INSUMO','Columna 1') || 'NO').toUpperCase(),
-                insumoDesc: buscar('DESCRIPCION DE INSUMOS','DESCRIPCIÓN DE INSUMOS','DESCRIPCION INSUMO','DESCRIPCION DE INSUMO','Columna 2'),
+                usoInsumo: (buscar('USO DE INSUMO','USO INSUMO','¿SE USÓ INSUMO?','SE USO INSUMO') || 'NO').toUpperCase(),
+                insumoDesc: buscar('DESCRIPCION DE INSUMOS','DESCRIPCIÓN DE INSUMOS','DESCRIPCION INSUMO','DESCRIPCION DE INSUMO'),
                 ejec:  buscar('EJECUTOR DEL MANTENIMIENTO:','EJECUTOR','ejecutor'),
                 obs:   buscar('OBSERVACIONES DEL MANTENIMIENTO:','OBSERVAC','observac').slice(0,220),
                 pdf: (()=>{
@@ -1558,37 +1549,6 @@ msRepoblarDynamic('f-estab',  valsFor('estab',  'estab'),  estabs);
   renderTags();
   renderKPIs();
   renderTable();
-  sincronizarBotonInsumos();
-}
-
-/* ════════════════════════════════════════════════════════════
-   BOTÓN "CON INSUMOS" — control rápido de OTMs con insumo usado
-════════════════════════════════════════════════════════════ */
-function toggleFiltroInsumos() {
-  const sel = document.getElementById('f-insumo');
-  if (sel.value === 'SI') {
-    sel.value = '';
-  } else {
-    sel.value = 'SI';
-  }
-  applyFilters();
-  document.querySelector('.main')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-}
-function sincronizarBotonInsumos() {
-  const btn = document.getElementById('btn-ver-insumos');
-  const sel = document.getElementById('f-insumo');
-  if (!btn || !sel) return;
-  const activo = sel.value === 'SI';
-  btn.classList.toggle('activo', activo);
-  if (activo) {
-    btn.style.background = '#16a34a';
-    btn.style.borderColor = '#16a34a';
-    btn.innerHTML = '<span style="font-size:13px">✔</span><span>Con Insumos (' + filtered.length + ')</span>';
-  } else {
-    btn.style.background = 'rgba(255,255,255,.12)';
-    btn.style.borderColor = 'rgba(255,255,255,.25)';
-    btn.innerHTML = '<span style="font-size:13px">🧰</span><span>Con Insumos</span>';
-  }
 }
 
 /* ════════════════════════════════════════════════════════════
@@ -1609,7 +1569,6 @@ function clearAll() {
   renderTags();
   renderKPIs();
   renderTable();
-  sincronizarBotonInsumos();
 }
 
 /* ════════════════════════════════════════════════════════════
