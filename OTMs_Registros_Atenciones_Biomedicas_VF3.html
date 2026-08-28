@@ -1202,8 +1202,8 @@ async function cargarDatosDesdeDrive() {
                 serie: buscar('SERIE DEL EQUIPO:','SERIE','serie'),
                 tipo:  buscar('TIPO DE MANTENIMIENTO:','TIPO DE MANT','tipo de mant','TIPO'),
                 estado:normEstado(buscar('ESTADO FUNCIONAL FINAL DEL BIEN:','ESTADO FUNCIONAL','ESTADO FUNC','estado')),
-                usoInsumo: (buscar('USO DE INSUMO','USO INSUMO','¿SE USÓ INSUMO?','SE USO INSUMO') || 'NO').toUpperCase(),
-                insumoDesc: buscar('DESCRIPCION DE INSUMOS','DESCRIPCIÓN DE INSUMOS','DESCRIPCION INSUMO','DESCRIPCION DE INSUMO'),
+                usoInsumo: (buscar('USO DE INSUMO','USO INSUMO','¿SE USÓ INSUMO?','SE USO INSUMO','Columna 1') || 'NO').toUpperCase(),
+                insumoDesc: buscar('DESCRIPCION DE INSUMOS','DESCRIPCIÓN DE INSUMOS','DESCRIPCION INSUMO','DESCRIPCION DE INSUMO','Columna 2'),
                 ejec:  buscar('EJECUTOR DEL MANTENIMIENTO:','EJECUTOR','ejecutor'),
                 obs:   buscar('OBSERVACIONES DEL MANTENIMIENTO:','OBSERVAC','observac').slice(0,220),
                 pdf: (()=>{
