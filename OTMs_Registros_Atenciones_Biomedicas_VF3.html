@@ -600,15 +600,24 @@ function verificarAcceso() {
   <span style="font-size:13px">📊</span>
   <span>Base de datos</span>
 </button>
-<!-- Botón verificar OTMs con insumos usados (control) -->
-<button id="btn-ver-insumos" onclick="toggleFiltroInsumos()" title="Ver solo OTMs donde se usó insumo"
-        style="background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.25);color:#fff;
-               border-radius:8px;padding:6px 13px;font-size:12px;font-weight:600;cursor:pointer;
-               display:flex;align-items:center;gap:6px;margin-right:10px;font-family:inherit;
-               transition:background .15s" onmouseover="if(!this.classList.contains('activo'))this.style.background='rgba(255,255,255,.22)'" onmouseout="if(!this.classList.contains('activo'))this.style.background='rgba(255,255,255,.12)'">
-  <span style="font-size:13px">🧰</span>
-  <span>Con Insumos</span>
-</button>
+<!-- Botón verificar OTMs con insumos usados + generar informe de consumo -->
+<div id="grp-insumos" style="display:flex;align-items:stretch;border-radius:8px;overflow:hidden;border:1px solid rgba(255,255,255,.25);margin-right:10px;">
+  <button id="btn-ver-insumos" onclick="toggleFiltroInsumos()" title="Ver solo OTMs donde se usó insumo"
+          style="background:rgba(255,255,255,.12);border:none;color:#fff;
+                 padding:6px 13px;font-size:12px;font-weight:600;cursor:pointer;
+                 display:flex;align-items:center;gap:6px;font-family:inherit;
+                 transition:background .15s" onmouseover="if(!this.classList.contains('activo'))this.style.background='rgba(255,255,255,.22)'" onmouseout="if(!this.classList.contains('activo'))this.style.background='rgba(255,255,255,.12)'">
+    <span style="font-size:13px">🧰</span>
+    <span>Con Insumos</span>
+  </button>
+  <button id="btn-reporte-consumo" onclick="generarReporteConsumo()" title="Generar informe PDF de consumo de insumos"
+          style="background:rgba(255,255,255,.08);border:none;border-left:1px solid rgba(255,255,255,.25);color:#fff;
+                 padding:6px 11px;font-size:13px;cursor:pointer;display:flex;align-items:center;
+                 font-family:inherit;transition:background .15s"
+          onmouseover="this.style.background='rgba(255,255,255,.22)'" onmouseout="this.style.background='rgba(255,255,255,.08)'">
+    📄
+  </button>
+</div>
   <!-- Botón refresh manual -->
   <button id="btn-refresh" onclick="refreshManual()" title="Actualizar ahora" style="background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.25);color:#fff;
            border-radius:8px;padding:6px 13px;font-size:12px;font-weight:600;cursor:pointer;
@@ -860,7 +869,6 @@ function verificarAcceso() {
         <div class="sbar-cnt" id="srch-cnt">869 resultados</div>
       </div>
     <button id="btn-charts" onclick="toggleCharts()" style="display: flex; align-items: center; gap: 8px; padding: 0px 20px; background: linear-gradient(135deg, rgb(13, 43, 94), rgb(29, 78, 216)); color: rgb(255, 255, 255); border-width: medium; border-style: none; border-color: currentcolor; border-image: initial; border-radius: 12px; font-size: 13px; font-weight: 700; cursor: pointer; white-space: nowrap; box-shadow: rgba(29, 78, 216, 0.25) 0px 2px 8px; transition: opacity 0.2s; font-family: inherit;">📊 Gráficas</button>
-      <button id="btn-reporte-consumo" onclick="generarReporteConsumo()" style="display:flex;align-items:center;gap:8px;padding:0 20px;background:linear-gradient(135deg,#7c3aed,#6d28d9);color:#fff;border:none;border-radius:12px;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;box-shadow:0 2px 8px rgba(124,58,237,.25);transition:opacity .2s;font-family:inherit;">🧰 Reporte de Consumo</button>
       <button id="btn-export-xlsx" onclick="exportarExcel()" style="display:flex;align-items:center;gap:8px;padding:0 20px;background:linear-gradient(135deg,#15803d,#16a34a);color:#fff;border:none;border-radius:12px;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;box-shadow:0 2px 8px rgba(21,128,61,.25);transition:opacity .2s;font-family:inherit;">📥 Exportar Excel</button>
     </div>
 
