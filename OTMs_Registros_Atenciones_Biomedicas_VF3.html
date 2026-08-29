@@ -3041,39 +3041,71 @@ async function generarReporteConsumo() {
   btn.disabled = true;
 
   try {
-    // Asegurar datos frescos de catálogo y kardex
-    await Promise.all([cargarCatalogoInsumos(), cargarMovimientosInsumos()]);
+    // ── Fuente de datos: las OTMs ya cargadas (ALL), no la pestaña
+    // "Movimientos_Insumos" (kardex), que solo se llena editando OTMs
+    // una por una desde este dashboard y normalmente no existe.
+    // El detalle de insumos de cada OTM viene en r.insumoDesc con el
+    // formato "<codigo> - <descripcion> x <cantidad>; ..." que escribe
+    // el formulario de registro.
+    const otmsConInsumoLista = ALL.filter(r => r.usoInsumo === 'SI' && r.insumoDesc);
 
-    if (!MOVIMIENTOS_INSUMOS.length) {
-      alert('Todavía no hay movimientos de insumos registrados.');
+    if (!otmsConInsumoLista.length) {
+      alert('Todavía no hay OTMs con insumos registrados.');
       return;
     }
 
     // ── Agregaciones ──────────────────────────────────────────
-    const consumoPorInsumo = {}; // codigo -> {descripcion, unidad, total}
+    const consumoPorInsumo = {}; // clave (codigo o descripción) -> {codigo, descripcion, total, usos}
     const consumoPorEstab  = {}; // establecimiento -> total unidades
     let totalUnidades = 0;
 
-    MOVIMIENTOS_INSUMOS.forEach(m => {
-      const key = m.codigo || m.descripcion;
-      if (!consumoPorInsumo[key]) {
-        const cat = CATALOGO_INSUMOS.find(c => c.codigo === m.codigo);
-        consumoPorInsumo[key] = { codigo: m.codigo, descripcion: m.descripcion, unidad: cat ? cat.unidad : '', total: 0, usos: 0 };
-      }
-      consumoPorInsumo[key].total += m.cantidad;
-      consumoPorInsumo[key].usos  += 1;
-      totalUnidades += m.cantidad;
+    otmsConInsumoLista.forEach(r => {
+      const partes = r.insumoDesc.split(';').map(s => s.trim()).filter(Boolean);
+      let cantidadOtm = 0;
 
-      const estabKey = m.estab || 'Sin dato';
-      consumoPorEstab[estabKey] = (consumoPorEstab[estabKey] || 0) + m.cantidad;
+      partes.forEach(parte => {
+        // Formato esperado: "<codigo> - <descripcion> x <cantidad>"
+        const m = parte.match(/^(.*?)\s*-\s*(.*?)\s*x\s*([\d.,]+)\s*$/i);
+        let codigo, descripcion, cantidad;
+        if (m) {
+          codigo = m[1].trim();
+          descripcion = m[2].trim();
+          cantidad = Number(m[3].replace(',', '.')) || 0;
+        } else {
+          // No calzó el formato esperado — se muestra tal cual, sin cantidad
+          codigo = '';
+          descripcion = parte;
+          cantidad = 0;
+        }
+        const key = codigo || descripcion;
+        if (!consumoPorInsumo[key]) consumoPorInsumo[key] = { codigo, descripcion, total: 0, usos: 0 };
+        consumoPorInsumo[key].total += cantidad;
+        consumoPorInsumo[key].usos  += 1;
+        totalUnidades += cantidad;
+        cantidadOtm += cantidad;
+      });
+
+      const estabKey = r.estab || 'Sin dato';
+      consumoPorEstab[estabKey] = (consumoPorEstab[estabKey] || 0) + cantidadOtm;
     });
 
     const topInsumos = Object.values(consumoPorInsumo).sort((a,b) => b.total - a.total).slice(0, 12);
     const topEstabs  = Object.entries(consumoPorEstab).sort((a,b) => b[1]-a[1]).slice(0, 10);
-    const STOCK_MIN  = 5;
-    const stockBajo  = CATALOGO_INSUMOS.filter(i => i.cantidad <= STOCK_MIN).sort((a,b) => a.cantidad - b.cantidad);
 
-    const otmsConInsumo = new Set(MOVIMIENTOS_INSUMOS.map(m => m.otmId)).size;
+    // ── Stock bajo: solo si el catálogo remoto se ve confiable ──
+    // (si el backend del dashboard no tiene la versión con
+    // ?action=catalogoInsumos desplegada, esto devuelve el listado
+    // completo de OTMs y NO debe usarse — se detecta y se omite)
+    await cargarCatalogoInsumos();
+    const codigosUsados = new Set(Object.values(consumoPorInsumo).map(i => i.codigo).filter(Boolean));
+    const catalogoConfiable = CATALOGO_INSUMOS.length > 0 && CATALOGO_INSUMOS.length <= 200 &&
+      CATALOGO_INSUMOS.some(c => codigosUsados.has(c.codigo));
+    const STOCK_MIN  = 5;
+    const stockBajo  = catalogoConfiable
+      ? CATALOGO_INSUMOS.filter(i => Number(i.cantidad) <= STOCK_MIN).sort((a,b) => a.cantidad - b.cantidad)
+      : null; // null = no se pudo verificar
+
+    const otmsConInsumo = otmsConInsumoLista.length;
     const nInsumosDistintos = Object.keys(consumoPorInsumo).length;
 
     // ── PDF ───────────────────────────────────────────────────
@@ -3106,7 +3138,7 @@ async function generarReporteConsumo() {
       { v: String(nInsumosDistintos), l: 'Insumos distintos usados', c: '#7c3aed' },
       { v: String(totalUnidades),     l: 'Unidades consumidas',      c: '#1d4ed8' },
       { v: String(otmsConInsumo),     l: 'OTMs con insumo',          c: '#15803d' },
-      { v: String(stockBajo.length),  l: 'Insumos con stock bajo',   c: '#dc2626' },
+      { v: stockBajo === null ? '—' : String(stockBajo.length), l: 'Insumos con stock bajo', c: '#dc2626' },
     ];
     const KW = (PW-2*M-9)/4;
     kpis.forEach((k,i)=>{
@@ -3186,7 +3218,12 @@ async function generarReporteConsumo() {
     doc.text(`INSUMOS CON STOCK BAJO (≤ ${STOCK_MIN} unidades)`, M+4, y+4.8);
     y += 9;
 
-    if (!stockBajo.length) {
+    if (stockBajo === null) {
+      doc.setFont('helvetica','normal'); st('#b45309'); doc.setFontSize(7.5);
+      doc.text('⚠ No se pudo verificar el stock actual (el catálogo remoto no respondió', M+2, y+5);
+      doc.text('   con datos válidos). El resto del informe sigue siendo correcto.', M+2, y+9.5);
+      y += 15;
+    } else if (!stockBajo.length) {
       doc.setFont('helvetica','normal'); st('#15803d'); doc.setFontSize(7.5);
       doc.text('✔ Ningún insumo está por debajo del umbral de stock mínimo.', M+2, y+5);
       y += 10;
