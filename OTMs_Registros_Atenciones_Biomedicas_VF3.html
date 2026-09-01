@@ -2885,6 +2885,52 @@ clearAll = function() {
   </div>
 </div>
 
+<!-- ════════════════════════════════
+     MODAL — DATOS DEL INFORME DE CONSUMO
+════════════════════════════════ -->
+<div class="edit-bg" id="modal-informe" onclick="if(event.target===this)closeInformeModal()">
+  <div class="edit-box" style="max-width:520px;">
+    <div class="edit-title">
+      <span style="font-size:22px">📄</span>
+      <span>Datos del Informe de Consumo</span>
+    </div>
+    <div class="edit-grid" style="grid-template-columns:1fr;">
+      <div>
+        <label class="edit-lbl">A (destinatario)</label>
+        <input class="edit-inp" id="inf-para" value="OFICINA DE INFRAESTRUCTURA Y EQUIPAMIENTO">
+      </div>
+      <div>
+        <label class="edit-lbl">De</label>
+        <input class="edit-inp" id="inf-de" value="WAGNER EDILBERTO ROJAS CHAVEZ">
+      </div>
+      <div>
+        <label class="edit-lbl">Cargo de quien remite</label>
+        <input class="edit-inp" id="inf-de-cargo" value="EQUIPO BIOMÉDICO DIRIS LIMA NORTE">
+      </div>
+      <div>
+        <label class="edit-lbl">Asunto</label>
+        <input class="edit-inp" id="inf-asunto" value="SE REMITE INFORME DE CONSUMO DE INSUMOS EN MANTENIMIENTO DE EQUIPOS BIOMÉDICOS">
+      </div>
+      <div>
+        <label class="edit-lbl">Firma (nombre de quien suscribe)</label>
+        <input class="edit-inp" id="inf-firma-nombre" value="JORGE GUSTAVO FERNANDEZ FLORES">
+      </div>
+      <div>
+        <label class="edit-lbl">Cargo de quien suscribe</label>
+        <input class="edit-inp" id="inf-firma-cargo" value="JEFE(A) DE LA OFICINA DE INFRAESTRUCTURA Y EQUIPAMIENTO">
+      </div>
+      <div>
+        <label class="edit-lbl">Iniciales (pie de documento)</label>
+        <input class="edit-inp" id="inf-iniciales" value="JFF/wrc">
+      </div>
+    </div>
+    <div class="edit-footer">
+      <button class="btn-save" id="btn-generar-informe" onclick="confirmarGenerarInforme()">📄 Generar informe</button>
+      <button class="btn-cancel-edit" onclick="closeInformeModal()">Cancelar</button>
+    </div>
+  </div>
+</div>
+
 <script>
 /* ════════════════════════════════════════════════════════════
    EDITAR / ELIMINAR OTMs — sincronización con Google Sheet
@@ -3041,9 +3087,88 @@ document.addEventListener('click', e => {
 });
 
 // ════════════════════════════════════════
-//  REPORTE DE CONSUMO DE INSUMOS (PDF)
+//  MEMBRETE OFICIAL DIRIS LIMA NORTE (logo institucional)
+//  Extraído del formato oficial de memorandos de la Oficina de
+//  Infraestructura y Equipamiento (PLANTILLA.docx)
 // ════════════════════════════════════════
-async function generarReporteConsumo() {
+const LOGO_DIRIS_B64 = "data:image/png;base64,PLACEHOLDER_LOGO_BASE64";
+
+// Dibuja el membrete institucional completo (logo + barras + leyendas)
+// y devuelve la coordenada Y donde continúa el contenido.
+function dibujarMembreteOficial(doc, hex2rgb) {
+  const PW = doc.internal.pageSize.getWidth();
+  const M  = 14;
+  const sf=h=>{const[r,g,b]=hex2rgb(h);doc.setFillColor(r,g,b);};
+  const st=h=>{const[r,g,b]=hex2rgb(h);doc.setTextColor(r,g,b);};
+
+  const imgX = M, imgY = 8, imgW = 75.2, imgH = 12.4;
+  try { doc.addImage(LOGO_DIRIS_B64, 'PNG', imgX, imgY, imgW, imgH); } catch(e) {}
+
+  // Caja gris "DIRECCIÓN ADMINISTRATIVA"
+  const b1X = imgX + imgW + 1.5, b1W = 27, bH = 12.4;
+  sf('#a5a5a5'); doc.rect(b1X, imgY, b1W, bH, 'F');
+  doc.setFont('helvetica','bold'); st('#ffffff'); doc.setFontSize(6.3);
+  const l1 = doc.splitTextToSize('DIRECCIÓN ADMINISTRATIVA', b1W - 3);
+  doc.text(l1, b1X + b1W/2, imgY + bH/2 - (l1.length-1)*1.4, {align:'center'});
+
+  // Caja gris clara "OFICINA DE INFRAESTRUCTURA Y EQUIPAMIENTO"
+  const b2X = b1X + b1W + 0.6, b2W = 33;
+  sf('#bfbfbf'); doc.rect(b2X, imgY, b2W, bH, 'F');
+  doc.setFont('helvetica','bold'); st('#333333'); doc.setFontSize(6);
+  const l2 = doc.splitTextToSize('OFICINA DE INFRAESTRUCTURA Y EQUIPAMIENTO', b2W - 3);
+  doc.text(l2, b2X + b2W/2, imgY + bH/2 - (l2.length-1)*1.4, {align:'center'});
+
+  // Leyendas centradas del "Decenio" / "Año"
+  doc.setFont('helvetica','italic'); st('#64748b'); doc.setFontSize(7);
+  doc.text('"Decenio de la Igualdad de Oportunidades para Mujeres y Hombres"', PW/2, imgY + bH + 5, {align:'center'});
+  doc.text('"Año de la Esperanza y el Fortalecimiento de la Democracia"', PW/2, imgY + bH + 9, {align:'center'});
+
+  return imgY + bH + 14;
+}
+
+// Pie institucional (dirección) — igual que PLANTILLA.docx
+function dibujarPieInstitucional(doc, hex2rgb, pag, totalPags) {
+  const PH = doc.internal.pageSize.getHeight();
+  const PW = doc.internal.pageSize.getWidth();
+  const M  = 14;
+  const sf=h=>{const[r,g,b]=hex2rgb(h);doc.setFillColor(r,g,b);};
+  const st=h=>{const[r,g,b]=hex2rgb(h);doc.setTextColor(r,g,b);};
+  sf('#7f1d1d'); doc.rect(M, PH-24, 0.8, 16, 'F');
+  doc.setFont('helvetica','normal'); st('#334155'); doc.setFontSize(6.8);
+  const dir = ['Calle A Mz. 02 Lt. 03 Asoc. Victor', 'Raul Haya de la Torre,', 'Independencia', 'www.gob.pe/dirislimanorte'];
+  dir.forEach((ln,i)=> doc.text(ln, M+3, PH-22+i*3.6));
+  st('#94a3b8'); doc.setFontSize(6.5);
+  doc.text(`Pág. ${pag} de ${totalPags}`, PW-M, PH-8, {align:'right'});
+}
+
+// ════════════════════════════════════════
+//  MODAL: DATOS DEL INFORME (A/De/Asunto/Firma)
+// ════════════════════════════════════════
+function generarReporteConsumo() {
+  document.getElementById('modal-informe').classList.add('open');
+}
+function closeInformeModal() {
+  document.getElementById('modal-informe').classList.remove('open');
+}
+function confirmarGenerarInforme() {
+  const memo = {
+    para:        document.getElementById('inf-para').value.trim()        || 'OFICINA DE INFRAESTRUCTURA Y EQUIPAMIENTO',
+    de:          document.getElementById('inf-de').value.trim()          || 'WAGNER EDILBERTO ROJAS CHAVEZ',
+    deCargo:     document.getElementById('inf-de-cargo').value.trim()    || 'EQUIPO BIOMÉDICO DIRIS LIMA NORTE',
+    asunto:      document.getElementById('inf-asunto').value.trim()      || 'SE REMITE INFORME DE CONSUMO DE INSUMOS',
+    firmaNombre: document.getElementById('inf-firma-nombre').value.trim()|| '',
+    firmaCargo:  document.getElementById('inf-firma-cargo').value.trim() || '',
+    iniciales:   document.getElementById('inf-iniciales').value.trim()   || '',
+  };
+  closeInformeModal();
+  ejecutarGeneracionInforme(memo);
+}
+
+// ════════════════════════════════════════
+//  REPORTE DE CONSUMO DE INSUMOS (PDF) — formato oficial de memorando,
+//  con detalle de insumos por establecimiento y total general.
+// ════════════════════════════════════════
+async function ejecutarGeneracionInforme(memo) {
   const btn = document.getElementById('btn-reporte-consumo');
   const originalHTML = btn.innerHTML;
   btn.innerHTML = '⏳ Generando…';
@@ -3060,216 +3185,248 @@ async function generarReporteConsumo() {
 
     if (!otmsConInsumoLista.length) {
       alert('Todavía no hay OTMs con insumos registrados.');
+      btn.innerHTML = originalHTML;
+      btn.disabled = false;
       return;
     }
 
-    // ── Agregaciones ──────────────────────────────────────────
-    const consumoPorInsumo = {}; // clave (codigo o descripción) -> {codigo, descripcion, total, usos}
-    const consumoPorEstab  = {}; // establecimiento -> total unidades
-    let totalUnidades = 0;
+    // ── Parsear cada OTM en líneas de insumo {codigo, descripcion, cantidad} ──
+    function parsearInsumos(insumoDesc) {
+      const partes = insumoDesc.split(';').map(s => s.trim()).filter(Boolean);
+      return partes.map(parte => {
+        const m = parte.match(/^(.*?)\s*-\s*(.*?)\s*x\s*([\d.,]+)\s*$/i);
+        if (m) {
+          return { codigo: m[1].trim(), descripcion: m[2].trim(), cantidad: Number(m[3].replace(',', '.')) || 0 };
+        }
+        return { codigo: '', descripcion: parte, cantidad: 0 };
+      });
+    }
+
+    // ── Agregación POR ESTABLECIMIENTO → por insumo ──────────────
+    // estructura: { [establecimiento]: { insumos: { [key]: {codigo,descripcion,total,usos} }, totalUnidades, nOtms } }
+    const porEstablecimiento = {};
+    // Agregación GENERAL (todos los establecimientos) → por insumo
+    const totalGeneralInsumo = {}; // key -> {codigo, descripcion, total, usos}
+    let totalUnidadesGeneral = 0;
 
     otmsConInsumoLista.forEach(r => {
-      const partes = r.insumoDesc.split(';').map(s => s.trim()).filter(Boolean);
-      let cantidadOtm = 0;
+      const estabKey = r.estab || 'Sin establecimiento registrado';
+      if (!porEstablecimiento[estabKey]) {
+        porEstablecimiento[estabKey] = { insumos: {}, totalUnidades: 0, otms: new Set() };
+      }
+      const bucket = porEstablecimiento[estabKey];
+      bucket.otms.add(r.id);
 
-      partes.forEach(parte => {
-        // Formato esperado: "<codigo> - <descripcion> x <cantidad>"
-        const m = parte.match(/^(.*?)\s*-\s*(.*?)\s*x\s*([\d.,]+)\s*$/i);
-        let codigo, descripcion, cantidad;
-        if (m) {
-          codigo = m[1].trim();
-          descripcion = m[2].trim();
-          cantidad = Number(m[3].replace(',', '.')) || 0;
-        } else {
-          // No calzó el formato esperado — se muestra tal cual, sin cantidad
-          codigo = '';
-          descripcion = parte;
-          cantidad = 0;
-        }
-        const key = codigo || descripcion;
-        if (!consumoPorInsumo[key]) consumoPorInsumo[key] = { codigo, descripcion, total: 0, usos: 0 };
-        consumoPorInsumo[key].total += cantidad;
-        consumoPorInsumo[key].usos  += 1;
-        totalUnidades += cantidad;
-        cantidadOtm += cantidad;
+      parsearInsumos(r.insumoDesc).forEach(ins => {
+        const key = ins.codigo || ins.descripcion;
+
+        if (!bucket.insumos[key]) bucket.insumos[key] = { codigo: ins.codigo, descripcion: ins.descripcion, total: 0, usos: 0 };
+        bucket.insumos[key].total += ins.cantidad;
+        bucket.insumos[key].usos  += 1;
+        bucket.totalUnidades      += ins.cantidad;
+
+        if (!totalGeneralInsumo[key]) totalGeneralInsumo[key] = { codigo: ins.codigo, descripcion: ins.descripcion, total: 0, usos: 0 };
+        totalGeneralInsumo[key].total += ins.cantidad;
+        totalGeneralInsumo[key].usos  += 1;
+        totalUnidadesGeneral          += ins.cantidad;
       });
-
-      const estabKey = r.estab || 'Sin dato';
-      consumoPorEstab[estabKey] = (consumoPorEstab[estabKey] || 0) + cantidadOtm;
     });
 
-    const topInsumos = Object.values(consumoPorInsumo).sort((a,b) => b.total - a.total).slice(0, 12);
-    const topEstabs  = Object.entries(consumoPorEstab).sort((a,b) => b[1]-a[1]).slice(0, 10);
+    const establecimientos = Object.keys(porEstablecimiento).sort((a,b) => porEstablecimiento[b].totalUnidades - porEstablecimiento[a].totalUnidades);
+    const resumenGeneral = Object.values(totalGeneralInsumo).sort((a,b) => b.total - a.total);
+    const otmsConInsumo  = otmsConInsumoLista.length;
+    const nInsumosDistintos = resumenGeneral.length;
+    const nEstablecimientos = establecimientos.length;
 
-    // ── Stock bajo: solo si el catálogo remoto se ve confiable ──
-    // (si el backend del dashboard no tiene la versión con
-    // ?action=catalogoInsumos desplegada, esto devuelve el listado
-    // completo de OTMs y NO debe usarse — se detecta y se omite)
-    await cargarCatalogoInsumos();
-    const codigosUsados = new Set(Object.values(consumoPorInsumo).map(i => i.codigo).filter(Boolean));
-    const catalogoConfiable = CATALOGO_INSUMOS.length > 0 && CATALOGO_INSUMOS.length <= 200 &&
-      CATALOGO_INSUMOS.some(c => codigosUsados.has(c.codigo));
-    const STOCK_MIN  = 5;
-    const stockBajo  = catalogoConfiable
-      ? CATALOGO_INSUMOS.filter(i => Number(i.cantidad) <= STOCK_MIN).sort((a,b) => a.cantidad - b.cantidad)
-      : null; // null = no se pudo verificar
-
-    const otmsConInsumo = otmsConInsumoLista.length;
-    const nInsumosDistintos = Object.keys(consumoPorInsumo).length;
-
-    // ── PDF ───────────────────────────────────────────────────
+    // ── PDF — formato de memorando institucional (A4 vertical) ──
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
     const PW = 210, PH = 297, M = 14;
     const now  = new Date().toLocaleDateString('es-PE',{day:'2-digit',month:'2-digit',year:'numeric'});
-    const hora = new Date().toLocaleTimeString('es-PE',{hour:'2-digit',minute:'2-digit'});
+    const fechaMemo = new Date().toLocaleDateString('es-PE',{day:'2-digit',month:'long',year:'numeric'});
 
     function hex2rgb(h){ h=h.replace('#',''); if(h.length===3)h=h.split('').map(c=>c+c).join(''); const n=parseInt(h,16); return [n>>16&255,n>>8&255,n&255]; }
     const sf=h=>{const[r,g,b]=hex2rgb(h);doc.setFillColor(r,g,b);};
     const ss=h=>{const[r,g,b]=hex2rgb(h);doc.setDrawColor(r,g,b);};
     const st=h=>{const[r,g,b]=hex2rgb(h);doc.setTextColor(r,g,b);};
 
-    // Cabecera
-    sf('#0d2b5e'); doc.rect(0,0,PW,24,'F');
-    sf('#7c3aed'); doc.rect(0,0,6,24,'F');
-    doc.setFont('helvetica','bold'); st('#ffffff'); doc.setFontSize(14);
-    doc.text('INFORME DE CONSUMO DE INSUMOS', M+4, 10);
-    doc.setFont('helvetica','normal'); st('#c4b5fd'); doc.setFontSize(8);
-    doc.text('Control de Inventario Biomédico — Consumo actual registrado', M+4, 16.5);
-    st('#cbd5e1'); doc.setFontSize(7);
-    doc.text(`Generado: ${now}  ${hora}`, PW-M, 10, {align:'right'});
-    doc.text(`${otmsConInsumo} OTMs con insumo registrado`, PW-M, 16.5, {align:'right'});
+    let pagCount = 1;
 
-    let y = 30;
+    // ── Página 1: Membrete + memo (A/De/Asunto/Fecha) + Resumen general ──
+    let y = dibujarMembreteOficial(doc, hex2rgb);
 
-    // KPIs
-    const kpis = [
-      { v: String(nInsumosDistintos), l: 'Insumos distintos usados', c: '#7c3aed' },
-      { v: String(totalUnidades),     l: 'Unidades consumidas',      c: '#1d4ed8' },
-      { v: String(otmsConInsumo),     l: 'OTMs con insumo',          c: '#15803d' },
-      { v: stockBajo === null ? '—' : String(stockBajo.length), l: 'Insumos con stock bajo', c: '#dc2626' },
-    ];
-    const KW = (PW-2*M-9)/4;
-    kpis.forEach((k,i)=>{
-      const kx = M + i*(KW+3);
-      sf('#f8fafc'); ss('#e2e8f0'); doc.setLineWidth(0.3);
-      doc.roundedRect(kx, y, KW, 20, 2, 2, 'FD');
-      sf(k.c); doc.rect(kx, y, 3, 20, 'F');
-      st(k.c); doc.setFont('helvetica','bold'); doc.setFontSize(16);
-      doc.text(k.v, kx+6, y+11);
-      st('#64748b'); doc.setFont('helvetica','normal'); doc.setFontSize(6);
-      doc.text(doc.splitTextToSize(k.l.toUpperCase(), KW-8), kx+6, y+16);
-    });
-    y += 27;
+    // Bloque A/De/Asunto/Fecha (igual estructura que PLANTILLA.docx)
+    doc.setFont('helvetica','normal'); st('#1e293b'); doc.setFontSize(10);
+    function campoMemo(label, valorLineas, yy) {
+      doc.setFont('helvetica','normal'); doc.text(label, M, yy);
+      doc.text(':', M+22, yy);
+      doc.setFont('helvetica','bold');
+      valorLineas.forEach((ln,i)=> doc.text(ln, M+28, yy + i*4.6));
+      return yy + valorLineas.length*4.6 + 4;
+    }
+    y = campoMemo('A', doc.splitTextToSize(memo.para, PW-2*M-28), y);
+    const deLineas = [memo.de]; if (memo.deCargo) deLineas.push(memo.deCargo);
+    y = campoMemo('De', doc.splitTextToSize(deLineas.join('\n'), PW-2*M-28).length ? deLineas : deLineas, y);
+    // (De: nombre en negrita, cargo en normal debajo)
+    y = campoMemo('Asunto', doc.splitTextToSize(memo.asunto, PW-2*M-28), y);
+    doc.setFont('helvetica','normal');
+    y = campoMemo('Fecha', [`Independencia, ${fechaMemo}`], y);
 
-    // Tabla: Top insumos más consumidos
-    sf('#0d2b5e'); doc.roundedRect(M, y, PW-2*M, 7, 1.5, 1.5, 'F');
-    doc.setFont('helvetica','bold'); st('#ffffff'); doc.setFontSize(8);
-    doc.text('INSUMOS MÁS CONSUMIDOS', M+4, y+4.8);
-    y += 9;
+    ss('#94a3b8'); doc.setLineWidth(0.3); doc.line(M, y, PW-M, y);
+    y += 8;
 
-    const colX = [M, M+95, M+130, M+160];
-    doc.setFont('helvetica','bold'); st('#64748b'); doc.setFontSize(6.5);
-    doc.text('DESCRIPCIÓN', colX[0]+2, y+3.5);
-    doc.text('CÓDIGO', colX[1]+2, y+3.5);
-    doc.text('USOS', colX[2]+2, y+3.5);
-    doc.text('CANT. TOTAL', colX[3]+2, y+3.5);
+    // Título del informe
+    doc.setFont('helvetica','bold'); st('#0d2b5e'); doc.setFontSize(12);
+    doc.text('INFORME DE CONSUMO DE INSUMOS', PW/2, y, {align:'center'});
     y += 5;
-    ss('#e2e8f0'); doc.setLineWidth(0.2); doc.line(M, y, PW-M, y);
-    y += 1;
+    doc.setFont('helvetica','normal'); st('#64748b'); doc.setFontSize(8.5);
+    doc.text('Mantenimiento de Equipos Biomédicos — Detalle por establecimiento de salud', PW/2, y, {align:'center'});
+    y += 8;
 
-    doc.setFont('helvetica','normal'); st('#1e293b'); doc.setFontSize(7);
-    topInsumos.forEach((ins, i) => {
-      if (i % 2 === 0) { sf('#f8fafc'); doc.rect(M, y, PW-2*M, 6, 'F'); }
-      st('#1e293b');
-      doc.text((ins.descripcion || '—').slice(0, 52), colX[0]+2, y+4);
-      st('#64748b'); doc.setFontSize(6.5);
-      doc.text(ins.codigo || '—', colX[1]+2, y+4);
-      doc.text(String(ins.usos), colX[2]+2, y+4);
-      doc.setFont('helvetica','bold'); st('#7c3aed'); doc.setFontSize(7);
-      doc.text(String(ins.total) + (ins.unidad ? ' ' + ins.unidad : ''), colX[3]+2, y+4);
-      doc.setFont('helvetica','normal'); doc.setFontSize(7);
-      y += 6;
-    });
-    y += 6;
+    // Párrafo introductorio
+    doc.setFont('helvetica','normal'); st('#1e293b'); doc.setFontSize(9.5);
+    const intro = doc.splitTextToSize(
+      `Por medio del presente se remite el informe de consumo de insumos registrado en las Órdenes de ` +
+      `Trabajo de Mantenimiento (OTM) ejecutadas, correspondiente a ${otmsConInsumo} atención(es) en las que ` +
+      `se reportó uso de insumo(s), distribuidas en ${nEstablecimientos} establecimiento(s) de salud. El detalle ` +
+      `se presenta a continuación, discriminado por establecimiento, así como el consolidado general.`,
+      PW-2*M);
+    doc.text(intro, M, y);
+    y += intro.length*4.2 + 6;
 
-    // Tabla: Consumo por establecimiento
-    sf('#0d2b5e'); doc.roundedRect(M, y, PW-2*M, 7, 1.5, 1.5, 'F');
-    doc.setFont('helvetica','bold'); st('#ffffff'); doc.setFontSize(8);
-    doc.text('CONSUMO POR ESTABLECIMIENTO (TOP 10)', M+4, y+4.8);
-    y += 9;
+    // KPIs resumidos (texto, estilo formal, sin tarjetas de color)
+    sf('#eff6ff'); ss('#bfdbfe'); doc.setLineWidth(0.25);
+    doc.roundedRect(M, y, PW-2*M, 16, 1.5, 1.5, 'FD');
+    sf('#1d4ed8'); doc.rect(M, y, 2, 16, 'F');
+    doc.setFont('helvetica','bold'); st('#0d2b5e'); doc.setFontSize(8);
+    const kpiLine1 = `OTMs con insumo: ${otmsConInsumo}      Establecimientos: ${nEstablecimientos}      Insumos distintos: ${nInsumosDistintos}`;
+    const kpiLine2 = `TOTAL GENERAL DE UNIDADES CONSUMIDAS: ${totalUnidadesGeneral}`;
+    doc.text(kpiLine1, M+5, y+6.5);
+    doc.setFontSize(9.5);
+    doc.text(kpiLine2, M+5, y+12.5);
+    y += 22;
 
-    doc.setFont('helvetica','bold'); st('#64748b'); doc.setFontSize(6.5);
-    doc.text('ESTABLECIMIENTO', M+2, y+3.5);
-    doc.text('UNIDADES CONSUMIDAS', PW-M-40, y+3.5);
-    y += 5;
-    ss('#e2e8f0'); doc.line(M, y, PW-M, y);
-    y += 1;
+    function nuevaPagina() {
+      dibujarPieInstitucionalPlaceholder();
+      doc.addPage();
+      pagCount++;
+      sf('#0d2b5e'); doc.rect(0,0,PW,10,'F');
+      doc.setFont('helvetica','bold'); st('#ffffff'); doc.setFontSize(7.5);
+      doc.text('INFORME DE CONSUMO DE INSUMOS — DIRIS LIMA NORTE', M, 6.5);
+      st('#bfdbfe'); doc.setFontSize(6.5);
+      doc.text(`${now}`, PW-M, 6.5, {align:'right'});
+      return 16;
+    }
+    // marcador de pie pendiente por página (se dibuja al cerrar cada página)
+    let piePendientePagina = 1;
+    function dibujarPieInstitucionalPlaceholder() {
+      dibujarPieInstitucional(doc, hex2rgb, piePendientePagina, '__TOTAL__');
+      piePendientePagina++;
+    }
 
-    doc.setFont('helvetica','normal'); st('#1e293b'); doc.setFontSize(7);
-    topEstabs.forEach(([estab, total], i) => {
-      if (i % 2 === 0) { sf('#f8fafc'); doc.rect(M, y, PW-2*M, 6, 'F'); }
-      st('#1e293b');
-      doc.text((estab || '—').slice(0, 55), M+2, y+4);
-      doc.setFont('helvetica','bold'); st('#1d4ed8');
-      doc.text(String(total), PW-M-40, y+4);
-      doc.setFont('helvetica','normal');
-      y += 6;
-    });
-    y += 6;
+    function encabezadoTabla(yy, ancho) {
+      sf('#0d2b5e'); doc.roundedRect(M, yy, ancho, 6.5, 1, 1, 'F');
+      doc.setFont('helvetica','bold'); st('#ffffff'); doc.setFontSize(7);
+      doc.text('INSUMO', M+3, yy+4.3);
+      doc.text('CÓDIGO', M+ancho-58, yy+4.3);
+      doc.text('USOS', M+ancho-34, yy+4.3);
+      doc.text('CANTIDAD', M+ancho-18, yy+4.3);
+      return yy + 8;
+    }
+    function filaInsumo(ins, yy, ancho, idx) {
+      if (yy > PH - 30) { yy = nuevaPagina(); yy = encabezadoTabla(yy, ancho); }
+      if (idx % 2 === 0) { sf('#f8fafc'); doc.rect(M, yy-4, ancho, 5.6, 'F'); }
+      st('#1e293b'); doc.setFont('helvetica','normal'); doc.setFontSize(7.6);
+      doc.text((ins.descripcion || '—').slice(0, 58), M+3, yy);
+      st('#64748b'); doc.setFontSize(7);
+      doc.text((ins.codigo || '—').slice(0,14), M+ancho-58, yy);
+      doc.text(String(ins.usos), M+ancho-32, yy);
+      doc.setFont('helvetica','bold'); st('#1d4ed8'); doc.setFontSize(7.6);
+      doc.text(String(ins.total), M+ancho-18, yy);
+      return yy + 5.6;
+    }
 
-    // Nueva página si no hay espacio para la tabla de stock bajo
-    if (y > PH - 70) { doc.addPage(); y = 20; }
+    const anchoTabla = PW-2*M;
 
-    // Tabla: Insumos con stock bajo
-    sf('#dc2626'); doc.roundedRect(M, y, PW-2*M, 7, 1.5, 1.5, 'F');
-    doc.setFont('helvetica','bold'); st('#ffffff'); doc.setFontSize(8);
-    doc.text(`INSUMOS CON STOCK BAJO (≤ ${STOCK_MIN} unidades)`, M+4, y+4.8);
-    y += 9;
+    // ── Detalle por establecimiento ──────────────────────────────
+    doc.setFont('helvetica','bold'); st('#0d2b5e'); doc.setFontSize(10.5);
+    if (y > PH - 40) y = nuevaPagina();
+    doc.text('1. DETALLE DE CONSUMO POR ESTABLECIMIENTO', M, y);
+    y += 7;
 
-    if (stockBajo === null) {
-      doc.setFont('helvetica','normal'); st('#b45309'); doc.setFontSize(7.5);
-      doc.text('⚠ No se pudo verificar el stock actual (el catálogo remoto no respondió', M+2, y+5);
-      doc.text('   con datos válidos). El resto del informe sigue siendo correcto.', M+2, y+9.5);
-      y += 15;
-    } else if (!stockBajo.length) {
-      doc.setFont('helvetica','normal'); st('#15803d'); doc.setFontSize(7.5);
-      doc.text('✔ Ningún insumo está por debajo del umbral de stock mínimo.', M+2, y+5);
+    establecimientos.forEach((estab, iEstab) => {
+      const bucket = porEstablecimiento[estab];
+      const insumosEstab = Object.values(bucket.insumos).sort((a,b)=>b.total-a.total);
+
+      if (y > PH - 45) y = nuevaPagina();
+
+      // Encabezado del establecimiento
+      sf('#0d2b5e'); doc.roundedRect(M, y, anchoTabla, 7, 1.2, 1.2, 'F');
+      doc.setFont('helvetica','bold'); st('#ffffff'); doc.setFontSize(8);
+      doc.text(`${iEstab+1}. ${estab}`, M+3, y+4.8);
+      doc.setFontSize(7);
+      doc.text(`${bucket.otms.size} OTM(s)  ·  ${bucket.totalUnidades} unid.`, M+anchoTabla-3, y+4.8, {align:'right'});
+      y += 9;
+
+      y = encabezadoTabla(y, anchoTabla);
+      insumosEstab.forEach((ins, idx) => { y = filaInsumo(ins, y, anchoTabla, idx); });
+
+      // Subtotal del establecimiento
+      if (y > PH - 20) y = nuevaPagina();
+      sf('#f1f5f9'); doc.rect(M, y-4, anchoTabla, 6, 'F');
+      doc.setFont('helvetica','bold'); st('#0d2b5e'); doc.setFontSize(7.6);
+      doc.text(`Subtotal ${estab}:`, M+3, y);
+      doc.text(`${bucket.totalUnidades} unidades`, M+anchoTabla-18, y);
       y += 10;
-    } else {
-      doc.setFont('helvetica','bold'); st('#64748b'); doc.setFontSize(6.5);
-      doc.text('DESCRIPCIÓN', M+2, y+3.5);
-      doc.text('CÓDIGO', M+95, y+3.5);
-      doc.text('STOCK', PW-M-25, y+3.5);
-      y += 5;
-      ss('#e2e8f0'); doc.line(M, y, PW-M, y);
-      y += 1;
-      doc.setFont('helvetica','normal'); st('#1e293b'); doc.setFontSize(7);
-      stockBajo.forEach((ins, i) => {
-        if (y > PH - 20) { doc.addPage(); y = 20; }
-        if (i % 2 === 0) { sf('#fef2f2'); doc.rect(M, y, PW-2*M, 6, 'F'); }
-        st('#1e293b');
-        doc.text((ins.descripcion || '—').slice(0, 52), M+2, y+4);
-        st('#64748b');
-        doc.text(ins.codigo || '—', M+95, y+4);
-        doc.setFont('helvetica','bold'); st('#dc2626');
-        doc.text(String(ins.cantidad) + (ins.unidad ? ' ' + ins.unidad : ''), PW-M-25, y+4);
-        doc.setFont('helvetica','normal');
-        y += 6;
-      });
-    }
+    });
 
-    // Pie de página en todas las páginas
-    const totalPages = doc.internal.getNumberOfPages();
-    for (let p = 1; p <= totalPages; p++) {
+    // ── Resumen / total general ───────────────────────────────────
+    if (y > PH - 50) y = nuevaPagina();
+    doc.setFont('helvetica','bold'); st('#0d2b5e'); doc.setFontSize(10.5);
+    doc.text('2. RESUMEN GENERAL — TODOS LOS ESTABLECIMIENTOS', M, y);
+    y += 7;
+    y = encabezadoTabla(y, anchoTabla);
+    resumenGeneral.forEach((ins, idx) => { y = filaInsumo(ins, y, anchoTabla, idx); });
+
+    if (y > PH - 22) y = nuevaPagina();
+    sf('#0d2b5e'); doc.roundedRect(M, y-4.5, anchoTabla, 9, 1.5, 1.5, 'F');
+    doc.setFont('helvetica','bold'); st('#ffffff'); doc.setFontSize(9.5);
+    doc.text('TOTAL GENERAL', M+4, y+1.5);
+    doc.text(`${totalUnidadesGeneral} unidades  ·  ${nInsumosDistintos} insumos  ·  ${nEstablecimientos} establecimientos`, M+anchoTabla-4, y+1.5, {align:'right'});
+    y += 16;
+
+    // ── Cierre / firma (igual estructura que PLANTILLA.docx) ──────
+    if (y > PH - 60) y = nuevaPagina();
+    doc.setFont('helvetica','normal'); st('#1e293b'); doc.setFontSize(9.5);
+    doc.text('Atentamente,', M, y);
+    y += 22;
+    if (memo.firmaNombre) {
+      doc.setFont('helvetica','normal'); doc.setFontSize(9.5);
+      doc.text(memo.firmaNombre, M, y); y += 4.6;
+    }
+    if (memo.firmaCargo) {
+      const cargoLines = doc.splitTextToSize(memo.firmaCargo, PW-2*M);
+      doc.text(cargoLines, M, y); y += cargoLines.length*4.6;
+    }
+    y += 4;
+    if (memo.iniciales) { doc.text(`(${memo.iniciales})`, M, y); y += 4.6; }
+    doc.text('cc.:', M, y);
+
+    // Pie de la última página
+    dibujarPieInstitucionalPlaceholder();
+
+    // ── Reescribir el total de páginas en todos los pies ──────────
+    const totalPaginas = doc.internal.getNumberOfPages();
+    for (let p = 1; p <= totalPaginas; p++) {
       doc.setPage(p);
-      ss('#cbd5e1'); doc.setLineWidth(0.25); doc.line(M, PH-12, PW-M, PH-12);
+      // limpiar la franja del número de página y volver a escribir con el total correcto
+      sf('#ffffff'); doc.rect(PW-M-30, PH-11, 30, 5, 'F');
       st('#94a3b8'); doc.setFont('helvetica','normal'); doc.setFontSize(6.5);
-      doc.text('Red de Salud — Unidad de Ingeniería Biomédica  |  Generado automáticamente.', M, PH-7);
-      doc.text(`Pág. ${p} de ${totalPages}`, PW-M, PH-7, {align:'right'});
+      doc.text(`Pág. ${p} de ${totalPaginas}`, PW-M, PH-8, {align:'right'});
     }
 
-    doc.save(`Reporte_Consumo_Insumos_${now.replace(/\//g,'-')}.pdf`);
+    doc.save(`Informe_Consumo_Insumos_${now.replace(/\//g,'-')}.pdf`);
+    mostrarToast(`📄 Informe generado: ${totalUnidadesGeneral} unidades en ${nEstablecimientos} establecimientos`);
 
   } catch(err) {
     console.error('Error generando reporte de consumo:', err);
@@ -3518,7 +3675,7 @@ async function ejecutarEliminar() {
 
 // Cerrar modales con Escape
 document.addEventListener('keydown', e => {
-  if (e.key === 'Escape') { closeEdit(); closeConfirm(); }
+  if (e.key === 'Escape') { closeEdit(); closeConfirm(); closeInformeModal(); }
 });
 </script>
 </body></html>
