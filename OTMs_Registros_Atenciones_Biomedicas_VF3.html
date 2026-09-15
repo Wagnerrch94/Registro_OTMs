@@ -1260,7 +1260,7 @@ async function cargarDatosDesdeDrive() {
         });
 
         // Repoblar selects conservando selección
-        const mesOrder=['ENERO','FEBRERO','MARZO','ABRIL','MAYO','JUNIO','JULIO','AGOSTO','SEPTIEMBRE','OCTUBRE','NOVIEMBRE','DICIEMBRE'];
+        const mesOrder=['ENERO','FEBRERO','MARZO','ABRIL','MAYO','JUNIO','JULIO','AGOSTO','SETIEMBRE','OCTUBRE','NOVIEMBRE','DICIEMBRE'];
         const uniq=key=>{
             const vals=[...new Set(ALL.map(r=>r[key]).filter(Boolean))];
             if(key==='mes_n'){return vals.sort((a,b)=>{const[ma,ya]=a.split(' ');const[mb,yb]=b.split(' ');return(+ya||0)-(+yb||0)||mesOrder.indexOf(ma)-mesOrder.indexOf(mb);});}
@@ -1543,7 +1543,7 @@ if (excludeField !== 'estab'  && estabs.length  && !estabs.includes(r.estab))   
   filtered = baseFilter(null);
 
  // Repoblar multiselects con solo los valores disponibles según filtros cruzados
-  const mesOrderF = ['ENERO','FEBRERO','MARZO','ABRIL','MAYO','JUNIO','JULIO','AGOSTO','SEPTIEMBRE','OCTUBRE','NOVIEMBRE','DICIEMBRE'];
+  const mesOrderF = ['ENERO','FEBRERO','MARZO','ABRIL','MAYO','JUNIO','JULIO','AGOSTO','SETIEMBRE','OCTUBRE','NOVIEMBRE','DICIEMBRE'];
   const valsFor = (field, excludeField) => {
     const rows = baseFilter(excludeField);
     const vals = [...new Set(rows.map(r => r[field]).filter(Boolean))];
@@ -2188,7 +2188,7 @@ function renderCharts() {
 
   // ── 3. OTMs por Mes — Línea ────────────────────────────────
   const mesOrder = ['ENERO','FEBRERO','MARZO','ABRIL','MAYO','JUNIO',
-                    'JULIO','AGOSTO','SEPTIEMBRE','OCTUBRE','NOVIEMBRE','DICIEMBRE'];
+                    'JULIO','AGOSTO','SETIEMBRE','OCTUBRE','NOVIEMBRE','DICIEMBRE'];
   const mesMap = {};
   data.forEach(r => {
     if (!r.mes_n) return;
