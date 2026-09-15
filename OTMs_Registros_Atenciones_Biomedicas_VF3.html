@@ -530,7 +530,7 @@ tr:hover td { background: var(--azul-suave); cursor: pointer; }
     <span class="login-icon">🏥</span>
     <h2>Registro de OTMs</h2>
     <p>Ingresa tu correo institucional para acceder</p>
-    <input type="email" id="login-email" placeholder="tucorreo@ejemplo.com" onkeydown="if(event.key===&#39;Enter&#39;) verificarAcceso()" autocomplete="email">
+    <input type="email" id="login-email" placeholder="tucorreo@ejemplo.com" onkeydown="if(event.key==='Enter') verificarAcceso()" autocomplete="email">
     <button id="login-btn" onclick="verificarAcceso()">Ingresar →</button>
     <div id="login-error">❌ Este correo no tiene acceso autorizado.</div>
     <div class="login-footer">Atenciones Biomédicas · Solo personal autorizado</div>
@@ -665,21 +665,21 @@ function verificarAcceso() {
         <div class="estab-quick-search" style="margin-bottom:2px;position:relative">
           <span style="position:absolute;left:9px;top:50%;transform:translateY(-50%);font-size:12px;color:#64748b;pointer-events:none">🔍</span>
           <input id="estab-quick" type="text" placeholder="Escribir para buscar..." autocomplete="off" style="width:100%;padding:4px 8px 4px 26px;border:1.5px solid #e2e8f0;border-radius:7px;
-                   font-size:12px;font-family:inherit;color:#1e293b;outline:none;transition:border-color .15s,box-shadow .15s" oninput="estabQuickSearch(this.value)" onfocus="this.style.borderColor=&#39;#1d4ed8&#39;;this.style.boxShadow=&#39;0 0 0 3px rgba(29,78,216,.12)&#39;" onblur="this.style.borderColor=&#39;#e2e8f0&#39;;this.style.boxShadow=&#39;none&#39;">
+                   font-size:12px;font-family:inherit;color:#1e293b;outline:none;transition:border-color .15s,box-shadow .15s" oninput="estabQuickSearch(this.value)" onfocus="this.style.borderColor='#1d4ed8';this.style.boxShadow='0 0 0 3px rgba(29,78,216,.12)'" onblur="this.style.borderColor='#e2e8f0';this.style.boxShadow='none'">
         </div>
         <div class="ms-wrap" id="ms-wrap-f-estab">
-  <div class="ms-box" id="ms-box-f-estab" onclick="msToggleOpen(&#39;f-estab&#39;)">
+  <div class="ms-box" id="ms-box-f-estab" onclick="msToggleOpen('f-estab')">
     <span class="ms-placeholder" id="ms-ph-f-estab">— Todos —</span>
     <span class="ms-box-arrow">▾</span>
   </div>
   <div class="ms-dropdown" id="ms-dd-f-estab">
     <div class="ms-search">
       <span class="ms-search-icon">🔍</span>
-      <input type="text" placeholder="Buscar..." oninput="msSearch(this,&#39;f-estab&#39;)">
+      <input type="text" placeholder="Buscar..." oninput="msSearch(this,'f-estab')">
     </div>
     <div class="ms-actions">
-      <button class="ms-action-btn" onclick="msSelectAll(&#39;f-estab&#39;)">☑ Seleccionar todo</button>
-      <button class="ms-action-btn" onclick="msClear(&#39;f-estab&#39;)">✕ Limpiar</button>
+      <button class="ms-action-btn" onclick="msSelectAll('f-estab')">☑ Seleccionar todo</button>
+      <button class="ms-action-btn" onclick="msClear('f-estab')">✕ Limpiar</button>
     </div>
     <div class="ms-list" id="ms-list-f-estab"></div>
   </div>
@@ -712,18 +712,18 @@ function verificarAcceso() {
       <div class="fg">
         <label class="fl">📆 Mes</label>
         <div class="ms-wrap" id="ms-wrap-f-mes">
-  <div class="ms-box" id="ms-box-f-mes" onclick="msToggleOpen(&#39;f-mes&#39;)">
+  <div class="ms-box" id="ms-box-f-mes" onclick="msToggleOpen('f-mes')">
     <span class="ms-placeholder" id="ms-ph-f-mes" style="">— Todos —</span>
     <span class="ms-box-arrow">▾</span>
   </div>
   <div class="ms-dropdown" id="ms-dd-f-mes">
     <div class="ms-search">
       <span class="ms-search-icon">🔍</span>
-      <input type="text" placeholder="Buscar..." oninput="msSearch(this,&#39;f-mes&#39;)">
+      <input type="text" placeholder="Buscar..." oninput="msSearch(this,'f-mes')">
     </div>
     <div class="ms-actions">
-      <button class="ms-action-btn" onclick="msSelectAll(&#39;f-mes&#39;)">☑ Seleccionar todo</button>
-      <button class="ms-action-btn" onclick="msClear(&#39;f-mes&#39;)">✕ Limpiar</button>
+      <button class="ms-action-btn" onclick="msSelectAll('f-mes')">☑ Seleccionar todo</button>
+      <button class="ms-action-btn" onclick="msClear('f-mes')">✕ Limpiar</button>
     </div>
     <div class="ms-list" id="ms-list-f-mes"></div>
   </div>
@@ -769,18 +769,18 @@ function verificarAcceso() {
       <div class="fg">
         <label class="fl">🔧 Tipo mantenimiento</label>
         <div class="ms-wrap" id="ms-wrap-f-tipo">
-  <div class="ms-box" id="ms-box-f-tipo" onclick="msToggleOpen(&#39;f-tipo&#39;)">
+  <div class="ms-box" id="ms-box-f-tipo" onclick="msToggleOpen('f-tipo')">
     <span class="ms-placeholder" id="ms-ph-f-tipo">— Todos —</span>
     <span class="ms-box-arrow">▾</span>
   </div>
   <div class="ms-dropdown" id="ms-dd-f-tipo">
     <div class="ms-search">
       <span class="ms-search-icon">🔍</span>
-      <input type="text" placeholder="Buscar..." oninput="msSearch(this,&#39;f-tipo&#39;)">
+      <input type="text" placeholder="Buscar..." oninput="msSearch(this,'f-tipo')">
     </div>
     <div class="ms-actions">
-      <button class="ms-action-btn" onclick="msSelectAll(&#39;f-tipo&#39;)">☑ Seleccionar todo</button>
-      <button class="ms-action-btn" onclick="msClear(&#39;f-tipo&#39;)">✕ Limpiar</button>
+      <button class="ms-action-btn" onclick="msSelectAll('f-tipo')">☑ Seleccionar todo</button>
+      <button class="ms-action-btn" onclick="msClear('f-tipo')">✕ Limpiar</button>
     </div>
     <div class="ms-list" id="ms-list-f-tipo"></div>
   </div>
@@ -791,18 +791,18 @@ function verificarAcceso() {
       <div class="fg">
         <label class="fl">⚙ Estado funcional</label>
         <div class="ms-wrap" id="ms-wrap-f-estado">
-  <div class="ms-box" id="ms-box-f-estado" onclick="msToggleOpen(&#39;f-estado&#39;)">
+  <div class="ms-box" id="ms-box-f-estado" onclick="msToggleOpen('f-estado')">
     <span class="ms-placeholder" id="ms-ph-f-estado">— Todos —</span>
     <span class="ms-box-arrow">▾</span>
   </div>
   <div class="ms-dropdown" id="ms-dd-f-estado">
     <div class="ms-search">
       <span class="ms-search-icon">🔍</span>
-      <input type="text" placeholder="Buscar..." oninput="msSearch(this,&#39;f-estado&#39;)">
+      <input type="text" placeholder="Buscar..." oninput="msSearch(this,'f-estado')">
     </div>
     <div class="ms-actions">
-      <button class="ms-action-btn" onclick="msSelectAll(&#39;f-estado&#39;)">☑ Seleccionar todo</button>
-      <button class="ms-action-btn" onclick="msClear(&#39;f-estado&#39;)">✕ Limpiar</button>
+      <button class="ms-action-btn" onclick="msSelectAll('f-estado')">☑ Seleccionar todo</button>
+      <button class="ms-action-btn" onclick="msClear('f-estado')">✕ Limpiar</button>
     </div>
     <div class="ms-list" id="ms-list-f-estado"></div>
   </div>
@@ -813,18 +813,18 @@ function verificarAcceso() {
       <div class="fg">
         <label class="fl">👤 Ejecutor</label>
         <div class="ms-wrap" id="ms-wrap-f-ejec">
-  <div class="ms-box" id="ms-box-f-ejec" onclick="msToggleOpen(&#39;f-ejec&#39;)">
+  <div class="ms-box" id="ms-box-f-ejec" onclick="msToggleOpen('f-ejec')">
     <span class="ms-placeholder" id="ms-ph-f-ejec">— Todos —</span>
     <span class="ms-box-arrow">▾</span>
   </div>
   <div class="ms-dropdown" id="ms-dd-f-ejec">
     <div class="ms-search">
       <span class="ms-search-icon">🔍</span>
-      <input type="text" placeholder="Buscar..." oninput="msSearch(this,&#39;f-ejec&#39;)">
+      <input type="text" placeholder="Buscar..." oninput="msSearch(this,'f-ejec')">
     </div>
     <div class="ms-actions">
-      <button class="ms-action-btn" onclick="msSelectAll(&#39;f-ejec&#39;)">☑ Seleccionar todo</button>
-      <button class="ms-action-btn" onclick="msClear(&#39;f-ejec&#39;)">✕ Limpiar</button>
+      <button class="ms-action-btn" onclick="msSelectAll('f-ejec')">☑ Seleccionar todo</button>
+      <button class="ms-action-btn" onclick="msClear('f-ejec')">✕ Limpiar</button>
     </div>
     <div class="ms-list" id="ms-list-f-ejec"></div>
   </div>
@@ -989,18 +989,18 @@ function verificarAcceso() {
         <table>
           <thead>
             <tr>
-              <th onclick="sortBy(&#39;id&#39;)" data-c="id" class="asc">    # OTM</th>
-              <th onclick="sortBy(&#39;fdisp&#39;)" data-c="fdisp" class=""> Fecha</th>
-              <th onclick="sortBy(&#39;mes_n&#39;)" data-c="mes_n" class=""> Mes</th>
-              <th onclick="sortBy(&#39;estab&#39;)" data-c="estab" class=""> Establecimiento</th>
-              <th onclick="sortBy(&#39;serv&#39;)" data-c="serv" class="">  Servicio</th>
-              <th onclick="sortBy(&#39;equipo&#39;)" data-c="equipo" class="">Equipo</th>
-              <th onclick="sortBy(&#39;marca&#39;)" data-c="marca" class=""> Marca</th>
-              <th onclick="sortBy(&#39;tienePdf&#39;)" data-c="tienePdf" class="">PDF</th>
-              <th onclick="sortBy(&#39;tipo&#39;)" data-c="tipo" class="">  Tipo</th>
-              <th onclick="sortBy(&#39;estado&#39;)" data-c="estado" class="">Estado</th>
-              <th onclick="sortBy(&#39;usoInsumo&#39;)" data-c="usoInsumo" class="">Insumo</th>
-              <th onclick="sortBy(&#39;ejec&#39;)" data-c="ejec" class="">  Ejecutor</th>
+              <th onclick="sortBy('id')" data-c="id" class="asc">    # OTM</th>
+              <th onclick="sortBy('fdisp')" data-c="fdisp" class=""> Fecha</th>
+              <th onclick="sortBy('mes_n')" data-c="mes_n" class=""> Mes</th>
+              <th onclick="sortBy('estab')" data-c="estab" class=""> Establecimiento</th>
+              <th onclick="sortBy('serv')" data-c="serv" class="">  Servicio</th>
+              <th onclick="sortBy('equipo')" data-c="equipo" class="">Equipo</th>
+              <th onclick="sortBy('marca')" data-c="marca" class=""> Marca</th>
+              <th onclick="sortBy('tienePdf')" data-c="tienePdf" class="">PDF</th>
+              <th onclick="sortBy('tipo')" data-c="tipo" class="">  Tipo</th>
+              <th onclick="sortBy('estado')" data-c="estado" class="">Estado</th>
+              <th onclick="sortBy('usoInsumo')" data-c="usoInsumo" class="">Insumo</th>
+              <th onclick="sortBy('ejec')" data-c="ejec" class="">  Ejecutor</th>
             </tr>
           </thead>
           <tbody id="tbody"></tbody>
@@ -1049,7 +1049,7 @@ function verificarAcceso() {
    PARA ACTUALIZAR: reemplazar el array ALL con los nuevos datos
    Usar el script Python adjunto para generar el JSON desde Excel
 ════════════════════════════════════════════════════════════ */
-const SHEET_URL   = "https://script.google.com/macros/s/AKfycbx4k_VYMUpMgoRwhuqLTmiYDlOVCMRyBGsNNQNKechXTnl6e31g3fnX96IsswdtI7o8YQ/exec";
+const SHEET_URL   = "https://script.google.com/macros/s/AKfycbyzhj1CM2a0fqwUDrV-nNd31S0xsTiSvyht1udnEivtKsTrF32oA6Ak1EKSB46wI7bKGQ/exec";
 const SHEET_XLSX_URL = "https://docs.google.com/spreadsheets/d/1wjz8_z0XKa_B0ujPQ4CKTKnNoUxMiXdRzjBo1GIhJcc/edit?gid=949223292#gid=949223292";
 const PDF_FOLDER_ID = "1eJUBvy7CKa8S1lHE25AlGHR9U4sdxK6U";  // carpeta Drive con los PDFs
 let ALL = [];
