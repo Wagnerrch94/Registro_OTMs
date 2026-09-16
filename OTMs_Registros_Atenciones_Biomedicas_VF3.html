@@ -3363,7 +3363,11 @@ async function ejecutarGeneracionInforme(memo) {
       const bucket = porEstablecimiento[estab];
       const insumosEstab = Object.values(bucket.insumos).sort((a,b)=>b.total-a.total);
 
-      if (y > PH - 45) y = nuevaPagina();
+      // Calcular el alto total que ocupará este bloque (encabezado + tabla + subtotal)
+      // para decidir el salto de página ANTES de empezar a dibujarlo, y así nunca
+      // cortar una tabla de establecimiento a la mitad entre dos páginas.
+      const altoBloque = 9 + 8 + insumosEstab.length * 5.6 + 10;
+      if (y + altoBloque > PH - 24) y = nuevaPagina();
 
       // Encabezado del establecimiento
       sf('#0d2b5e'); doc.roundedRect(M, y, anchoTabla, 7, 1.2, 1.2, 'F');
