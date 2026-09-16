@@ -639,7 +639,7 @@ function verificarAcceso() {
   <!-- Contador y countdown -->
   <div class="hdr-pill">
     Total: <span id="hdr-total">869</span> &nbsp;|&nbsp;
-    <span style="font-size:11px;opacity:.75">próx. en <span id="countdown">0</span>s</span>
+    <span style="font-size:11px;opacity:.75">próx. en <span id="countdown">0</span></span>
   </div>
 
 </header>
@@ -1105,7 +1105,7 @@ function limpiar(v){return(v!==null&&v!==undefined&&String(v).trim()!==''&&Strin
 // ══════════════════════════════════════════════════════════════
 //  TIEMPO REAL
 // ══════════════════════════════════════════════════════════════
-const INTERVALO_SEG = 30;
+const INTERVALO_SEG = 300; // 5 minutos
 let timerInterval = null;
 let countdown = INTERVALO_SEG;
 let cargando = false;
@@ -1132,13 +1132,18 @@ function setSyncStatus(estado) {
     }
 }
 
+function fmtCountdown(seg){
+    const m=Math.floor(seg/60), s=seg%60;
+    return m>0 ? `${m}:${String(s).padStart(2,'0')}` : `${s}s`;
+}
 function iniciarCountdown(){
     clearInterval(timerInterval);
     countdown=INTERVALO_SEG;
     const el=document.getElementById('countdown');
+    if(el)el.textContent=fmtCountdown(countdown);
     timerInterval=setInterval(()=>{
         countdown--;
-        if(el)el.textContent=countdown;
+        if(el)el.textContent=fmtCountdown(countdown);
         if(countdown<=0){clearInterval(timerInterval);cargarDatosDesdeDrive();}
     },1000);
 }
