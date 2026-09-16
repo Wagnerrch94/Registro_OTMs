@@ -3339,7 +3339,7 @@ async function ejecutarGeneracionInforme(memo) {
       return yy + 8;
     }
     function filaInsumo(ins, yy, ancho, idx) {
-      if (yy > PH - 30) { yy = nuevaPagina(); yy = encabezadoTabla(yy, ancho); }
+      if (yy > PH - 32) { yy = nuevaPagina(); yy = encabezadoTabla(yy, ancho); }
       if (idx % 2 === 0) { sf('#f8fafc'); doc.rect(M, yy-4, ancho, 5.6, 'F'); }
       st('#1e293b'); doc.setFont('helvetica','normal'); doc.setFontSize(7.6);
       doc.text((ins.descripcion || '—').slice(0, 58), M+3, yy);
@@ -3377,7 +3377,7 @@ async function ejecutarGeneracionInforme(memo) {
       insumosEstab.forEach((ins, idx) => { y = filaInsumo(ins, y, anchoTabla, idx); });
 
       // Subtotal del establecimiento
-      if (y > PH - 20) y = nuevaPagina();
+      if (y > PH - 32) y = nuevaPagina();
       sf('#f1f5f9'); doc.rect(M, y-4, anchoTabla, 6, 'F');
       doc.setFont('helvetica','bold'); st('#0d2b5e'); doc.setFontSize(7.6);
       doc.text(`Subtotal ${estab}:`, M+3, y);
@@ -3393,7 +3393,7 @@ async function ejecutarGeneracionInforme(memo) {
     y = encabezadoTabla(y, anchoTabla);
     resumenGeneral.forEach((ins, idx) => { y = filaInsumo(ins, y, anchoTabla, idx); });
 
-    if (y > PH - 22) y = nuevaPagina();
+    if (y > PH - 32) y = nuevaPagina();
     sf('#0d2b5e'); doc.roundedRect(M, y-4.5, anchoTabla, 9, 1.5, 1.5, 'F');
     doc.setFont('helvetica','bold'); st('#ffffff'); doc.setFontSize(9.5);
     doc.text('TOTAL GENERAL', M+4, y+1.5);
