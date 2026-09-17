@@ -7,7 +7,7 @@
 <!--
 ══════════════════════════════════════════════════════════════
   BUSCADOR DE OTMs — CÓDIGO FUENTE
-  Versión: 3.6 | Setiembre 2026
+  Versión: 3.7 | Setiembre 2026
   Cambio v3.5: interlineado de las tablas de insumos del
   informe de consumo (filas ya no van pegadas).
 ══════════════════════════════════════════════════════════════
@@ -1063,6 +1063,7 @@ let timerInterval = null;
 let countdown = INTERVALO_SEG;
 let cargando = false;
 let primeraVez = true;
+let idsConocidos = new Set(); // IDs de OTMs ya vistos — para detectar registros nuevos en el auto-refresh
 
 function setSyncStatus(estado) {
     const dot=document.getElementById('sync-dot');
@@ -1101,7 +1102,7 @@ function iniciarCountdown(){
     },1000);
 }
 
-async function refreshManual(){clearInterval(timerInterval);await cargarDatosDesdeDrive();}
+async function refreshManual(){clearInterval(timerInterval);await cargarDatosDesdeDrive(true);}
 
 function mostrarToast(msg){
     let t=document.getElementById('toast');
@@ -1117,13 +1118,27 @@ function mostrarToast(msg){
 // ══════════════════════════════════════════════════════════════
 //  CARGA PRINCIPAL
 // ══════════════════════════════════════════════════════════════
-async function cargarDatosDesdeDrive() {
+async function fetchConReintentos(url, intentos = 3, esperaMs = 900) {
+    let ultimoError;
+    for (let i = 0; i < intentos; i++) {
+        try {
+            const resp = await fetch(url);
+            if (!resp.ok) throw new Error(`HTTP ${resp.status}`);
+            return resp;
+        } catch (e) {
+            ultimoError = e;
+            if (i < intentos - 1) await new Promise(r => setTimeout(r, esperaMs * (i + 1)));
+        }
+    }
+    throw ultimoError;
+}
+
+async function cargarDatosDesdeDrive(manual = false) {
     if(cargando)return;
     cargando=true;
     setSyncStatus('loading');
     try {
-        const resp = await fetch(SHEET_URL+'?v='+Date.now());
-        if(!resp.ok) throw new Error(`HTTP ${resp.status}`);
+        const resp = await fetchConReintentos(SHEET_URL+'?v='+Date.now());
         const datos = await resp.json();
         if(!datos||datos.length===0) throw new Error('Sin datos');
 
@@ -1197,7 +1212,17 @@ async function cargarDatosDesdeDrive() {
             return obj;
         });
 
-        const huboNuevos = !primeraVez && nuevos.length !== ALL.length;
+        const idsNuevos = new Set(nuevos.map(r=>r.id));
+        const hayRegistroNuevo = primeraVez || [...idsNuevos].some(id => !idsConocidos.has(id));
+
+        // Auto-refresh (no manual) sin registros nuevos → no tocar la UI, solo confirmar el check
+        if (!manual && !hayRegistroNuevo) {
+            setSyncStatus('ok');
+            return;
+        }
+
+        const huboNuevos = !primeraVez && hayRegistroNuevo;
+        idsConocidos = idsNuevos;
         ALL = nuevos;
         ALL.sort((a,b)=>{
             if(a.fecha<b.fecha)return -1;if(a.fecha>b.fecha)return 1;
