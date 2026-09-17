@@ -1,5 +1,4 @@
 <!DOCTYPE html>
-<!-- saved from url=(0078)file:///C:/Users/WAGNER%20ROJAS/Downloads/OTMs_Atenciones_Biomedicas_v3_3.html -->
 <html lang="es"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 
 <meta name="viewport" content="width=device-width,initial-scale=1">
@@ -8,12 +7,9 @@
 <!--
 ══════════════════════════════════════════════════════════════
   BUSCADOR DE OTMs — CÓDIGO FUENTE
-  Versión: 1.0 | Mayo 2026
-  
-  CÓMO ACTUALIZAR LOS DATOS:
-  1. Exportar el Excel a JSON con el script Python adjunto
-  2. Reemplazar el contenido de ALL = [...] en la línea ~320
-  3. Guardar y abrir en el navegador
+  Versión: 3.5 | Setiembre 2026
+  Cambio v3.5: interlineado de las tablas de insumos del
+  informe de consumo (filas ya no van pegadas).
 ══════════════════════════════════════════════════════════════
 -->
 
@@ -161,7 +157,6 @@ select.fc:focus, input.fc:focus {
 ════════════════════════════════════════ */
 .ms-wrap { position: relative; width: 100%; margin-bottom: 0; }
 
-/* Caja que muestra los seleccionados */
 .ms-box {
   width: 100%; min-height: 34px;
   border: 1.5px solid var(--borde);
@@ -182,7 +177,6 @@ select.fc:focus, input.fc:focus {
 .ms-box.open .ms-box-arrow { transform: translateY(-50%) rotate(180deg); }
 .ms-placeholder { color: var(--texto-dim); font-size: 13px; padding: 1px 0; }
 
-/* Tags de seleccionados */
 .ms-tag {
   display: inline-flex; align-items: center; gap: 3px;
   background: var(--azul-claro); color: #1e40af;
@@ -198,7 +192,6 @@ select.fc:focus, input.fc:focus {
   font-size: 11px; font-weight: 700; white-space: nowrap;
 }
 
-/* Dropdown */
 .ms-dropdown {
   display: none; position: fixed;
   z-index: 9999;
@@ -210,7 +203,6 @@ select.fc:focus, input.fc:focus {
 }
 .ms-dropdown.open { display: block; }
 
-/* Búsqueda interna */
 .ms-search {
   display: flex; align-items: center; gap: 6px;
   padding: 8px 11px; border-bottom: 1px solid var(--borde);
@@ -222,7 +214,6 @@ select.fc:focus, input.fc:focus {
 }
 .ms-search input::placeholder { color: var(--texto-dim); }
 
-/* Acciones Selec. todo / Limpiar */
 .ms-actions {
   display: flex; gap: 0;
   border-bottom: 1px solid var(--borde);
@@ -236,7 +227,6 @@ select.fc:focus, input.fc:focus {
 .ms-action-btn:hover { background: var(--azul-suave); color: var(--azul); }
 .ms-action-btn:first-child { border-right: 1px solid var(--borde); }
 
-/* Lista de opciones */
 .ms-list {
   max-height: 240px; overflow-y: auto;
   padding: 4px 0;
@@ -265,7 +255,6 @@ select.fc:focus, input.fc:focus {
   display: flex; flex-direction: column; gap: 16px;
 }
 
-/* Tags de filtros activos */
 .tags { display: flex; flex-wrap: wrap; gap: 6px; min-height: 4px; }
 .tag {
   display: inline-flex; align-items: center; gap: 5px;
@@ -276,7 +265,6 @@ select.fc:focus, input.fc:focus {
 .tag-x { cursor: pointer; font-size: 14px; opacity: .65; }
 .tag-x:hover { opacity: 1; color: #ef4444; }
 
-/* KPIs */
 .kpis { display: grid; grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)); gap: 10px; }
 .kpi {
   background: var(--blanco);
@@ -287,7 +275,6 @@ select.fc:focus, input.fc:focus {
 .kpi-v { font-size: 26px; font-weight: 800; line-height: 1; margin-bottom: 3px; }
 .kpi-l { font-size: 10px; color: var(--texto-dim); font-weight: 700; text-transform: uppercase; }
 
-/* Searchbar */
 .sbar {
   background: var(--blanco); border-radius: 11px;
   padding: 12px 16px; display: flex; align-items: center; gap: 10px;
@@ -306,7 +293,6 @@ select.fc:focus, input.fc:focus {
   font-weight: 700; color: #475569; white-space: nowrap;
 }
 
-/* Tabla */
 .tcard { background: var(--blanco); border-radius: 11px; box-shadow: 0 1px 4px rgba(0,0,0,.07); overflow: hidden; }
 .tscroll { overflow-x: auto; max-height: calc(100vh - 380px); overflow-y: auto; }
 table { width: 100%; border-collapse: collapse; min-width: 960px; }
@@ -330,7 +316,6 @@ td {
 tr:nth-child(even) td { background: #f8fafc; }
 tr:hover td { background: var(--azul-suave); cursor: pointer; }
 
-/* Badges */
 .b { display: inline-block; padding: 2px 10px; border-radius: 20px; font-size: 10px; font-weight: 700; white-space: nowrap; }
 .ok   { background: #dcfce7; color: #14532d; }
 .nc   { background: #dbeafe; color: #1e3a8a; }
@@ -349,7 +334,7 @@ tr:hover td { background: var(--azul-suave); cursor: pointer; }
 .pdf-no { background: #fee2e2; color: #7f1d1d; }
 
 /* ════════════════════════════════════════
-   BOTONES EDITAR / ELIMINAR en modal detalle
+   BOTONES EDITAR / ELIMINAR
 ════════════════════════════════════════ */
 .btn-edit {
   flex:1; padding:9px 0; background:var(--azul); color:#fff;
@@ -413,7 +398,6 @@ tr:hover td { background: var(--azul-suave); cursor: pointer; }
 }
 .btn-cancel-edit:hover { border-color:#94a3b8; }
 
-/* Toast de éxito/error edición */
 .edit-msg {
   padding:8px 14px; border-radius:8px; font-size:12px;
   font-weight:700; text-align:center; margin-top:10px;
@@ -458,7 +442,6 @@ tr:hover td { background: var(--azul-suave); cursor: pointer; }
 .m-close { margin-top: 18px; width: 100%; padding: 11px; background: var(--azul-oscuro); color: #fff; border: none; border-radius: 9px; font-size: 13px; font-weight: 700; cursor: pointer; }
 .m-close:hover { background: var(--azul); }
 
-/* Scrollbar */
 ::-webkit-scrollbar        { width: 6px; height: 6px; }
 ::-webkit-scrollbar-track  { background: #f1f5f9; }
 ::-webkit-scrollbar-thumb  { background: #cbd5e1; border-radius: 3px; }
@@ -541,7 +524,6 @@ tr:hover td { background: var(--azul-suave); cursor: pointer; }
 <script>
 /* ════════════════════════════════════════════════════════
    LISTA DE CORREOS AUTORIZADOS
-   — Agrega o elimina correos aquí —
 ════════════════════════════════════════════════════════ */
 const CORREOS_AUTORIZADOS = [
 "wagnerrch19_94@hotmail.com",
@@ -565,7 +547,6 @@ function verificarAcceso() {
   }
 }
 
-// Mostrar login al inicio si no hay sesión activa
 (function() {
   if (sessionStorage.getItem('otm_acceso')) {
     document.getElementById('login-overlay').style.display = 'none';
@@ -586,12 +567,11 @@ function verificarAcceso() {
   </div>
   <div class="hdr-space"></div>
 
-  <!-- Indicador última actualización -->
   <div id="hdr-sync" style="display:flex;align-items:center;gap:8px;margin-right:10px">
     <span id="sync-dot" style="width: 8px; height: 8px; border-radius: 50%; background: rgb(250, 204, 21); flex-shrink: 0; transition: background 0.3s;"></span>
     <span id="sync-txt" style="font-size:11px;color:rgba(255,255,255,.55);white-space:nowrap">Actualizando...</span>
   </div>
-<!-- Botón ir a base de datos Excel/Drive -->
+
 <button onclick="window.open(SHEET_XLSX_URL, '_blank')" title="Abrir base de datos en Google Sheets"
         style="background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.25);color:#fff;
                border-radius:8px;padding:6px 13px;font-size:12px;font-weight:600;cursor:pointer;
@@ -600,7 +580,7 @@ function verificarAcceso() {
   <span style="font-size:13px">📊</span>
   <span>Base de datos</span>
 </button>
-<!-- Botón verificar OTMs con insumos usados + generar informe de consumo -->
+
 <div id="grp-insumos" style="display:flex;align-items:stretch;border-radius:8px;overflow:hidden;border:1px solid rgba(255,255,255,.25);margin-right:10px;">
   <button id="btn-ver-insumos" onclick="toggleFiltroInsumos()" title="Ver solo OTMs donde se usó insumo"
           style="background:rgba(255,255,255,.12);border:none;color:#fff;
@@ -618,7 +598,7 @@ function verificarAcceso() {
     📄
   </button>
 </div>
-<!-- Botón Actualización de Equipos Biomédicos -->
+
 <button onclick="window.open('https://docs.google.com/spreadsheets/d/1fQ41kQaaDWZ4mtJ2lx7DkJdWkppbj7mewh5qB-Vf--o/edit?usp=sharing', '_blank')" title="Abrir base de actualización de equipos biomédicos"
         style="background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.25);color:#fff;
                border-radius:8px;padding:6px 13px;font-size:12px;font-weight:600;cursor:pointer;
@@ -627,7 +607,7 @@ function verificarAcceso() {
   <span style="font-size:13px">🩺</span>
   <span>Actualización de Equipos Biomédicos</span>
 </button>
-  <!-- Botón refresh manual -->
+
   <button id="btn-refresh" onclick="refreshManual()" title="Actualizar ahora" style="background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.25);color:#fff;
            border-radius:8px;padding:6px 13px;font-size:12px;font-weight:600;cursor:pointer;
            display:flex;align-items:center;gap:6px;margin-right:10px;font-family:inherit;
@@ -636,9 +616,8 @@ function verificarAcceso() {
     <span>Actualizar</span>
   </button>
 
-  <!-- Contador y countdown -->
   <div class="hdr-pill">
-    Total: <span id="hdr-total">869</span> &nbsp;|&nbsp;
+    Total: <span id="hdr-total">0</span> &nbsp;|&nbsp;
     <span style="font-size:11px;opacity:.75">próx. en <span id="countdown">0</span></span>
   </div>
 
@@ -653,13 +632,11 @@ function verificarAcceso() {
     <div class="sb-head">⚙ Filtros de búsqueda</div>
     <div class="sb-body">
 
-      <!-- Filtro 1: N° OTM -->
       <div class="fg">
         <label class="fl">📋 N° OTM</label>
         <input class="fc" id="f-otm" type="text" placeholder="Ej: 125">
       </div>
 
-      <!-- Filtro 2: Establecimiento -->
       <div class="fg">
         <label class="fl">🏥 Establecimiento</label>
         <div class="estab-quick-search" style="margin-bottom:2px;position:relative">
@@ -686,7 +663,6 @@ function verificarAcceso() {
 </div>
       </div>
 
-      <!-- Filtro 3: Servicio -->
       <div class="fg">
         <label class="fl">🩺 Servicio</label>
         <div class="ms-wrap" id="ms-wrap-f-serv">
@@ -708,12 +684,11 @@ function verificarAcceso() {
 </div>
       </div>
 
-      <!-- Filtro 4: Mes -->
       <div class="fg">
         <label class="fl">📆 Mes</label>
         <div class="ms-wrap" id="ms-wrap-f-mes">
   <div class="ms-box" id="ms-box-f-mes" onclick="msToggleOpen('f-mes')">
-    <span class="ms-placeholder" id="ms-ph-f-mes" style="">— Todos —</span>
+    <span class="ms-placeholder" id="ms-ph-f-mes">— Todos —</span>
     <span class="ms-box-arrow">▾</span>
   </div>
   <div class="ms-dropdown" id="ms-dd-f-mes">
@@ -729,7 +704,7 @@ function verificarAcceso() {
   </div>
 </div>
       </div>
-<!-- Filtro: Semana -->
+
       <div class="fg">
         <label class="fl">🗓️ Semana</label>
         <div class="ms-wrap" id="ms-wrap-f-semana">
@@ -751,13 +726,11 @@ function verificarAcceso() {
         </div>
       </div>
 
-      <!-- Filtro 4: Fecha desde -->
       <div class="fg">
         <label class="fl">📅 Fecha desde</label>
         <input class="fc" id="f-desde" type="date">
       </div>
 
-      <!-- Filtro 5: Fecha hasta -->
       <div class="fg">
         <label class="fl">📅 Fecha hasta</label>
         <input class="fc" id="f-hasta" type="date">
@@ -765,7 +738,6 @@ function verificarAcceso() {
 
       <div class="divider"></div>
 
-      <!-- Filtro 6: Tipo mantenimiento -->
       <div class="fg">
         <label class="fl">🔧 Tipo mantenimiento</label>
         <div class="ms-wrap" id="ms-wrap-f-tipo">
@@ -787,7 +759,6 @@ function verificarAcceso() {
 </div>
       </div>
 
-      <!-- Filtro 7: Estado funcional -->
       <div class="fg">
         <label class="fl">⚙ Estado funcional</label>
         <div class="ms-wrap" id="ms-wrap-f-estado">
@@ -809,7 +780,6 @@ function verificarAcceso() {
 </div>
       </div>
 
-      <!-- Filtro 8: Ejecutor -->
       <div class="fg">
         <label class="fl">👤 Ejecutor</label>
         <div class="ms-wrap" id="ms-wrap-f-ejec">
@@ -831,7 +801,6 @@ function verificarAcceso() {
 </div>
       </div>
 
-      <!-- Filtro 9: PDF adjunto -->
       <div class="fg">
         <label class="fl">📄 PDF Adjunto</label>
         <select id="f-pdf" style="width:100%;padding:5px 9px;border:1.5px solid var(--borde);border-radius:7px;background:#fff;font-size:12px;color:var(--texto);font-family:inherit;cursor:pointer;" onchange="applyFilters()">
@@ -841,7 +810,6 @@ function verificarAcceso() {
         </select>
       </div>
 
-      <!-- Filtro 10: Uso de Insumo -->
       <div class="fg">
         <label class="fl">🧰 Uso de Insumo</label>
         <select id="f-insumo" style="width:100%;padding:5px 9px;border:1.5px solid var(--borde);border-radius:7px;background:#fff;font-size:12px;color:var(--texto);font-family:inherit;cursor:pointer;" onchange="applyFilters()">
@@ -864,20 +832,17 @@ function verificarAcceso() {
   ════════════════════════════════ -->
   <main class="main">
 
-    <!-- Tags de filtros activos -->
     <div class="tags" id="tags"></div>
 
-    <!-- Tarjetas KPI -->
     <div class="kpis" id="kpis"></div>
 
-    <!-- Barra de búsqueda libre + botón gráficas -->
     <div style="display:flex;gap:10px;align-items:stretch;margin-bottom:0">
       <div class="sbar" style="flex:1;margin-bottom:0">
         <span style="font-size:18px">🔍</span>
         <input type="text" id="srch" placeholder="Buscar por equipo, marca, servicio, observaciones…">
-        <div class="sbar-cnt" id="srch-cnt">869 resultados</div>
+        <div class="sbar-cnt" id="srch-cnt">0 resultados</div>
       </div>
-    <button id="btn-charts" onclick="toggleCharts()" style="display: flex; align-items: center; gap: 8px; padding: 0px 20px; background: linear-gradient(135deg, rgb(13, 43, 94), rgb(29, 78, 216)); color: rgb(255, 255, 255); border-width: medium; border-style: none; border-color: currentcolor; border-image: initial; border-radius: 12px; font-size: 13px; font-weight: 700; cursor: pointer; white-space: nowrap; box-shadow: rgba(29, 78, 216, 0.25) 0px 2px 8px; transition: opacity 0.2s; font-family: inherit;">📊 Gráficas</button>
+    <button id="btn-charts" onclick="toggleCharts()" style="display: flex; align-items: center; gap: 8px; padding: 0px 20px; background: linear-gradient(135deg, rgb(13, 43, 94), rgb(29, 78, 216)); color: rgb(255, 255, 255); border-style: none; border-radius: 12px; font-size: 13px; font-weight: 700; cursor: pointer; white-space: nowrap; box-shadow: rgba(29, 78, 216, 0.25) 0px 2px 8px; transition: opacity 0.2s; font-family: inherit;">📊 Gráficas</button>
       <button id="btn-export-xlsx" onclick="exportarExcel()" style="display:flex;align-items:center;gap:8px;padding:0 20px;background:linear-gradient(135deg,#15803d,#16a34a);color:#fff;border:none;border-radius:12px;font-size:13px;font-weight:700;cursor:pointer;white-space:nowrap;box-shadow:0 2px 8px rgba(21,128,61,.25);transition:opacity .2s;font-family:inherit;">📥 Exportar Excel</button>
     </div>
 
@@ -886,7 +851,6 @@ function verificarAcceso() {
       <div style="background:#fff;border-radius:14px;padding:22px 24px;
                   box-shadow:0 2px 12px rgba(0,0,0,.07);border:1px solid #e2e8f0">
 
-        <!-- Título panel -->
         <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:18px">
           <div>
             <div style="font-size:15px;font-weight:800;color:#0d2b5e">📊 Análisis Visual</div>
@@ -906,76 +870,68 @@ function verificarAcceso() {
           </div>
         </div>
 
-        <!-- Grid de gráficas -->
         <div style="display:grid;grid-template-columns:1fr 1fr;gap:20px">
 
-          <!-- Gráfica: OTMs por Ejecutor (Barras horizontales) -->
           <div style="background:#f8fafc;border-radius:10px;padding:16px">
             <div style="font-size:12px;font-weight:700;color:#0d2b5e;margin-bottom:12px;text-transform:uppercase;letter-spacing:.04em">
               OTMs por Ejecutor
             </div>
             <div style="position:relative;height:220px">
-              <canvas id="chart-ejec" style="box-sizing: border-box; display: block; height: 220px; width: 440px;" width="550" height="275"></canvas>
+              <canvas id="chart-ejec"></canvas>
             </div>
           </div>
 
-          <!-- Gráfica: Tipo de Mantenimiento (Barras) -->
           <div style="background:#f8fafc;border-radius:10px;padding:16px">
             <div style="font-size:12px;font-weight:700;color:#0d2b5e;margin-bottom:12px;text-transform:uppercase;letter-spacing:.04em">
               Tipo de Mantenimiento
             </div>
             <div style="position:relative;height:220px">
-              <canvas id="chart-tipo" style="box-sizing: border-box; display: block; height: 220px; width: 440px;" width="550" height="275"></canvas>
+              <canvas id="chart-tipo"></canvas>
             </div>
           </div>
 
-          <!-- Gráfica: Top 8 Establecimientos (Barras horizontales) -->
           <div style="background:#f8fafc;border-radius:10px;padding:16px">
             <div style="font-size:12px;font-weight:700;color:#0d2b5e;margin-bottom:12px;text-transform:uppercase;letter-spacing:.04em">
               Top Establecimientos
             </div>
             <div style="position:relative;height:220px">
-              <canvas id="chart-estab" style="box-sizing: border-box; display: block; height: 220px; width: 440px;" width="550" height="275"></canvas>
+              <canvas id="chart-estab"></canvas>
             </div>
           </div>
 
-          <!-- Gráfica: OTMs por Servicio (Barras) -->
           <div style="background:#f8fafc;border-radius:10px;padding:16px">
             <div style="font-size:12px;font-weight:700;color:#0d2b5e;margin-bottom:12px;text-transform:uppercase;letter-spacing:.04em">
               OTMs por Servicio
             </div>
             <div style="position:relative;height:220px">
-              <canvas id="chart-servicio" style="box-sizing: border-box; display: block; height: 220px; width: 440px;" width="550" height="275"></canvas>
+              <canvas id="chart-servicio"></canvas>
             </div>
           </div>
 
-          <!-- Gráfica: OTMs por Mes (Línea) -->
           <div style="background:#f8fafc;border-radius:10px;padding:16px">
             <div style="font-size:12px;font-weight:700;color:#0d2b5e;margin-bottom:12px;text-transform:uppercase;letter-spacing:.04em">
               OTMs por Mes
             </div>
             <div style="position:relative;height:220px">
-              <canvas id="chart-mes" style="box-sizing: border-box; display: block; height: 220px; width: 440px;" width="550" height="275"></canvas>
+              <canvas id="chart-mes"></canvas>
             </div>
           </div>
 
-          <!-- Gráfica: OTMs por Día (Línea) -->
           <div style="background:#f8fafc;border-radius:10px;padding:16px">
             <div style="font-size:12px;font-weight:700;color:#0d2b5e;margin-bottom:12px;text-transform:uppercase;letter-spacing:.04em">
               OTMs por Día
             </div>
             <div style="position:relative;height:220px">
-              <canvas id="chart-semana" style="box-sizing: border-box; display: block; height: 220px; width: 440px;" width="550" height="275"></canvas>
+              <canvas id="chart-semana"></canvas>
             </div>
           </div>
 
-          <!-- Gráfica: Estado Funcional (Dona) -->
           <div style="background:#f8fafc;border-radius:10px;padding:16px">
             <div style="font-size:12px;font-weight:700;color:#0d2b5e;margin-bottom:12px;text-transform:uppercase;letter-spacing:.04em">
               Estado Funcional
             </div>
             <div style="position:relative;height:220px">
-              <canvas id="chart-estado" style="box-sizing: border-box; display: block; height: 220px; width: 440px;" width="550" height="275"></canvas>
+              <canvas id="chart-estado"></canvas>
             </div>
           </div>
 
@@ -990,26 +946,25 @@ function verificarAcceso() {
           <thead>
             <tr>
               <th onclick="sortBy('id')" data-c="id" class="asc">    # OTM</th>
-              <th onclick="sortBy('fdisp')" data-c="fdisp" class=""> Fecha</th>
-              <th onclick="sortBy('mes_n')" data-c="mes_n" class=""> Mes</th>
-              <th onclick="sortBy('estab')" data-c="estab" class=""> Establecimiento</th>
-              <th onclick="sortBy('serv')" data-c="serv" class="">  Servicio</th>
-              <th onclick="sortBy('equipo')" data-c="equipo" class="">Equipo</th>
-              <th onclick="sortBy('marca')" data-c="marca" class=""> Marca</th>
-              <th onclick="sortBy('tienePdf')" data-c="tienePdf" class="">PDF</th>
-              <th onclick="sortBy('tipo')" data-c="tipo" class="">  Tipo</th>
-              <th onclick="sortBy('estado')" data-c="estado" class="">Estado</th>
-              <th onclick="sortBy('usoInsumo')" data-c="usoInsumo" class="">Insumo</th>
-              <th onclick="sortBy('ejec')" data-c="ejec" class="">  Ejecutor</th>
+              <th onclick="sortBy('fdisp')" data-c="fdisp"> Fecha</th>
+              <th onclick="sortBy('mes_n')" data-c="mes_n"> Mes</th>
+              <th onclick="sortBy('estab')" data-c="estab"> Establecimiento</th>
+              <th onclick="sortBy('serv')" data-c="serv">  Servicio</th>
+              <th onclick="sortBy('equipo')" data-c="equipo">Equipo</th>
+              <th onclick="sortBy('marca')" data-c="marca"> Marca</th>
+              <th onclick="sortBy('tienePdf')" data-c="tienePdf">PDF</th>
+              <th onclick="sortBy('tipo')" data-c="tipo">  Tipo</th>
+              <th onclick="sortBy('estado')" data-c="estado">Estado</th>
+              <th onclick="sortBy('usoInsumo')" data-c="usoInsumo">Insumo</th>
+              <th onclick="sortBy('ejec')" data-c="ejec">  Ejecutor</th>
             </tr>
           </thead>
           <tbody id="tbody"></tbody>
         </table>
       </div>
-      <!-- Paginación -->
       <div class="pag">
-        <div class="pag-info" id="pag-info">Página 1 de 44 · 1–20 de 869</div>
-        <button class="pb" id="btn-p" onclick="goPag(-1)" disabled="">‹ Anterior</button>
+        <div class="pag-info" id="pag-info">Página 1 de 1</div>
+        <button class="pb" id="btn-p" onclick="goPag(-1)" disabled>‹ Anterior</button>
         <div id="pag-ns"></div>
         <button class="pb" id="btn-n" onclick="goPag(1)">Siguiente ›</button>
       </div>
@@ -1023,7 +978,7 @@ function verificarAcceso() {
 ════════════════════════════════ -->
 <div class="mbg" id="modal" onclick="if(event.target===this)closeM()">
   <div class="mbox">
-    <div class="m-title" id="m-title">OTM #OTM_0013 — ESTERILIZADOR A CALOR SECO</div>
+    <div class="m-title" id="m-title">OTM</div>
     <div class="m-layout">
       <div class="m-info">
         <div class="m-grid" id="m-body"></div>
@@ -1046,8 +1001,6 @@ function verificarAcceso() {
 <script>
 /* ════════════════════════════════════════════════════════════
    DATOS
-   PARA ACTUALIZAR: reemplazar el array ALL con los nuevos datos
-   Usar el script Python adjunto para generar el JSON desde Excel
 ════════════════════════════════════════════════════════════ */
 const SHEET_URL   = "https://script.google.com/macros/s/AKfycbx4k_VYMUpMgoRwhuqLTmiYDlOVCMRyBGsNNQNKechXTnl6e31g3fnX96IsswdtI7o8YQ/exec";
 const SHEET_XLSX_URL = "https://docs.google.com/spreadsheets/d/1wjz8_z0XKa_B0ujPQ4CKTKnNoUxMiXdRzjBo1GIhJcc/edit?gid=949223292#gid=949223292";
@@ -1174,33 +1127,23 @@ async function cargarDatosDesdeDrive() {
         const datos = await resp.json();
         if(!datos||datos.length===0) throw new Error('Sin datos');
 
-        // Guardar filtros activos Y página actual
         const prevPage = page;
         const prev={
             otm:   document.getElementById('f-otm')?.value||'',
-            estab: document.getElementById('f-estab')?.value||'',
-            mes:   document.getElementById('f-mes')?.value||'',
-            tipo:  document.getElementById('f-tipo')?.value||'',
-            estado:document.getElementById('f-estado')?.value||'',
-            ejec:  document.getElementById('f-ejec')?.value||'',
             desde: document.getElementById('f-desde')?.value||'',
             hasta: document.getElementById('f-hasta')?.value||'',
             srch:  document.getElementById('srch')?.value||'',
         };
 
-        // Log de columnas disponibles (solo primera vez)
         if(primeraVez){
             console.log('📋 Columnas del Google Sheet:', Object.keys(datos[0]));
         }
 
         const nuevos = datos.map((item,idx)=>{
-            // buscar: coincidencia exacta primero, luego parcial, insensible a mayúsculas
             const keysItem = Object.keys(item);
             const buscar=(...pats)=>{
                 for(const p of pats){
-                    // 1. Exacto
                     let key = keysItem.find(k => k.trim() === p.trim());
-                    // 2. Parcial case-insensitive
                     if(!key) key = keysItem.find(k => k.trim().toLowerCase().includes(p.trim().toLowerCase()));
                     if(key && item[key]!==null && item[key]!==undefined && String(item[key]).trim()!=='')
                         return String(item[key]).trim();
@@ -1213,7 +1156,7 @@ async function cargarDatosDesdeDrive() {
                 id,
                 fecha: fechaISO,
                 fdisp: fmtDisp(fechaISO),
-               mes:   fechaISO?fechaISO.slice(0,7):'',
+                mes:   fechaISO?fechaISO.slice(0,7):'',
                 mes_n: mesNombre(fechaISO),
                 semana_n: semanaISO(fechaISO),
                 estab: buscar('Nombre de Establecimiento:','Establecimiento','establecimiento'),
@@ -1230,7 +1173,6 @@ async function cargarDatosDesdeDrive() {
                 ejec:  buscar('EJECUTOR DEL MANTENIMIENTO:','EJECUTOR','ejecutor'),
                 obs:   buscar('OBSERVACIONES DEL MANTENIMIENTO:','OBSERVAC','observac').slice(0,220),
                 pdf: (()=>{
-                    // 1. URL directa guardada en la hoja
                     const pdfUrl = String(item['__pdf_url__'] || '').trim();
                     if (pdfUrl && pdfUrl.startsWith('http')) return pdfUrl;
                     const kUrl = keysItem.find(k => {
@@ -1239,7 +1181,6 @@ async function cargarDatosDesdeDrive() {
                                (s.includes('drive.google') || s.toLowerCase().includes('.pdf'));
                     });
                     if (kUrl) return String(item[kUrl]).trim();
-                    // 2. Construir URL de búsqueda con el ticket (columna A) en la carpeta Drive
                     const ticketPdf = limpiar(buscar('N° TICKET','TICKET','ID','id','OTM N°','N° OTM','OTM')) || String(idx+1);
                     if (ticketPdf) {
                         const nombrePdf = ticketPdf + '.pdf';
@@ -1248,7 +1189,6 @@ async function cargarDatosDesdeDrive() {
                     return '';
                 })(),
             };
-            // Campo calculado para ordenar por PDF
             obj.tienePdf = (obj.pdf && (
                 /\/file\/d\/[a-zA-Z0-9_-]+/.test(obj.pdf) ||
                 /[?&]id=[a-zA-Z0-9_-]+/.test(obj.pdf) ||
@@ -1264,7 +1204,6 @@ async function cargarDatosDesdeDrive() {
             return(+a.id||0)-(+b.id||0);
         });
 
-        // Repoblar selects conservando selección
         const mesOrder=['ENERO','FEBRERO','MARZO','ABRIL','MAYO','JUNIO','JULIO','AGOSTO','SETIEMBRE','OCTUBRE','NOVIEMBRE','DICIEMBRE'];
         const uniq=key=>{
             const vals=[...new Set(ALL.map(r=>r[key]).filter(Boolean))];
@@ -1272,7 +1211,6 @@ async function cargarDatosDesdeDrive() {
             if(key==='semana_n'){return vals.sort((a,b)=>{const na=parseInt(a.match(/\d+/)[0]);const nb=parseInt(b.match(/\d+/)[0]);return na-nb;});}
             return vals.sort();
         };
-        // Repoblar multiselects conservando selección anterior
         const prevEstabs  = typeof msGetValues==='function' ? msGetValues('f-estab')  : [];
         const prevMeses   = typeof msGetValues==='function' ? msGetValues('f-mes')    : [];
         const prevSemanas = typeof msGetValues==='function' ? msGetValues('f-semana') : [];
@@ -1288,12 +1226,10 @@ async function cargarDatosDesdeDrive() {
         msRepoblar('f-estado', uniq('estado').filter(v=>v!=='Sin dato'), prevEstados);
         msRepoblar('f-ejec',   uniq('ejec'),   prevEjecs);
 
-        // Restaurar búsqueda libre
         if(prev.srch&&document.getElementById('srch'))
             document.getElementById('srch').value=prev.srch;
 
         applyFilters();
-        // Restaurar página si sigue siendo válida
         if(!primeraVez && prevPage > 1) {
             const totalPagesNow = Math.max(1, Math.ceil(filtered.length / PER));
             page = Math.min(prevPage, totalPagesNow);
@@ -1323,22 +1259,12 @@ async function cargarDatosDesdeDrive() {
 ════════════════════════════════════════════════════════════ */
 let filtered = [...ALL];
 let sortCol  = 'fecha';
-let sortDir  = -1;     // 1=Ascendente, -1=Descendente
+let sortDir  = -1;
 let page     = 1;
-const PER    = 20;     // Registros por página
+const PER    = 20;
 
-/* ════════════════════════════════════════════════════════════
-   INICIALIZACIÓN
-   Llena los selects dinámicamente desde los datos
-════════════════════════════════════════════════════════════ */
-function init() {
-    // Los selects se llenan dinámicamente en cargarDatosDesdeDrive()
-}
+function init() {}
 
-/* ════════════════════════════════════════════════════════════
-   APLICAR FILTROS
-   Filtra el array ALL según los criterios seleccionados
-════════════════════════════════════════════════════════════ */
 // ════════════════════════════════════════════════════════════
 // MULTISELECT ENGINE
 // ════════════════════════════════════════════════════════════
@@ -1350,12 +1276,11 @@ function msGetValues(id) {
 function msPositionDropdown(id) {
     const box = document.getElementById('ms-box-' + id);
     const dd  = document.getElementById('ms-dd-'  + id);
-    // Move to body to escape any overflow:hidden ancestor
     if (dd.parentElement !== document.body) {
         document.body.appendChild(dd);
     }
     const rect = box.getBoundingClientRect();
-    const ddH  = 280; // max expected height of dropdown
+    const ddH  = 280;
     const spaceBelow = window.innerHeight - rect.bottom;
     const spaceAbove = rect.top;
 
@@ -1364,11 +1289,9 @@ function msPositionDropdown(id) {
     dd.style.width    = rect.width + 'px';
     dd.style.zIndex   = '9999';
     if (spaceBelow >= ddH || spaceBelow >= spaceAbove) {
-        // Open downward
         dd.style.top    = (rect.bottom + 4) + 'px';
         dd.style.bottom = 'auto';
     } else {
-        // Open upward
         dd.style.bottom = (window.innerHeight - rect.top + 4) + 'px';
         dd.style.top    = 'auto';
     }
@@ -1425,13 +1348,10 @@ function msSearch(input, id) {
     } else if (emp) emp.remove();
 }
 
-// Búsqueda rápida para Establecimiento (campo visible sin abrir dropdown)
 function estabQuickSearch(val) {
     const q = val.toLowerCase().trim();
-    // Sync the internal dropdown search too
     const ddInput = document.querySelector('#ms-dd-f-estab .ms-search input');
     if (ddInput) { ddInput.value = val; msSearch(ddInput, 'f-estab'); }
-    // If there's text, open the dropdown; if empty, close it
     const dd  = document.getElementById('ms-dd-f-estab');
     const box = document.getElementById('ms-box-f-estab');
     if (q.length > 0) {
@@ -1497,7 +1417,6 @@ function msRepoblar(id, valores, prevVals) {
     });
     msUpdateBox(id);
 }
-// msRepoblarDynamic: igual que msRepoblar pero conserva selección activa
 function msRepoblarDynamic(id, valores, prevVals) {
     msRepoblar(id, valores, prevVals);
 }
@@ -1528,10 +1447,9 @@ function applyFilters() {
   const pdfFilt = (document.getElementById('f-pdf')?.value || '').trim();
   const insumoFilt = (document.getElementById('f-insumo')?.value || '').trim();
 
-  // Función base de filtrado (excluye opcionalmente un campo para repoblado cruzado)
   const baseFilter = (excludeField) => ALL.filter(r => {
     if (excludeField !== 'otm'    && otm           && !r.id.toLowerCase().includes(otm.toLowerCase())) return false;
-if (excludeField !== 'estab'  && estabs.length  && !estabs.includes(r.estab))   return false;
+    if (excludeField !== 'estab'  && estabs.length  && !estabs.includes(r.estab))   return false;
     if (excludeField !== 'mes'    && meses.length   && !meses.includes(r.mes_n))    return false;
     if (excludeField !== 'semana' && semanas.length && !semanas.includes(r.semana_n)) return false;
     if (                             desde          && r.fecha < desde)             return false;
@@ -1547,7 +1465,6 @@ if (excludeField !== 'estab'  && estabs.length  && !estabs.includes(r.estab))   
 
   filtered = baseFilter(null);
 
- // Repoblar multiselects con solo los valores disponibles según filtros cruzados
   const mesOrderF = ['ENERO','FEBRERO','MARZO','ABRIL','MAYO','JUNIO','JULIO','AGOSTO','SETIEMBRE','OCTUBRE','NOVIEMBRE','DICIEMBRE'];
   const valsFor = (field, excludeField) => {
     const rows = baseFilter(excludeField);
@@ -1568,8 +1485,8 @@ if (excludeField !== 'estab'  && estabs.length  && !estabs.includes(r.estab))   
     }
     return vals.sort();
   };
- 
-msRepoblarDynamic('f-estab',  valsFor('estab',  'estab'),  estabs);
+
+  msRepoblarDynamic('f-estab',  valsFor('estab',  'estab'),  estabs);
   msRepoblarDynamic('f-mes',    valsFor('mes_n',  'mes'),    meses);
   msRepoblarDynamic('f-semana', valsFor('semana_n','semana'), semanas);
   msRepoblarDynamic('f-serv',   valsFor('serv',   'serv'),   servs);
@@ -1585,7 +1502,7 @@ msRepoblarDynamic('f-estab',  valsFor('estab',  'estab'),  estabs);
 }
 
 /* ════════════════════════════════════════════════════════════
-   BOTÓN "CON INSUMOS" — control rápido de OTMs con insumo usado
+   BOTÓN "CON INSUMOS"
 ════════════════════════════════════════════════════════════ */
 function toggleFiltroInsumos() {
   const sel = document.getElementById('f-insumo');
@@ -1636,7 +1553,7 @@ function clearAll() {
 }
 
 /* ════════════════════════════════════════════════════════════
-   TAGS DE FILTROS ACTIVOS (etiquetas sobre la tabla)
+   TAGS DE FILTROS ACTIVOS
 ════════════════════════════════════════════════════════════ */
 function renderTags() {
   const textInputs = [['f-otm','OTM'],['f-desde','Desde'],['f-hasta','Hasta']];
@@ -1661,7 +1578,7 @@ function clearOne(id) {
 }
 
 /* ════════════════════════════════════════════════════════════
-   KPIs (tarjetas numéricas de resumen)
+   KPIs
 ════════════════════════════════════════════════════════════ */
 function renderKPIs() {
   const t    = filtered.length;
@@ -1690,7 +1607,7 @@ function renderKPIs() {
 }
 
 /* ════════════════════════════════════════════════════════════
-   BADGES DE COLOR
+   BADGES
 ════════════════════════════════════════════════════════════ */
 function bEstado(e) {
   if (!e || e === 'Sin dato') return `<span class="b gray">${e||'—'}</span>`;
@@ -1722,7 +1639,6 @@ function bInsumo(v) {
 }
 
 function bPdf(r) {
-  // Tiene PDF si la URL guardada contiene un fileId directo de Drive
   const hasPdf = r.pdf && (
     /\/file\/d\/[a-zA-Z0-9_-]+/.test(r.pdf) ||
     /[?&]id=[a-zA-Z0-9_-]+/.test(r.pdf) ||
@@ -1739,7 +1655,6 @@ function bPdf(r) {
 function getRowsFiltradasOrdenadas() {
   const srch = (document.getElementById('srch').value || '').toLowerCase();
 
-  // Búsqueda libre (equipo, marca, servicio, obs)
   let rows = filtered;
   if (srch) {
     rows = rows.filter(r =>
@@ -1748,13 +1663,11 @@ function getRowsFiltradasOrdenadas() {
     );
   }
 
-  // Ordenar
   rows = [...rows].sort((a, b) => {
     let va = a[sortCol] || '', vb = b[sortCol] || '';
     if (sortCol === 'id') { va = +va || 0; vb = +vb || 0; }
     const cmp = (va < vb ? -1 : va > vb ? 1 : 0) * sortDir;
     if (cmp !== 0) return cmp;
-    // Desempate: si columna principal empata, ordenar por fecha luego por id
     if (sortCol !== 'fecha') {
       const fd = (a.fecha || '') < (b.fecha || '') ? -1 : (a.fecha || '') > (b.fecha || '') ? 1 : 0;
       if (fd !== 0) return fd;
@@ -1764,7 +1677,8 @@ function getRowsFiltradasOrdenadas() {
 
   return rows;
 }
-  function exportarExcel() {
+
+function exportarExcel() {
   const rows = getRowsFiltradasOrdenadas();
 
   if (!rows.length) {
@@ -1821,7 +1735,6 @@ function renderTable() {
   document.getElementById('srch-cnt').textContent =
     `${total} resultado${total !== 1 ? 's' : ''}`;
 
-  // Filas vacías
   if (total === 0) {
     document.getElementById('tbody').innerHTML =
       `<tr><td colspan="12" style="text-align:center;padding:60px;color:#94a3b8">
@@ -1830,7 +1743,6 @@ function renderTable() {
         <div style="font-size:13px;margin-top:6px">Intente con otros filtros</div>
       </td></tr>`;
   } else {
-    // Renderizar filas
     document.getElementById('tbody').innerHTML = slice.map(r =>
       `<tr onclick="showDetail('${r.id}')" title="Click para ver detalle">
         <td style="font-weight:700;color:#1d4ed8">${r.id}</td>
@@ -1849,19 +1761,16 @@ function renderTable() {
     ).join('');
   }
 
-  // Paginación
   document.getElementById('btn-p').disabled = page <= 1;
   document.getElementById('btn-n').disabled = page >= totalPages;
   document.getElementById('pag-info').textContent =
-    `Página ${page} de ${totalPages} · ${(page-1)*PER+1}–${Math.min(page*PER, total)} de ${total}`;
+    `Página ${page} de ${totalPages} · ${total ? (page-1)*PER+1 : 0}–${Math.min(page*PER, total)} de ${total}`;
 
-  // Números de página
   const nums = [];
   for (let p = Math.max(1, page-2); p <= Math.min(totalPages, page+2); p++)
     nums.push(`<button class="pb${p===page?' on':''}" onclick="goPage(${p})">${p}</button>`);
   document.getElementById('pag-ns').innerHTML = nums.join('');
 
-  // Indicadores de columna ordenada
   document.querySelectorAll('th[data-c]').forEach(th => {
     const c = th.dataset.c;
     th.className = c === sortCol ? (sortDir === 1 ? 'asc' : 'desc') : '';
@@ -1869,25 +1778,19 @@ function renderTable() {
 }
 
 /* ════════════════════════════════════════════════════════════
-   ORDENAR COLUMNAS
+   ORDENAR / PAGINACIÓN
 ════════════════════════════════════════════════════════════ */
 function sortBy(col) {
   sortDir = (sortCol === col) ? -sortDir : 1;
   sortCol = col;
   renderTable();
 }
-
-/* ════════════════════════════════════════════════════════════
-   PAGINACIÓN
-════════════════════════════════════════════════════════════ */
 function goPag(d) { page += d; renderTable(); }
 function goPage(p) { page = p;  renderTable(); }
 
 /* ════════════════════════════════════════════════════════════
    MODAL — DETALLE COMPLETO
 ════════════════════════════════════════════════════════════ */
-
-// Cache de fileIds ya resueltos para no repetir búsquedas
 const _pdfCache = {};
 
 function mostrarVisorPDF(mViewer, fileId, nombrePdf) {
@@ -1919,7 +1822,6 @@ function mostrarVisorPDF(mViewer, fileId, nombrePdf) {
         </a>
       </div>
     </div>`;
-  // Detectar si el iframe no cargó correctamente
   setTimeout(() => {
     const fr = document.getElementById('pdf-iframe-' + uid);
     if (!fr) return;
@@ -1927,7 +1829,6 @@ function mostrarVisorPDF(mViewer, fileId, nombrePdf) {
       document.getElementById('pdf-loading-' + uid).style.display = 'none';
       document.getElementById('pdf-err-' + uid).style.display = 'flex';
     });
-    // Timeout de seguridad: si en 8s el loading sigue visible → mostrar error con descarga
     setTimeout(() => {
       const ld = document.getElementById('pdf-loading-' + uid);
       if (ld && ld.style.display !== 'none') {
@@ -1939,11 +1840,7 @@ function mostrarVisorPDF(mViewer, fileId, nombrePdf) {
 }
 
 async function buscarFileIdEnDrive(nombrePdf) {
-  // El Apps Script ya resuelve las URLs en __pdf_url__ al cargar los datos.
-  // Esta función es fallback: busca en ALL si hay algún registro con ese nombre de PDF
-  // cuya URL ya fue resuelta (por si el modal se abrió antes de cargar datos).
   if (_pdfCache[nombrePdf]) return _pdfCache[nombrePdf];
-  // Buscar en ALL un registro que tenga URL resuelta para ese PDF
   const nombre = nombrePdf.replace('.pdf','').toUpperCase();
   const registro = ALL.find(r => r.id && r.id.toUpperCase() === nombre && r.pdf);
   if (registro && registro.pdf) {
@@ -1979,7 +1876,6 @@ function showDetail(id) {
   const mViewer = document.getElementById('m-viewer');
   const nombrePdf = r.id + '.pdf';
 
-  // Intentar extraer fileId de la URL guardada (cualquier formato de Drive)
   let fileId = null;
   if (r.pdf) {
     const m1 = r.pdf.match(/\/file\/d\/([a-zA-Z0-9_-]+)/);
@@ -1990,10 +1886,8 @@ function showDetail(id) {
   }
 
   if (fileId) {
-    // Tenemos fileId directo — mostrar visor inmediatamente
     mostrarVisorPDF(mViewer, fileId, nombrePdf);
   } else {
-    // Sin fileId — buscar en Drive por nombre del archivo usando el Apps Script
     mViewer.innerHTML = `
       <div class="m-viewer-label">ARCHIVO PDF — ${nombrePdf}</div>
       <div style="width:100%;padding:32px 20px;text-align:center;border:1.5px solid #e2e8f0;border-radius:10px;background:#f8fafc;">
@@ -2024,31 +1918,24 @@ function closeM() {
 /* ════════════════════════════════════════════════════════════
    EVENTOS
 ════════════════════════════════════════════════════════════ */
-// Botones principales
 document.getElementById('btn-apply').addEventListener('click', applyFilters);
 document.getElementById('btn-reset').addEventListener('click', clearAll);
 
-// Búsqueda libre en tiempo real
 document.getElementById('srch').addEventListener('input', () => {
   page = 1;
   renderTable();
 });
 
-// Los multiselects ya llaman applyFilters() directamente en msToggle()
-
-// N° OTM: filtrar en tiempo real mientras escribe
 document.getElementById('f-otm').addEventListener('input', () => {
   applyFilters();
 });
 
-// Fechas: filtrar al presionar Enter
 ['f-desde','f-hasta'].forEach(id =>
   document.getElementById(id).addEventListener('keydown', e => {
     if (e.key === 'Enter') applyFilters();
   })
 );
 
-// Cerrar modal con Escape
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape') closeM();
 });
@@ -2058,9 +1945,6 @@ document.addEventListener('keydown', e => {
 ════════════════════════════════════════════════════════════ */
 renderKPIs();
 renderTable();
-// ── ARRANQUE ─────────────────────────────────────────────────
-// La primera carga ocurre inmediatamente al abrir la página.
-// Luego se repite automáticamente cada 30 segundos.
 window.addEventListener('DOMContentLoaded', () => {
     cargarDatosDesdeDrive();
     cargarCatalogoInsumos();
@@ -2068,11 +1952,10 @@ window.addEventListener('DOMContentLoaded', () => {
 </script>
 
 
-<div id="toast" style="position: fixed; bottom: 24px; right: 24px; background: rgb(13, 43, 94); color: rgb(255, 255, 255); padding: 10px 18px; border-radius: 10px; font-size: 13px; font-weight: 600; box-shadow: rgba(0, 0, 0, 0.25) 0px 8px 24px; z-index: 9999; transition: opacity 0.3s; opacity: 0; pointer-events: none;">✅ Nuevos datos: 869 registros</div><script>
+<script>
 /* ════════════════════════════════════════════════════════════
    GRÁFICAS — Chart.js
 ════════════════════════════════════════════════════════════ */
-// Registrar el plugin de datalabels UNA SOLA VEZ de forma global
 Chart.register(ChartDataLabels);
 Chart.defaults.devicePixelRatio = 3;
 
@@ -2092,15 +1975,10 @@ function toggleCharts() {
 }
 
 function renderCharts() {
-  const data = filtered; // usa siempre los datos filtrados actuales
+  const data = filtered;
   if (!data || !data.length) return;
 
   destroyCharts();
-
-  const CHART_DEFAULTS = {
-    plugins: { legend: { labels: { font: { family: "'Segoe UI',Arial,sans-serif", size: 11 } } } },
-    animation: { duration: 400 }
-  };
 
   // ── 1. Estado Funcional — Dona ──────────────────────────────
   const estadoMap = {};
@@ -2307,7 +2185,7 @@ function renderCharts() {
     }
   });
 
-  // ── Gráfica: OTMs por Servicio — Barras ────────────────────
+  // ── OTMs por Servicio — Barras ─────────────────────────────
   const servMap = {};
   data.forEach(r => { const s = r.serv || 'Sin dato'; servMap[s] = (servMap[s]||0) + 1; });
   const servSorted = Object.entries(servMap).sort((a,b) => b[1]-a[1]).slice(0, 8);
@@ -2405,7 +2283,6 @@ async function printPDFReport() {
   btn.disabled = true;
 
   try {
-    // ── 1. Renderizar gráficas ────────────────────────────────────
     if (!chartsVisible) {
       chartsVisible = true;
       document.getElementById('charts-panel').style.display = 'block';
@@ -2413,14 +2290,12 @@ async function printPDFReport() {
       await new Promise(r => setTimeout(r, 800));
     }
 
-    // ── 2. Capturar imágenes de los canvas ────────────────────────
     const imgs = {};
     for (const id of ['chart-estado','chart-tipo','chart-mes','chart-estab','chart-ejec','chart-servicio','chart-semana']) {
       const c = document.getElementById(id);
       if (c) imgs[id] = c.toDataURL('image/png', 1.0);
     }
 
-    // ── 3. Calcular estadísticas ──────────────────────────────────
     const data  = filtered;
     const total = data.length;
 
@@ -2472,33 +2347,28 @@ async function printPDFReport() {
       color: n.style.borderLeftColor || '#1d4ed8',
     }));
 
-    // ── 4. Configurar jsPDF ───────────────────────────────────────
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF({ orientation:'landscape', unit:'mm', format:'a4' });
     const PW=297, PH=210, M=12;
     const now  = new Date().toLocaleDateString('es-PE',{day:'2-digit',month:'2-digit',year:'numeric'});
     const hora = new Date().toLocaleTimeString('es-PE',{hour:'2-digit',minute:'2-digit'});
 
-    // Helpers de color
     function hex2rgb(h){ h=h.replace('#',''); if(h.length===3)h=h.split('').map(c=>c+c).join(''); const n=parseInt(h,16); return [n>>16&255,n>>8&255,n&255]; }
     const sf=h=>{const[r,g,b]=hex2rgb(h);doc.setFillColor(r,g,b);};
     const ss=h=>{const[r,g,b]=hex2rgb(h);doc.setDrawColor(r,g,b);};
     const st=h=>{const[r,g,b]=hex2rgb(h);doc.setTextColor(r,g,b);};
 
-    // Helper: cabecera común en páginas 2 y 3
     function cabecera(pag) {
       sf('#0d2b5e'); doc.rect(0,0,PW,17,'F');
       sf('#1d4ed8'); doc.rect(0,0,5,17,'F');
       doc.setFont('helvetica','bold'); st('#ffffff'); doc.setFontSize(9);
       doc.text('INFORME DE GESTIÓN BIOMÉDICA — OTMs Atenciones', M+2, 8);
       st('#cbd5e1'); doc.text(`${now} ${hora}  ·  Pág. ${pag} de 3`, PW-M, 10, {align:'right'});
-      // Línea de filtros aplicados (resumen) en cabecera de pág. 2 y 3
       st('#bfdbfe'); doc.setFont('helvetica','italic'); doc.setFontSize(6);
       const fResumen = doc.splitTextToSize(`Filtros: ${filtrosTxt}`, PW-2*M-40)[0];
       doc.text(fResumen, M+2, 16);
     }
 
-    // Helper: pie de página
     function pie(pag) {
       ss('#cbd5e1'); doc.setLineWidth(0.25); doc.line(M,PH-9,PW-M,PH-9);
       st('#94a3b8'); doc.setFont('helvetica','normal'); doc.setFontSize(6);
@@ -2506,32 +2376,24 @@ async function printPDFReport() {
       doc.text(`Pág. ${pag} de 3`, PW-M, PH-5, {align:'right'});
     }
 
-    // Helper: dibuja una caja de análisis [gráfica izq + texto der]
     function cajaAnalisis(imgId, titulo, texto, y, h, chartW) {
       const analX = M + chartW + 5;
       const analW = PW - M - analX;
-      // Marco gráfica
       sf('#f8fafc'); ss('#e2e8f0'); doc.setLineWidth(0.3);
       doc.roundedRect(M, y, chartW, h, 2, 2, 'FD');
       sf('#0d2b5e'); doc.roundedRect(M, y, chartW, 6.5, 2, 2, 'F');
       doc.setFont('helvetica','bold'); st('#ffffff'); doc.setFontSize(7);
       doc.text(titulo, M+3, y+4.7);
       if(imgs[imgId]) doc.addImage(imgs[imgId],'PNG', M+2, y+7.5, chartW-4, h-9);
-      // Panel texto
       sf('#f8fafc'); ss('#e2e8f0'); doc.setLineWidth(0.3);
       doc.roundedRect(analX, y, analW, h, 2, 2, 'FD');
       sf('#1d4ed8'); doc.rect(analX, y, 3, h, 'F');
-      // Texto
       const lines = doc.splitTextToSize(texto, analW-8);
       doc.setFont('helvetica','normal'); st('#1e293b'); doc.setFontSize(7.5);
       doc.text(lines, analX+5, y+6);
     }
 
-    // ════════════════════════════════════════════════════════════
-    //  PÁGINA 1 — RESUMEN EJECUTIVO + KPIs
-    // ════════════════════════════════════════════════════════════
-
-    // Cabecera azul grande
+    // ── PÁGINA 1 ──
     sf('#0d2b5e'); doc.rect(0,0,PW,26,'F');
     sf('#1d4ed8'); doc.rect(0,0,6,26,'F');
     doc.setFont('helvetica','bold'); st('#ffffff'); doc.setFontSize(15);
@@ -2539,14 +2401,13 @@ async function printPDFReport() {
     doc.setFont('helvetica','normal'); st('#93c5fd'); doc.setFontSize(8.5);
     const subtitulo = activeTags.length
       ? `Filtros aplicados: ${filtrosTxt}`
-      : 'Registro y Análisis de Órdenes de Trabajo de Mantenimiento (OTMs)  ·  Enero–Mayo 2026  ·  Sin filtros — universo completo';
+      : 'Registro y Análisis de Órdenes de Trabajo de Mantenimiento (OTMs)  ·  Sin filtros — universo completo';
     const subLines = doc.splitTextToSize(subtitulo, PW-2*M-60);
     doc.text(subLines[0], M+4, 18);
     st('#cbd5e1'); doc.setFontSize(7);
     doc.text(`Generado: ${now}  ${hora}`, PW-M, 10, {align:'right'});
     doc.text(`Total analizado: ${total} OTMs`, PW-M, 17, {align:'right'});
 
-    // Banda de filtros
     let y=27;
     sf('#eff6ff'); ss('#bfdbfe'); doc.setLineWidth(0.25);
     doc.roundedRect(M, y, PW-2*M, 9, 1.5, 1.5, 'FD');
@@ -2558,7 +2419,6 @@ async function printPDFReport() {
     doc.text(fLines.slice(0,1), M+46, y+5.8);
     y+=11;
 
-    // KPIs — fila de 8 tarjetas
     const KH=17, KW=(PW-2*M)/8;
     kpis.slice(0,8).forEach((k,i)=>{
       const kx=M+i*KW;
@@ -2574,13 +2434,11 @@ async function printPDFReport() {
     });
     y+=19;
 
-    // Título sección
     sf('#0d2b5e'); doc.roundedRect(M, y, PW-2*M, 7, 1.5,1.5,'F');
     doc.setFont('helvetica','bold'); st('#ffffff'); doc.setFontSize(7.5);
     doc.text('RESUMEN EJECUTIVO', M+4, y+5);
     y+=9;
 
-    // 4 bloques de análisis en 2×2
     const bW=(PW-2*M-5)/2, bH=32;
     const bloques=[
       {
@@ -2649,16 +2507,13 @@ async function printPDFReport() {
 
     pie(1);
 
-    // ════════════════════════════════════════════════════════════
-    //  PÁGINA 2 — GRÁFICAS 1 y 2 con análisis
-    // ════════════════════════════════════════════════════════════
+    // ── PÁGINA 2 ──
     doc.addPage();
     cabecera(2);
 
-    const CHART_W = 128;  // ancho fijo para gráficas
+    const CHART_W = 128;
     let y2 = 20;
 
-    // Gráfica 1 — Estado Funcional
     const txt1 = [
       `Se registran ${total} OTMs en el período. El ${pctOp}% de los equipos`,
       `presenta algún grado de operatividad al cierre de la atención.`,
@@ -2675,7 +2530,6 @@ async function printPDFReport() {
     cajaAnalisis('chart-estado','1. Estado Funcional de Equipos Biomédicos', txt1, y2, h1, CHART_W);
     y2 += h1 + 5;
 
-    // Gráfica 2 — Tipo de Mantenimiento
     const txt2 = [
       `El tipo de mantenimiento predominante es "${tipoTop[0]}"`,
       `con ${tipoTop[1]} intervenciones.`,
@@ -2697,9 +2551,7 @@ async function printPDFReport() {
 
     pie(2);
 
-    // ════════════════════════════════════════════════════════════
-    //  PÁGINA 3 — GRÁFICAS 3, 4 y 5 con análisis
-    // ════════════════════════════════════════════════════════════
+    // ── PÁGINA 3 ──
     doc.addPage();
     cabecera(3);
 
@@ -2707,7 +2559,6 @@ async function printPDFReport() {
     const h3each = Math.floor((PH - y3 - 14 - 8) / 3);
     const CW3 = 115;
 
-    // Gráfica 3 — Evolución Mensual
     const txt3 = [
       `Se analizan ${nMeses} mes${nMeses!==1?'es':''} con un promedio de ${promMes} OTMs/mes.`,
       `· Mes pico: ${mesPico[0]} con ${mesPico[1]} OTMs`,
@@ -2718,7 +2569,6 @@ async function printPDFReport() {
     cajaAnalisis('chart-mes','3. Evolución Mensual de OTMs', txt3, y3, h3each, CW3);
     y3 += h3each + 4;
 
-    // Gráfica 4 — Top Establecimientos
     const txt4 = [
       `Cobertura: ${nEstabs} establecimiento${nEstabs!==1?'s':''} de salud atendidos.`,
       `· Mayor demanda: ${(estabTop[0]||'').slice(0,35)}`,
@@ -2729,7 +2579,6 @@ async function printPDFReport() {
     cajaAnalisis('chart-estab','4. Establecimientos con Mayor Actividad', txt4, y3, h3each, CW3);
     y3 += h3each + 4;
 
-    // Gráfica 5 — Ejecutores
     const txt5 = [
       `Participaron ${nEjec} ejecutor${nEjec!==1?'es':''} técnico${nEjec!==1?'s':''}.`,
       `Promedio: ${nEjec?Math.round(total/nEjec):0} OTMs por ejecutor.`,
@@ -2742,7 +2591,6 @@ async function printPDFReport() {
 
     pie(3);
 
-    // ── 5. Guardar ────────────────────────────────────────────────
     doc.save(`Informe_OTMs_${now.replace(/\//g,'-')}.pdf`);
 
   } catch(err) {
@@ -2941,11 +2789,10 @@ clearAll = function() {
    EDITAR / ELIMINAR OTMs — sincronización con Google Sheet
 ════════════════════════════════════════════════════════════ */
 
-let currentOtmId = null;   // ID de la OTM actualmente abierta en el modal detalle
-let editingOtmId = null;   // ID de la OTM en proceso de edición
-let editingInsumos = [];   // [{codigo, descripcion, unidad, cantidad}] — insumos de la OTM en edición
+let currentOtmId = null;
+let editingOtmId = null;
+let editingInsumos = [];
 
-// ── Guardar qué OTM está abierta en el modal detalle ──────────
 const _origShowDetail = showDetail;
 showDetail = function(id) {
   currentOtmId = String(id);
@@ -2955,8 +2802,8 @@ showDetail = function(id) {
 // ════════════════════════════════════════
 //  CATÁLOGO DE INSUMOS Y KARDEX
 // ════════════════════════════════════════
-let CATALOGO_INSUMOS    = []; // [{codigo, servicio, descripcion, cantidad, unidad}]
-let MOVIMIENTOS_INSUMOS = []; // [{fecha, otmId, estab, codigo, descripcion, cantidad, ejecutor}]
+let CATALOGO_INSUMOS    = [];
+let MOVIMIENTOS_INSUMOS = [];
 
 function leerCampo(item, keys, ...pats) {
   for (const p of pats) {
@@ -3083,7 +2930,6 @@ function quitarInsumoEdit(idx) {
   renderListaInsumosEdit();
 }
 
-// Cerrar sugerencias al hacer click afuera del buscador
 document.addEventListener('click', e => {
   if (!e.target.closest('#edit-insumos-wrap')) {
     const cont = document.getElementById('edit-insumo-sugerencias');
@@ -3092,14 +2938,10 @@ document.addEventListener('click', e => {
 });
 
 // ════════════════════════════════════════
-//  MEMBRETE OFICIAL DIRIS LIMA NORTE (logo institucional)
-//  Extraído del formato oficial de memorandos de la Oficina de
-//  Infraestructura y Equipamiento (PLANTILLA.docx)
+//  MEMBRETE OFICIAL DIRIS LIMA NORTE
 // ════════════════════════════════════════
 const LOGO_DIRIS_B64 = "data:image/png;base64,PLACEHOLDER_LOGO_BASE64";
 
-// Dibuja el membrete institucional completo (logo + barras + leyendas)
-// y devuelve la coordenada Y donde continúa el contenido.
 function dibujarMembreteOficial(doc, hex2rgb) {
   const PW = doc.internal.pageSize.getWidth();
   const M  = 14;
@@ -3109,21 +2951,18 @@ function dibujarMembreteOficial(doc, hex2rgb) {
   const imgX = M, imgY = 8, imgW = 75.2, imgH = 12.4;
   try { doc.addImage(LOGO_DIRIS_B64, 'PNG', imgX, imgY, imgW, imgH); } catch(e) {}
 
-  // Caja gris "DIRECCIÓN ADMINISTRATIVA"
   const b1X = imgX + imgW + 1.5, b1W = 27, bH = 12.4;
   sf('#a5a5a5'); doc.rect(b1X, imgY, b1W, bH, 'F');
   doc.setFont('helvetica','bold'); st('#ffffff'); doc.setFontSize(6.3);
   const l1 = doc.splitTextToSize('DIRECCIÓN ADMINISTRATIVA', b1W - 3);
   doc.text(l1, b1X + b1W/2, imgY + bH/2 - (l1.length-1)*1.4, {align:'center'});
 
-  // Caja gris clara "OFICINA DE INFRAESTRUCTURA Y EQUIPAMIENTO"
   const b2X = b1X + b1W + 0.6, b2W = 33;
   sf('#bfbfbf'); doc.rect(b2X, imgY, b2W, bH, 'F');
   doc.setFont('helvetica','bold'); st('#333333'); doc.setFontSize(6);
   const l2 = doc.splitTextToSize('OFICINA DE INFRAESTRUCTURA Y EQUIPAMIENTO', b2W - 3);
   doc.text(l2, b2X + b2W/2, imgY + bH/2 - (l2.length-1)*1.4, {align:'center'});
 
-  // Leyendas centradas del "Decenio" / "Año"
   doc.setFont('helvetica','italic'); st('#64748b'); doc.setFontSize(7);
   doc.text('"Decenio de la Igualdad de Oportunidades para Mujeres y Hombres"', PW/2, imgY + bH + 5, {align:'center'});
   doc.text('"Año de la Esperanza y el Fortalecimiento de la Democracia"', PW/2, imgY + bH + 9, {align:'center'});
@@ -3131,7 +2970,6 @@ function dibujarMembreteOficial(doc, hex2rgb) {
   return imgY + bH + 14;
 }
 
-// Pie institucional (dirección) — igual que PLANTILLA.docx
 function dibujarPieInstitucional(doc, hex2rgb, pag, totalPags) {
   const PH = doc.internal.pageSize.getHeight();
   const PW = doc.internal.pageSize.getWidth();
@@ -3147,7 +2985,7 @@ function dibujarPieInstitucional(doc, hex2rgb, pag, totalPags) {
 }
 
 // ════════════════════════════════════════
-//  MODAL: DATOS DEL INFORME (A/De/Asunto/Firma)
+//  MODAL: DATOS DEL INFORME
 // ════════════════════════════════════════
 function generarReporteConsumo() {
   document.getElementById('modal-informe').classList.add('open');
@@ -3170,8 +3008,7 @@ function confirmarGenerarInforme() {
 }
 
 // ════════════════════════════════════════
-//  REPORTE DE CONSUMO DE INSUMOS (PDF) — formato oficial de memorando,
-//  con detalle de insumos por establecimiento y total general.
+//  REPORTE DE CONSUMO DE INSUMOS (PDF)
 // ════════════════════════════════════════
 async function ejecutarGeneracionInforme(memo) {
   const btn = document.getElementById('btn-reporte-consumo');
@@ -3180,12 +3017,6 @@ async function ejecutarGeneracionInforme(memo) {
   btn.disabled = true;
 
   try {
-    // ── Fuente de datos: las OTMs ya cargadas (ALL), no la pestaña
-    // "Movimientos_Insumos" (kardex), que solo se llena editando OTMs
-    // una por una desde este dashboard y normalmente no existe.
-    // El detalle de insumos de cada OTM viene en r.insumoDesc con el
-    // formato "<codigo> - <descripcion> x <cantidad>; ..." que escribe
-    // el formulario de registro.
     const otmsConInsumoLista = ALL.filter(r => r.usoInsumo === 'SI' && r.insumoDesc);
 
     if (!otmsConInsumoLista.length) {
@@ -3195,7 +3026,6 @@ async function ejecutarGeneracionInforme(memo) {
       return;
     }
 
-    // ── Parsear cada OTM en líneas de insumo {codigo, descripcion, cantidad} ──
     function parsearInsumos(insumoDesc) {
       const partes = insumoDesc.split(';').map(s => s.trim()).filter(Boolean);
       return partes.map(parte => {
@@ -3207,11 +3037,8 @@ async function ejecutarGeneracionInforme(memo) {
       });
     }
 
-    // ── Agregación POR ESTABLECIMIENTO → por insumo ──────────────
-    // estructura: { [establecimiento]: { insumos: { [key]: {codigo,descripcion,total,usos} }, totalUnidades, nOtms } }
     const porEstablecimiento = {};
-    // Agregación GENERAL (todos los establecimientos) → por insumo
-    const totalGeneralInsumo = {}; // key -> {codigo, descripcion, total, usos}
+    const totalGeneralInsumo = {};
     let totalUnidadesGeneral = 0;
 
     otmsConInsumoLista.forEach(r => {
@@ -3243,7 +3070,6 @@ async function ejecutarGeneracionInforme(memo) {
     const nInsumosDistintos = resumenGeneral.length;
     const nEstablecimientos = establecimientos.length;
 
-    // ── PDF — formato de memorando institucional (A4 vertical) ──
     const { jsPDF } = window.jspdf;
     const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: 'a4' });
     const PW = 210, PH = 297, M = 14;
@@ -3255,12 +3081,8 @@ async function ejecutarGeneracionInforme(memo) {
     const ss=h=>{const[r,g,b]=hex2rgb(h);doc.setDrawColor(r,g,b);};
     const st=h=>{const[r,g,b]=hex2rgb(h);doc.setTextColor(r,g,b);};
 
-    let pagCount = 1;
-
-    // ── Página 1: Membrete + memo (A/De/Asunto/Fecha) + Resumen general ──
     let y = dibujarMembreteOficial(doc, hex2rgb);
 
-    // Bloque A/De/Asunto/Fecha (igual estructura que PLANTILLA.docx)
     doc.setFont('helvetica','normal'); st('#1e293b'); doc.setFontSize(10);
     function campoMemo(label, valorLineas, yy) {
       doc.setFont('helvetica','normal'); doc.text(label, M, yy);
@@ -3271,8 +3093,7 @@ async function ejecutarGeneracionInforme(memo) {
     }
     y = campoMemo('A', doc.splitTextToSize(memo.para, PW-2*M-28), y);
     const deLineas = [memo.de]; if (memo.deCargo) deLineas.push(memo.deCargo);
-    y = campoMemo('De', doc.splitTextToSize(deLineas.join('\n'), PW-2*M-28).length ? deLineas : deLineas, y);
-    // (De: nombre en negrita, cargo en normal debajo)
+    y = campoMemo('De', deLineas, y);
     y = campoMemo('Asunto', doc.splitTextToSize(memo.asunto, PW-2*M-28), y);
     doc.setFont('helvetica','normal');
     y = campoMemo('Fecha', [`Independencia, ${fechaMemo}`], y);
@@ -3280,7 +3101,6 @@ async function ejecutarGeneracionInforme(memo) {
     ss('#94a3b8'); doc.setLineWidth(0.3); doc.line(M, y, PW-M, y);
     y += 8;
 
-    // Título del informe
     doc.setFont('helvetica','bold'); st('#0d2b5e'); doc.setFontSize(12);
     doc.text('INFORME DE CONSUMO DE INSUMOS', PW/2, y, {align:'center'});
     y += 5;
@@ -3288,7 +3108,6 @@ async function ejecutarGeneracionInforme(memo) {
     doc.text('Mantenimiento de Equipos Biomédicos — Detalle por establecimiento de salud', PW/2, y, {align:'center'});
     y += 8;
 
-    // Párrafo introductorio
     doc.setFont('helvetica','normal'); st('#1e293b'); doc.setFontSize(9.5);
     const intro = doc.splitTextToSize(
       `Por medio del presente se remite el informe de consumo de insumos registrado en las Órdenes de ` +
@@ -3299,7 +3118,6 @@ async function ejecutarGeneracionInforme(memo) {
     doc.text(intro, M, y);
     y += intro.length*4.2 + 6;
 
-    // KPIs resumidos (texto, estilo formal, sin tarjetas de color)
     sf('#eff6ff'); ss('#bfdbfe'); doc.setLineWidth(0.25);
     doc.roundedRect(M, y, PW-2*M, 16, 1.5, 1.5, 'FD');
     sf('#1d4ed8'); doc.rect(M, y, 2, 16, 'F');
@@ -3314,7 +3132,6 @@ async function ejecutarGeneracionInforme(memo) {
     function nuevaPagina() {
       dibujarPieInstitucionalPlaceholder();
       doc.addPage();
-      pagCount++;
       sf('#0d2b5e'); doc.rect(0,0,PW,10,'F');
       doc.setFont('helvetica','bold'); st('#ffffff'); doc.setFontSize(7.5);
       doc.text('INFORME DE CONSUMO DE INSUMOS — DIRIS LIMA NORTE', M, 6.5);
@@ -3322,25 +3139,25 @@ async function ejecutarGeneracionInforme(memo) {
       doc.text(`${now}`, PW-M, 6.5, {align:'right'});
       return 16;
     }
-    // marcador de pie pendiente por página (se dibuja al cerrar cada página)
     let piePendientePagina = 1;
     function dibujarPieInstitucionalPlaceholder() {
       dibujarPieInstitucional(doc, hex2rgb, piePendientePagina, '__TOTAL__');
       piePendientePagina++;
     }
 
+    // ── Tablas de insumos (interlineado v3.5) ───────────────────
     function encabezadoTabla(yy, ancho) {
-      sf('#0d2b5e'); doc.roundedRect(M, yy, ancho, 6.5, 1, 1, 'F');
+      sf('#0d2b5e'); doc.roundedRect(M, yy, ancho, 7.5, 1, 1, 'F');
       doc.setFont('helvetica','bold'); st('#ffffff'); doc.setFontSize(7);
-      doc.text('INSUMO', M+3, yy+4.3);
-      doc.text('CÓDIGO', M+ancho-58, yy+4.3);
-      doc.text('USOS', M+ancho-34, yy+4.3);
-      doc.text('CANTIDAD', M+ancho-18, yy+4.3);
-      return yy + 8;
+      doc.text('INSUMO', M+3, yy+4.9);
+      doc.text('CÓDIGO', M+ancho-58, yy+4.9);
+      doc.text('USOS', M+ancho-34, yy+4.9);
+      doc.text('CANTIDAD', M+ancho-18, yy+4.9);
+      return yy + 11.5;
     }
     function filaInsumo(ins, yy, ancho, idx) {
       if (yy > PH - 32) { yy = nuevaPagina(); yy = encabezadoTabla(yy, ancho); }
-      if (idx % 2 === 0) { sf('#f8fafc'); doc.rect(M, yy-4, ancho, 5.6, 'F'); }
+      if (idx % 2 === 0) { sf('#f8fafc'); doc.rect(M, yy-5, ancho, 7.6, 'F'); }
       st('#1e293b'); doc.setFont('helvetica','normal'); doc.setFontSize(7.6);
       doc.text((ins.descripcion || '—').slice(0, 58), M+3, yy);
       st('#64748b'); doc.setFontSize(7);
@@ -3348,12 +3165,11 @@ async function ejecutarGeneracionInforme(memo) {
       doc.text(String(ins.usos), M+ancho-32, yy);
       doc.setFont('helvetica','bold'); st('#1d4ed8'); doc.setFontSize(7.6);
       doc.text(String(ins.total), M+ancho-18, yy);
-      return yy + 5.6;
+      return yy + 7.6;
     }
 
     const anchoTabla = PW-2*M;
 
-    // ── Detalle por establecimiento ──────────────────────────────
     doc.setFont('helvetica','bold'); st('#0d2b5e'); doc.setFontSize(10.5);
     if (y > PH - 40) y = nuevaPagina();
     doc.text('1. DETALLE DE CONSUMO POR ESTABLECIMIENTO', M, y);
@@ -3363,13 +3179,9 @@ async function ejecutarGeneracionInforme(memo) {
       const bucket = porEstablecimiento[estab];
       const insumosEstab = Object.values(bucket.insumos).sort((a,b)=>b.total-a.total);
 
-      // Calcular el alto total que ocupará este bloque (encabezado + tabla + subtotal)
-      // para decidir el salto de página ANTES de empezar a dibujarlo, y así nunca
-      // cortar una tabla de establecimiento a la mitad entre dos páginas.
-      const altoBloque = 9 + 8 + insumosEstab.length * 5.6 + 10;
+      const altoBloque = 9 + 11.5 + insumosEstab.length * 7.6 + 12;
       if (y + altoBloque > PH - 24) y = nuevaPagina();
 
-      // Encabezado del establecimiento
       sf('#0d2b5e'); doc.roundedRect(M, y, anchoTabla, 7, 1.2, 1.2, 'F');
       doc.setFont('helvetica','bold'); st('#ffffff'); doc.setFontSize(8);
       doc.text(`${iEstab+1}. ${estab}`, M+3, y+4.8);
@@ -3380,16 +3192,14 @@ async function ejecutarGeneracionInforme(memo) {
       y = encabezadoTabla(y, anchoTabla);
       insumosEstab.forEach((ins, idx) => { y = filaInsumo(ins, y, anchoTabla, idx); });
 
-      // Subtotal del establecimiento
       if (y > PH - 32) y = nuevaPagina();
-      sf('#f1f5f9'); doc.rect(M, y-4, anchoTabla, 6, 'F');
+      sf('#f1f5f9'); doc.rect(M, y-5, anchoTabla, 7, 'F');
       doc.setFont('helvetica','bold'); st('#0d2b5e'); doc.setFontSize(7.6);
       doc.text(`Subtotal ${estab}:`, M+3, y);
       doc.text(`${bucket.totalUnidades} unidades`, M+anchoTabla-18, y);
-      y += 10;
+      y += 12;
     });
 
-    // ── Resumen / total general ───────────────────────────────────
     if (y > PH - 50) y = nuevaPagina();
     doc.setFont('helvetica','bold'); st('#0d2b5e'); doc.setFontSize(10.5);
     doc.text('2. RESUMEN GENERAL — TODOS LOS ESTABLECIMIENTOS', M, y);
@@ -3404,7 +3214,6 @@ async function ejecutarGeneracionInforme(memo) {
     doc.text(`${totalUnidadesGeneral} unidades  ·  ${nInsumosDistintos} insumos  ·  ${nEstablecimientos} establecimientos`, M+anchoTabla-4, y+1.5, {align:'right'});
     y += 16;
 
-    // ── Cierre / firma (igual estructura que PLANTILLA.docx) ──────
     if (y > PH - 60) y = nuevaPagina();
     doc.setFont('helvetica','normal'); st('#1e293b'); doc.setFontSize(9.5);
     doc.text('Atentamente,', M, y);
@@ -3421,14 +3230,11 @@ async function ejecutarGeneracionInforme(memo) {
     if (memo.iniciales) { doc.text(`(${memo.iniciales})`, M, y); y += 4.6; }
     doc.text('cc.:', M, y);
 
-    // Pie de la última página
     dibujarPieInstitucionalPlaceholder();
 
-    // ── Reescribir el total de páginas en todos los pies ──────────
     const totalPaginas = doc.internal.getNumberOfPages();
     for (let p = 1; p <= totalPaginas; p++) {
       doc.setPage(p);
-      // limpiar la franja del número de página y volver a escribir con el total correcto
       sf('#ffffff'); doc.rect(PW-M-30, PH-11, 30, 5, 'F');
       st('#94a3b8'); doc.setFont('helvetica','normal'); doc.setFontSize(6.5);
       doc.text(`Pág. ${p} de ${totalPaginas}`, PW-M, PH-8, {align:'right'});
@@ -3466,7 +3272,6 @@ async function openEdit(id) {
   document.getElementById('edit-serie').value  = r.serie || '';
   document.getElementById('edit-obs').value    = r.obs   || '';
 
-  // Selects
   setSelectVal('edit-tipo',   r.tipo);
   setSelectVal('edit-estado', r.estado);
   setSelectVal('edit-ejec',   r.ejec);
@@ -3476,7 +3281,6 @@ async function openEdit(id) {
   msgEl.textContent = '';
   document.getElementById('btn-save-edit').disabled = false;
 
-  // Insumos: mostrar estado previo mientras se cargan del kardex
   editingInsumos = [];
   document.getElementById('edit-insumos-lista').innerHTML = '';
   document.getElementById('edit-insumos-vacio').textContent = 'Cargando insumos...';
@@ -3500,7 +3304,6 @@ function setSelectVal(selectId, val) {
   for (let i = 0; i < sel.options.length; i++) {
     if (sel.options[i].value === val) { sel.selectedIndex = i; return; }
   }
-  // Si no existe el valor, añadirlo dinámicamente
   if (val) {
     const opt = document.createElement('option');
     opt.value = val; opt.textContent = val;
@@ -3524,9 +3327,7 @@ async function guardarEdicion() {
   msgEl.className = 'edit-msg';
   msgEl.textContent = '';
 
-  // Construir payload
   const fechaRaw = document.getElementById('edit-fecha').value.trim();
-  // Convertir DD/MM/AAAA → YYYY-MM-DD si es necesario
   let fechaISO = fechaRaw;
   if (/^\d{2}\/\d{2}\/\d{4}$/.test(fechaRaw)) {
     const [d,m,y] = fechaRaw.split('/');
@@ -3565,7 +3366,6 @@ async function guardarEdicion() {
       msgEl.className = 'edit-msg ok';
       msgEl.textContent = '✅ Registro actualizado en Google Sheet';
       btn.textContent = '✅ Guardado';
-      // Actualizar en el array local sin esperar el siguiente sync
       const r = ALL.find(x => x.id === editingOtmId);
       if (r) {
         r.fecha  = fechaISO;
@@ -3586,12 +3386,10 @@ async function guardarEdicion() {
         r.usoInsumo  = payload.insumos.length ? 'SI' : 'NO';
         r.insumoDesc = payload.insumos.map(i => `${i.descripcion} (x${i.cantidad})`).join('; ');
       }
-      // Refrescar catálogo y kardex en segundo plano (por si se abre otro modal luego)
       cargarCatalogoInsumos();
       cargarMovimientosInsumos();
       setTimeout(() => {
         closeEdit();
-        // Refrescar el modal detalle si sigue abierto
         if (document.getElementById('modal').classList.contains('open')) {
           showDetail(editingOtmId);
         }
@@ -3657,10 +3455,8 @@ async function ejecutarEliminar() {
     if (data.ok || data.success || data.status === 'ok') {
       msgEl.className = 'edit-msg ok';
       msgEl.textContent = '✅ Registro eliminado del Google Sheet';
-      // Eliminar del array local
       const idx = ALL.findIndex(x => x.id === currentOtmId);
       if (idx !== -1) ALL.splice(idx, 1);
-      // El backend revierte el stock consumido por esta OTM: refrescar catálogo/kardex
       cargarCatalogoInsumos();
       cargarMovimientosInsumos();
       setTimeout(() => {
@@ -3682,7 +3478,6 @@ async function ejecutarEliminar() {
   }
 }
 
-// Cerrar modales con Escape
 document.addEventListener('keydown', e => {
   if (e.key === 'Escape') { closeEdit(); closeConfirm(); closeInformeModal(); }
 });
