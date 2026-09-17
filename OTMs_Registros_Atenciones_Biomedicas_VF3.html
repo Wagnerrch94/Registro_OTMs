@@ -7,7 +7,7 @@
 <!--
 ══════════════════════════════════════════════════════════════
   BUSCADOR DE OTMs — CÓDIGO FUENTE
-  Versión: 3.5 | Setiembre 2026
+  Versión: 3.6 | Setiembre 2026
   Cambio v3.5: interlineado de las tablas de insumos del
   informe de consumo (filas ya no van pegadas).
 ══════════════════════════════════════════════════════════════
@@ -3026,25 +3026,57 @@ async function ejecutarGeneracionInforme(memo) {
       return;
     }
 
+    // ── Unidad de medida: se toma del catálogo de insumos (Unidad de Despacho)
+    if (!CATALOGO_INSUMOS.length) await cargarCatalogoInsumos();
+    const UNIDAD_POR_CODIGO = {};
+    CATALOGO_INSUMOS.forEach(i => { if (i.codigo) UNIDAD_POR_CODIGO[String(i.codigo).trim()] = i.unidad || ''; });
+
+    function normUnidad(u) {
+      const s = String(u || '').trim().toUpperCase();
+      if (!s) return 'UND';
+      if (/^(METRO|METROS|MTS?|M)$/.test(s))            return 'M';
+      if (/^(UNIDAD|UNIDADES|UND|UNI|U)$/.test(s))      return 'UND';
+      if (/^(LITRO|LITROS|LT|L)$/.test(s))              return 'L';
+      if (/^(KILO|KILOS|KILOGRAMO|KG)$/.test(s))        return 'KG';
+      if (/^(GALON|GALÓN|GAL)$/.test(s))                return 'GAL';
+      if (/^(PAR|PARES)$/.test(s))                      return 'PAR';
+      if (/^(JUEGO|JGO|SET|KIT)$/.test(s))              return 'JGO';
+      if (/^(CAJA|CJA)$/.test(s))                       return 'CAJA';
+      if (/^(ROLLO|RLL)$/.test(s))                      return 'ROLLO';
+      return s.slice(0, 8);
+    }
+
+    // Convierte {UND:27, M:15} → "27 UND · 15 M"
+    function fmtTotales(mapa) {
+      const partes = Object.entries(mapa)
+        .filter(([,v]) => v > 0)
+        .sort((a,b) => b[1]-a[1])
+        .map(([u,v]) => `${Math.round(v*100)/100} ${u}`);
+      return partes.length ? partes.join('  ·  ') : '0';
+    }
+    function sumarEn(mapa, unidad, cant) { mapa[unidad] = (mapa[unidad] || 0) + cant; }
+
     function parsearInsumos(insumoDesc) {
       const partes = insumoDesc.split(';').map(s => s.trim()).filter(Boolean);
       return partes.map(parte => {
         const m = parte.match(/^(.*?)\s*-\s*(.*?)\s*x\s*([\d.,]+)\s*$/i);
         if (m) {
-          return { codigo: m[1].trim(), descripcion: m[2].trim(), cantidad: Number(m[3].replace(',', '.')) || 0 };
+          const codigo = m[1].trim();
+          return { codigo, descripcion: m[2].trim(), cantidad: Number(m[3].replace(',', '.')) || 0, unidad: normUnidad(UNIDAD_POR_CODIGO[codigo]) };
         }
-        return { codigo: '', descripcion: parte, cantidad: 0 };
+        return { codigo: '', descripcion: parte, cantidad: 0, unidad: 'UND' };
       });
     }
 
     const porEstablecimiento = {};
     const totalGeneralInsumo = {};
+    const totalesGeneralPorUnidad = {};
     let totalUnidadesGeneral = 0;
 
     otmsConInsumoLista.forEach(r => {
       const estabKey = r.estab || 'Sin establecimiento registrado';
       if (!porEstablecimiento[estabKey]) {
-        porEstablecimiento[estabKey] = { insumos: {}, totalUnidades: 0, otms: new Set() };
+        porEstablecimiento[estabKey] = { insumos: {}, totalUnidades: 0, porUnidad: {}, otms: new Set() };
       }
       const bucket = porEstablecimiento[estabKey];
       bucket.otms.add(r.id);
@@ -3052,15 +3084,17 @@ async function ejecutarGeneracionInforme(memo) {
       parsearInsumos(r.insumoDesc).forEach(ins => {
         const key = ins.codigo || ins.descripcion;
 
-        if (!bucket.insumos[key]) bucket.insumos[key] = { codigo: ins.codigo, descripcion: ins.descripcion, total: 0, usos: 0 };
+        if (!bucket.insumos[key]) bucket.insumos[key] = { codigo: ins.codigo, descripcion: ins.descripcion, unidad: ins.unidad, total: 0, usos: 0 };
         bucket.insumos[key].total += ins.cantidad;
         bucket.insumos[key].usos  += 1;
         bucket.totalUnidades      += ins.cantidad;
+        sumarEn(bucket.porUnidad, ins.unidad, ins.cantidad);
 
-        if (!totalGeneralInsumo[key]) totalGeneralInsumo[key] = { codigo: ins.codigo, descripcion: ins.descripcion, total: 0, usos: 0 };
+        if (!totalGeneralInsumo[key]) totalGeneralInsumo[key] = { codigo: ins.codigo, descripcion: ins.descripcion, unidad: ins.unidad, total: 0, usos: 0 };
         totalGeneralInsumo[key].total += ins.cantidad;
         totalGeneralInsumo[key].usos  += 1;
         totalUnidadesGeneral          += ins.cantidad;
+        sumarEn(totalesGeneralPorUnidad, ins.unidad, ins.cantidad);
       });
     });
 
@@ -3123,7 +3157,7 @@ async function ejecutarGeneracionInforme(memo) {
     sf('#1d4ed8'); doc.rect(M, y, 2, 16, 'F');
     doc.setFont('helvetica','bold'); st('#0d2b5e'); doc.setFontSize(8);
     const kpiLine1 = `OTMs con insumo: ${otmsConInsumo}      Establecimientos: ${nEstablecimientos}      Insumos distintos: ${nInsumosDistintos}`;
-    const kpiLine2 = `TOTAL GENERAL DE UNIDADES CONSUMIDAS: ${totalUnidadesGeneral}`;
+    const kpiLine2 = `TOTAL GENERAL CONSUMIDO: ${fmtTotales(totalesGeneralPorUnidad)}`;
     doc.text(kpiLine1, M+5, y+6.5);
     doc.setFontSize(9.5);
     doc.text(kpiLine2, M+5, y+12.5);
@@ -3150,21 +3184,23 @@ async function ejecutarGeneracionInforme(memo) {
       sf('#0d2b5e'); doc.roundedRect(M, yy, ancho, 7.5, 1, 1, 'F');
       doc.setFont('helvetica','bold'); st('#ffffff'); doc.setFontSize(7);
       doc.text('INSUMO', M+3, yy+4.9);
-      doc.text('CÓDIGO', M+ancho-58, yy+4.9);
-      doc.text('USOS', M+ancho-34, yy+4.9);
-      doc.text('CANTIDAD', M+ancho-18, yy+4.9);
+      doc.text('CÓDIGO', M+ancho-72, yy+4.9);
+      doc.text('UNIDAD', M+ancho-46, yy+4.9);
+      doc.text('USOS', M+ancho-28, yy+4.9);
+      doc.text('CANTIDAD', M+ancho-16, yy+4.9);
       return yy + 11.5;
     }
     function filaInsumo(ins, yy, ancho, idx) {
       if (yy > PH - 32) { yy = nuevaPagina(); yy = encabezadoTabla(yy, ancho); }
       if (idx % 2 === 0) { sf('#f8fafc'); doc.rect(M, yy-5, ancho, 7.6, 'F'); }
       st('#1e293b'); doc.setFont('helvetica','normal'); doc.setFontSize(7.6);
-      doc.text((ins.descripcion || '—').slice(0, 58), M+3, yy);
+      doc.text((ins.descripcion || '—').slice(0, 50), M+3, yy);
       st('#64748b'); doc.setFontSize(7);
-      doc.text((ins.codigo || '—').slice(0,14), M+ancho-58, yy);
-      doc.text(String(ins.usos), M+ancho-32, yy);
+      doc.text((ins.codigo || '—').slice(0,14), M+ancho-72, yy);
+      doc.text(ins.unidad || 'UND', M+ancho-46, yy);
+      doc.text(String(ins.usos), M+ancho-26, yy);
       doc.setFont('helvetica','bold'); st('#1d4ed8'); doc.setFontSize(7.6);
-      doc.text(String(ins.total), M+ancho-18, yy);
+      doc.text(`${ins.total} ${ins.unidad || 'UND'}`, M+ancho-16, yy);
       return yy + 7.6;
     }
 
@@ -3186,7 +3222,7 @@ async function ejecutarGeneracionInforme(memo) {
       doc.setFont('helvetica','bold'); st('#ffffff'); doc.setFontSize(8);
       doc.text(`${iEstab+1}. ${estab}`, M+3, y+4.8);
       doc.setFontSize(7);
-      doc.text(`${bucket.otms.size} OTM(s)  ·  ${bucket.totalUnidades} unid.`, M+anchoTabla-3, y+4.8, {align:'right'});
+      doc.text(`${bucket.otms.size} OTM(s)  ·  ${fmtTotales(bucket.porUnidad)}`, M+anchoTabla-3, y+4.8, {align:'right'});
       y += 9;
 
       y = encabezadoTabla(y, anchoTabla);
@@ -3196,7 +3232,7 @@ async function ejecutarGeneracionInforme(memo) {
       sf('#f1f5f9'); doc.rect(M, y-5, anchoTabla, 7, 'F');
       doc.setFont('helvetica','bold'); st('#0d2b5e'); doc.setFontSize(7.6);
       doc.text(`Subtotal ${estab}:`, M+3, y);
-      doc.text(`${bucket.totalUnidades} unidades`, M+anchoTabla-18, y);
+      doc.text(fmtTotales(bucket.porUnidad), M+anchoTabla-3, y, {align:'right'});
       y += 12;
     });
 
@@ -3211,7 +3247,7 @@ async function ejecutarGeneracionInforme(memo) {
     sf('#0d2b5e'); doc.roundedRect(M, y-4.5, anchoTabla, 9, 1.5, 1.5, 'F');
     doc.setFont('helvetica','bold'); st('#ffffff'); doc.setFontSize(9.5);
     doc.text('TOTAL GENERAL', M+4, y+1.5);
-    doc.text(`${totalUnidadesGeneral} unidades  ·  ${nInsumosDistintos} insumos  ·  ${nEstablecimientos} establecimientos`, M+anchoTabla-4, y+1.5, {align:'right'});
+    doc.text(`${fmtTotales(totalesGeneralPorUnidad)}  ·  ${nInsumosDistintos} insumos  ·  ${nEstablecimientos} establecimientos`, M+anchoTabla-4, y+1.5, {align:'right'});
     y += 16;
 
     if (y > PH - 60) y = nuevaPagina();
@@ -3241,7 +3277,7 @@ async function ejecutarGeneracionInforme(memo) {
     }
 
     doc.save(`Informe_Consumo_Insumos_${now.replace(/\//g,'-')}.pdf`);
-    mostrarToast(`📄 Informe generado: ${totalUnidadesGeneral} unidades en ${nEstablecimientos} establecimientos`);
+    mostrarToast(`📄 Informe generado: ${fmtTotales(totalesGeneralPorUnidad)} en ${nEstablecimientos} establecimientos`);
 
   } catch(err) {
     console.error('Error generando reporte de consumo:', err);
