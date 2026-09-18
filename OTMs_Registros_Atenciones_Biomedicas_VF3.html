@@ -7,7 +7,7 @@
 <!--
 ══════════════════════════════════════════════════════════════
   BUSCADOR DE OTMs — CÓDIGO FUENTE
-  Versión: 3.7 | Setiembre 2026
+  Versión: 3.9 | Setiembre 2026
   Cambio v3.5: interlineado de las tablas de insumos del
   informe de consumo (filas ya no van pegadas).
 ══════════════════════════════════════════════════════════════
@@ -599,7 +599,7 @@ function verificarAcceso() {
   </button>
 </div>
 
-<button onclick="window.open('https://docs.google.com/spreadsheets/d/1fQ41kQaaDWZ4mtJ2lx7DkJdWkppbj7mewh5qB-Vf--o/edit?gid=1322981168#gid=1322981168', '_blank')" title="Abrir base de actualización de equipos biomédicos"
+<button onclick="window.open('https://docs.google.com/spreadsheets/d/1fQ41kQaaDWZ4mtJ2lx7DkJdWkppbj7mewh5qB-Vf--o/edit?usp=sharing', '_blank')" title="Abrir base de actualización de equipos biomédicos"
         style="background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.25);color:#fff;
                border-radius:8px;padding:6px 13px;font-size:12px;font-weight:600;cursor:pointer;
                display:flex;align-items:center;gap:6px;margin-right:10px;font-family:inherit;
@@ -617,8 +617,7 @@ function verificarAcceso() {
   </button>
 
   <div class="hdr-pill">
-    Total: <span id="hdr-total">0</span> &nbsp;|&nbsp;
-    <span style="font-size:11px;opacity:.75">próx. en <span id="countdown">0</span></span>
+    Total: <span id="hdr-total">0</span>
   </div>
 
 </header>
@@ -1060,7 +1059,6 @@ function limpiar(v){return(v!==null&&v!==undefined&&String(v).trim()!==''&&Strin
 // ══════════════════════════════════════════════════════════════
 const INTERVALO_SEG = 300; // 5 minutos
 let timerInterval = null;
-let countdown = INTERVALO_SEG;
 let cargando = false;
 let primeraVez = true;
 let idsConocidos = new Set(); // IDs de OTMs ya vistos — para detectar registros nuevos en el auto-refresh
@@ -1086,20 +1084,10 @@ function setSyncStatus(estado) {
     }
 }
 
-function fmtCountdown(seg){
-    const m=Math.floor(seg/60), s=seg%60;
-    return m>0 ? `${m}:${String(s).padStart(2,'0')}` : `${s}s`;
-}
-function iniciarCountdown(){
+function iniciarAutoRefresh(){
     clearInterval(timerInterval);
-    countdown=INTERVALO_SEG;
-    const el=document.getElementById('countdown');
-    if(el)el.textContent=fmtCountdown(countdown);
-    timerInterval=setInterval(()=>{
-        countdown--;
-        if(el)el.textContent=fmtCountdown(countdown);
-        if(countdown<=0){clearInterval(timerInterval);cargarDatosDesdeDrive();}
-    },1000);
+    // Chequeo silencioso en segundo plano: solo re-renderiza si detecta un registro nuevo (ver cargarDatosDesdeDrive)
+    timerInterval=setInterval(()=>{ cargarDatosDesdeDrive(); }, INTERVALO_SEG*1000);
 }
 
 async function refreshManual(){clearInterval(timerInterval);await cargarDatosDesdeDrive(true);}
@@ -1275,7 +1263,7 @@ async function cargarDatosDesdeDrive(manual = false) {
         }
     } finally {
         cargando=false;
-        iniciarCountdown();
+        iniciarAutoRefresh();
     }
 }
 
