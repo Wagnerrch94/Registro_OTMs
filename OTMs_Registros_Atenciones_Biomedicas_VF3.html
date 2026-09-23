@@ -7,7 +7,7 @@
 <!--
 ══════════════════════════════════════════════════════════════
   BUSCADOR DE OTMs — CÓDIGO FUENTE
-  Versión: 3.9 | Setiembre 2026
+  Versión: 3.11 | Setiembre 2026 — SHEET_URL actualizado
   Cambio v3.5: interlineado de las tablas de insumos del
   informe de consumo (filas ya no van pegadas).
 ══════════════════════════════════════════════════════════════
@@ -1001,7 +1001,7 @@ function verificarAcceso() {
 /* ════════════════════════════════════════════════════════════
    DATOS
 ════════════════════════════════════════════════════════════ */
-const SHEET_URL   = "https://script.google.com/macros/s/AKfycbx4k_VYMUpMgoRwhuqLTmiYDlOVCMRyBGsNNQNKechXTnl6e31g3fnX96IsswdtI7o8YQ/exec";
+const SHEET_URL   = "https://script.google.com/macros/s/AKfycbxSEcpZyMPZExaAyuN6tPiiZgLlxNzeIzVoGxL3XaQMdLpDD_1dLy1T5_-L4OpIpKlwoQ/exec";
 const SHEET_XLSX_URL = "https://docs.google.com/spreadsheets/d/1wjz8_z0XKa_B0ujPQ4CKTKnNoUxMiXdRzjBo1GIhJcc/edit?gid=949223292#gid=949223292";
 const PDF_FOLDER_ID = "1eJUBvy7CKa8S1lHE25AlGHR9U4sdxK6U";  // carpeta Drive con los PDFs
 let ALL = [];
@@ -1062,6 +1062,8 @@ let timerInterval = null;
 let cargando = false;
 let primeraVez = true;
 let idsConocidos = new Set(); // IDs de OTMs ya vistos — para detectar registros nuevos en el auto-refresh
+let fallosConsecutivos = 0;   // fallos seguidos del auto-refresh en segundo plano
+const MAX_FALLOS_SILENCIOSOS = 3; // antes de mostrar "Error de conexión" en pantalla
 
 function setSyncStatus(estado) {
     const dot=document.getElementById('sync-dot');
@@ -1250,16 +1252,39 @@ async function cargarDatosDesdeDrive(manual = false) {
         }
         if(huboNuevos) mostrarToast(`✅ Nuevos datos: ${ALL.length} registros`);
         setSyncStatus('ok');
+        fallosConsecutivos = 0;
         primeraVez=false;
         console.log(`✅ ${ALL.length} registros`);
     } catch(e) {
         console.error('Error:',e);
-        setSyncStatus('error');
         if(primeraVez){
+            setSyncStatus('error');
+            const es404 = /404/.test(e.message);
             document.getElementById('tbody').innerHTML=
                 `<tr><td colspan="12" style="text-align:center;padding:40px;color:#dc2626">
                 ⚠️ Error al conectar con Google Drive<br>
-                <small style="color:#94a3b8">${e.message}</small></td></tr>`;
+                <small style="color:#94a3b8">${e.message}</small>
+                ${es404 ? `<br><small style="color:#94a3b8;display:block;margin-top:4px;max-width:420px;margin-left:auto;margin-right:auto;">
+                  El enlace del Apps Script no responde. Puede que se haya vuelto a implementar
+                  con una URL nueva. Verifique la implementación web del script.</small>` : ''}
+                <br><button onclick="refreshManual()" style="margin-top:14px;padding:9px 22px;background:#1d4ed8;
+                  color:#fff;border:none;border-radius:8px;font-size:13px;font-weight:700;cursor:pointer;
+                  font-family:inherit;">🔄 Reintentar</button>
+                </td></tr>`;
+        } else if (manual) {
+            // El usuario pidió actualizar a propósito: avisar de inmediato.
+            setSyncStatus('error');
+            mostrarToast('⚠️ No se pudo actualizar. Intente de nuevo.');
+        } else {
+            // Falla del chequeo automático en segundo plano: ya hay datos cargados,
+            // así que no se alarma al usuario por un fallo puntual (ej. 404 pasajero).
+            fallosConsecutivos++;
+            console.warn(`Auto-refresh falló (${fallosConsecutivos}/${MAX_FALLOS_SILENCIOSOS}):`, e.message);
+            if (fallosConsecutivos >= MAX_FALLOS_SILENCIOSOS) {
+                setSyncStatus('error');
+            }
+            // Reintento rápido antes del próximo ciclo normal de 5 min
+            setTimeout(() => { if(!cargando) cargarDatosDesdeDrive(); }, 20000);
         }
     } finally {
         cargando=false;
