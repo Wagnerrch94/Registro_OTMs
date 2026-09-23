@@ -7,7 +7,7 @@
 <!--
 ══════════════════════════════════════════════════════════════
   BUSCADOR DE OTMs — CÓDIGO FUENTE
-  Versión: 3.11 | Setiembre 2026 — SHEET_URL actualizado
+  Versión: 3.12 | Setiembre 2026 — Informe de consumo muestra N° de OTM por insumo
   Cambio v3.5: interlineado de las tablas de insumos del
   informe de consumo (filas ya no van pegadas).
 ══════════════════════════════════════════════════════════════
@@ -3122,22 +3122,31 @@ async function ejecutarGeneracionInforme(memo) {
       parsearInsumos(r.insumoDesc).forEach(ins => {
         const key = ins.codigo || ins.descripcion;
 
-        if (!bucket.insumos[key]) bucket.insumos[key] = { codigo: ins.codigo, descripcion: ins.descripcion, unidad: ins.unidad, total: 0, usos: 0 };
+        if (!bucket.insumos[key]) bucket.insumos[key] = { codigo: ins.codigo, descripcion: ins.descripcion, unidad: ins.unidad, total: 0, otms: new Set() };
         bucket.insumos[key].total += ins.cantidad;
-        bucket.insumos[key].usos  += 1;
+        bucket.insumos[key].otms.add(r.id);
         bucket.totalUnidades      += ins.cantidad;
         sumarEn(bucket.porUnidad, ins.unidad, ins.cantidad);
 
-        if (!totalGeneralInsumo[key]) totalGeneralInsumo[key] = { codigo: ins.codigo, descripcion: ins.descripcion, unidad: ins.unidad, total: 0, usos: 0 };
+        if (!totalGeneralInsumo[key]) totalGeneralInsumo[key] = { codigo: ins.codigo, descripcion: ins.descripcion, unidad: ins.unidad, total: 0, otms: new Set() };
         totalGeneralInsumo[key].total += ins.cantidad;
-        totalGeneralInsumo[key].usos  += 1;
+        totalGeneralInsumo[key].otms.add(r.id);
         totalUnidadesGeneral          += ins.cantidad;
         sumarEn(totalesGeneralPorUnidad, ins.unidad, ins.cantidad);
       });
     });
 
+    // Convierte un Set de N° OTM en un texto legible, recortando si son muchos
+    function formatOtmList(otmsSet) {
+      const arr = [...otmsSet].sort();
+      const MAX = 10;
+      if (arr.length <= MAX) return arr.join(', ');
+      return arr.slice(0, MAX).join(', ') + ` +${arr.length - MAX} más`;
+    }
+    function conListaOtm(ins) { return { ...ins, otmList: formatOtmList(ins.otms) }; }
+
     const establecimientos = Object.keys(porEstablecimiento).sort((a,b) => porEstablecimiento[b].totalUnidades - porEstablecimiento[a].totalUnidades);
-    const resumenGeneral = Object.values(totalGeneralInsumo).sort((a,b) => b.total - a.total);
+    const resumenGeneral = Object.values(totalGeneralInsumo).map(conListaOtm).sort((a,b) => b.total - a.total);
     const otmsConInsumo  = otmsConInsumoLista.length;
     const nInsumosDistintos = resumenGeneral.length;
     const nEstablecimientos = establecimientos.length;
@@ -3217,29 +3226,31 @@ async function ejecutarGeneracionInforme(memo) {
       piePendientePagina++;
     }
 
-    // ── Tablas de insumos (interlineado v3.5) ───────────────────
+    // ── Tablas de insumos (v3.12: cada fila muestra los N° de OTM) ───
+    const ROW_H_INSUMO = 9.4;
     function encabezadoTabla(yy, ancho) {
       sf('#0d2b5e'); doc.roundedRect(M, yy, ancho, 7.5, 1, 1, 'F');
       doc.setFont('helvetica','bold'); st('#ffffff'); doc.setFontSize(7);
       doc.text('INSUMO', M+3, yy+4.9);
-      doc.text('CÓDIGO', M+ancho-72, yy+4.9);
-      doc.text('UNIDAD', M+ancho-46, yy+4.9);
-      doc.text('USOS', M+ancho-28, yy+4.9);
+      doc.text('CÓDIGO', M+ancho-58, yy+4.9);
+      doc.text('UNIDAD', M+ancho-32, yy+4.9);
       doc.text('CANTIDAD', M+ancho-16, yy+4.9);
       return yy + 11.5;
     }
     function filaInsumo(ins, yy, ancho, idx) {
-      if (yy > PH - 32) { yy = nuevaPagina(); yy = encabezadoTabla(yy, ancho); }
-      if (idx % 2 === 0) { sf('#f8fafc'); doc.rect(M, yy-5, ancho, 7.6, 'F'); }
+      if (yy + ROW_H_INSUMO - 2 > PH - 32) { yy = nuevaPagina(); yy = encabezadoTabla(yy, ancho); }
+      if (idx % 2 === 0) { sf('#f8fafc'); doc.rect(M, yy-5, ancho, ROW_H_INSUMO, 'F'); }
       st('#1e293b'); doc.setFont('helvetica','normal'); doc.setFontSize(7.6);
       doc.text((ins.descripcion || '—').slice(0, 50), M+3, yy);
       st('#64748b'); doc.setFontSize(7);
-      doc.text((ins.codigo || '—').slice(0,14), M+ancho-72, yy);
-      doc.text(ins.unidad || 'UND', M+ancho-46, yy);
-      doc.text(String(ins.usos), M+ancho-26, yy);
+      doc.text((ins.codigo || '—').slice(0,14), M+ancho-58, yy);
+      doc.text(ins.unidad || 'UND', M+ancho-32, yy);
       doc.setFont('helvetica','bold'); st('#1d4ed8'); doc.setFontSize(7.6);
       doc.text(`${ins.total} ${ins.unidad || 'UND'}`, M+ancho-16, yy);
-      return yy + 7.6;
+      // Segunda línea: N° de OTM que aportaron a este insumo
+      st('#94a3b8'); doc.setFont('helvetica','normal'); doc.setFontSize(6);
+      doc.text(`OTM: ${ins.otmList || '—'}`, M+3, yy+3.6);
+      return yy + ROW_H_INSUMO;
     }
 
     const anchoTabla = PW-2*M;
@@ -3251,9 +3262,9 @@ async function ejecutarGeneracionInforme(memo) {
 
     establecimientos.forEach((estab, iEstab) => {
       const bucket = porEstablecimiento[estab];
-      const insumosEstab = Object.values(bucket.insumos).sort((a,b)=>b.total-a.total);
+      const insumosEstab = Object.values(bucket.insumos).map(conListaOtm).sort((a,b)=>b.total-a.total);
 
-      const altoBloque = 9 + 11.5 + insumosEstab.length * 7.6 + 12;
+      const altoBloque = 9 + 11.5 + insumosEstab.length * ROW_H_INSUMO + 12;
       if (y + altoBloque > PH - 24) y = nuevaPagina();
 
       sf('#0d2b5e'); doc.roundedRect(M, y, anchoTabla, 7, 1.2, 1.2, 'F');
