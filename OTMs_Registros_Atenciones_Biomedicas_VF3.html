@@ -7,7 +7,7 @@
 <!--
 ══════════════════════════════════════════════════════════════
   BUSCADOR DE OTMs — CÓDIGO FUENTE
-  Versión: 3.14 | Setiembre 2026 — Botón para copiar cada gráfica al portapapeles
+  Versión: 3.16 | Setiembre 2026 — La copia de la gráfica también muestra los filtros activos (mes, establecimiento, etc.)
   Cambio v3.5: interlineado de las tablas de insumos del
   informe de consumo (filas ya no van pegadas).
 ══════════════════════════════════════════════════════════════
@@ -874,7 +874,7 @@ function verificarAcceso() {
           <div style="background:#f8fafc;border-radius:10px;padding:16px">
             <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
               <div style="font-size:12px;font-weight:700;color:#0d2b5e;text-transform:uppercase;letter-spacing:.04em">OTMs por Ejecutor</div>
-              <button onclick="copiarGrafica('chart-ejec')" title="Copiar gráfica" style="background:#fff;border:1px solid #e2e8f0;border-radius:6px;width:26px;height:26px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:13px;color:#64748b;flex-shrink:0;transition:background .15s,color .15s" onmouseover="this.style.background='#eff6ff';this.style.color='#1d4ed8'" onmouseout="this.style.background='#fff';this.style.color='#64748b'">📋</button>
+              <button onclick="copiarGrafica('chart-ejec', 'OTMs por Ejecutor')" title="Copiar gráfica" style="background:#fff;border:1px solid #e2e8f0;border-radius:6px;width:26px;height:26px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:13px;color:#64748b;flex-shrink:0;transition:background .15s,color .15s" onmouseover="this.style.background='#eff6ff';this.style.color='#1d4ed8'" onmouseout="this.style.background='#fff';this.style.color='#64748b'">📋</button>
             </div>
             <div style="position:relative;height:220px">
               <canvas id="chart-ejec"></canvas>
@@ -884,7 +884,7 @@ function verificarAcceso() {
           <div style="background:#f8fafc;border-radius:10px;padding:16px">
             <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
               <div style="font-size:12px;font-weight:700;color:#0d2b5e;text-transform:uppercase;letter-spacing:.04em">Tipo de Mantenimiento</div>
-              <button onclick="copiarGrafica('chart-tipo')" title="Copiar gráfica" style="background:#fff;border:1px solid #e2e8f0;border-radius:6px;width:26px;height:26px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:13px;color:#64748b;flex-shrink:0;transition:background .15s,color .15s" onmouseover="this.style.background='#eff6ff';this.style.color='#1d4ed8'" onmouseout="this.style.background='#fff';this.style.color='#64748b'">📋</button>
+              <button onclick="copiarGrafica('chart-tipo', 'Tipo de Mantenimiento')" title="Copiar gráfica" style="background:#fff;border:1px solid #e2e8f0;border-radius:6px;width:26px;height:26px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:13px;color:#64748b;flex-shrink:0;transition:background .15s,color .15s" onmouseover="this.style.background='#eff6ff';this.style.color='#1d4ed8'" onmouseout="this.style.background='#fff';this.style.color='#64748b'">📋</button>
             </div>
             <div style="position:relative;height:220px">
               <canvas id="chart-tipo"></canvas>
@@ -894,7 +894,7 @@ function verificarAcceso() {
           <div style="background:#f8fafc;border-radius:10px;padding:16px">
             <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
               <div style="font-size:12px;font-weight:700;color:#0d2b5e;text-transform:uppercase;letter-spacing:.04em">Top Establecimientos</div>
-              <button onclick="copiarGrafica('chart-estab')" title="Copiar gráfica" style="background:#fff;border:1px solid #e2e8f0;border-radius:6px;width:26px;height:26px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:13px;color:#64748b;flex-shrink:0;transition:background .15s,color .15s" onmouseover="this.style.background='#eff6ff';this.style.color='#1d4ed8'" onmouseout="this.style.background='#fff';this.style.color='#64748b'">📋</button>
+              <button onclick="copiarGrafica('chart-estab', 'Top Establecimientos')" title="Copiar gráfica" style="background:#fff;border:1px solid #e2e8f0;border-radius:6px;width:26px;height:26px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:13px;color:#64748b;flex-shrink:0;transition:background .15s,color .15s" onmouseover="this.style.background='#eff6ff';this.style.color='#1d4ed8'" onmouseout="this.style.background='#fff';this.style.color='#64748b'">📋</button>
             </div>
             <div style="position:relative;height:220px">
               <canvas id="chart-estab"></canvas>
@@ -904,7 +904,7 @@ function verificarAcceso() {
           <div style="background:#f8fafc;border-radius:10px;padding:16px">
             <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
               <div style="font-size:12px;font-weight:700;color:#0d2b5e;text-transform:uppercase;letter-spacing:.04em">OTMs por Servicio</div>
-              <button onclick="copiarGrafica('chart-servicio')" title="Copiar gráfica" style="background:#fff;border:1px solid #e2e8f0;border-radius:6px;width:26px;height:26px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:13px;color:#64748b;flex-shrink:0;transition:background .15s,color .15s" onmouseover="this.style.background='#eff6ff';this.style.color='#1d4ed8'" onmouseout="this.style.background='#fff';this.style.color='#64748b'">📋</button>
+              <button onclick="copiarGrafica('chart-servicio', 'OTMs por Servicio')" title="Copiar gráfica" style="background:#fff;border:1px solid #e2e8f0;border-radius:6px;width:26px;height:26px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:13px;color:#64748b;flex-shrink:0;transition:background .15s,color .15s" onmouseover="this.style.background='#eff6ff';this.style.color='#1d4ed8'" onmouseout="this.style.background='#fff';this.style.color='#64748b'">📋</button>
             </div>
             <div style="position:relative;height:220px">
               <canvas id="chart-servicio"></canvas>
@@ -914,7 +914,7 @@ function verificarAcceso() {
           <div style="background:#f8fafc;border-radius:10px;padding:16px">
             <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
               <div style="font-size:12px;font-weight:700;color:#0d2b5e;text-transform:uppercase;letter-spacing:.04em">OTMs por Mes</div>
-              <button onclick="copiarGrafica('chart-mes')" title="Copiar gráfica" style="background:#fff;border:1px solid #e2e8f0;border-radius:6px;width:26px;height:26px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:13px;color:#64748b;flex-shrink:0;transition:background .15s,color .15s" onmouseover="this.style.background='#eff6ff';this.style.color='#1d4ed8'" onmouseout="this.style.background='#fff';this.style.color='#64748b'">📋</button>
+              <button onclick="copiarGrafica('chart-mes', 'OTMs por Mes')" title="Copiar gráfica" style="background:#fff;border:1px solid #e2e8f0;border-radius:6px;width:26px;height:26px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:13px;color:#64748b;flex-shrink:0;transition:background .15s,color .15s" onmouseover="this.style.background='#eff6ff';this.style.color='#1d4ed8'" onmouseout="this.style.background='#fff';this.style.color='#64748b'">📋</button>
             </div>
             <div style="position:relative;height:220px">
               <canvas id="chart-mes"></canvas>
@@ -924,7 +924,7 @@ function verificarAcceso() {
           <div style="background:#f8fafc;border-radius:10px;padding:16px">
             <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
               <div style="font-size:12px;font-weight:700;color:#0d2b5e;text-transform:uppercase;letter-spacing:.04em">OTMs por Día</div>
-              <button onclick="copiarGrafica('chart-semana')" title="Copiar gráfica" style="background:#fff;border:1px solid #e2e8f0;border-radius:6px;width:26px;height:26px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:13px;color:#64748b;flex-shrink:0;transition:background .15s,color .15s" onmouseover="this.style.background='#eff6ff';this.style.color='#1d4ed8'" onmouseout="this.style.background='#fff';this.style.color='#64748b'">📋</button>
+              <button onclick="copiarGrafica('chart-semana', 'OTMs por Día')" title="Copiar gráfica" style="background:#fff;border:1px solid #e2e8f0;border-radius:6px;width:26px;height:26px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:13px;color:#64748b;flex-shrink:0;transition:background .15s,color .15s" onmouseover="this.style.background='#eff6ff';this.style.color='#1d4ed8'" onmouseout="this.style.background='#fff';this.style.color='#64748b'">📋</button>
             </div>
             <div style="position:relative;height:220px">
               <canvas id="chart-semana"></canvas>
@@ -934,7 +934,7 @@ function verificarAcceso() {
           <div style="background:#f8fafc;border-radius:10px;padding:16px">
             <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:12px">
               <div style="font-size:12px;font-weight:700;color:#0d2b5e;text-transform:uppercase;letter-spacing:.04em">Estado Funcional</div>
-              <button onclick="copiarGrafica('chart-estado')" title="Copiar gráfica" style="background:#fff;border:1px solid #e2e8f0;border-radius:6px;width:26px;height:26px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:13px;color:#64748b;flex-shrink:0;transition:background .15s,color .15s" onmouseover="this.style.background='#eff6ff';this.style.color='#1d4ed8'" onmouseout="this.style.background='#fff';this.style.color='#64748b'">📋</button>
+              <button onclick="copiarGrafica('chart-estado', 'Estado Funcional')" title="Copiar gráfica" style="background:#fff;border:1px solid #e2e8f0;border-radius:6px;width:26px;height:26px;display:flex;align-items:center;justify-content:center;cursor:pointer;font-size:13px;color:#64748b;flex-shrink:0;transition:background .15s,color .15s" onmouseover="this.style.background='#eff6ff';this.style.color='#1d4ed8'" onmouseout="this.style.background='#fff';this.style.color='#64748b'">📋</button>
             </div>
             <div style="position:relative;height:220px">
               <canvas id="chart-estado"></canvas>
@@ -2324,20 +2324,62 @@ function destroyCharts() {
   chartInstances = {};
 }
 
+// Texto de los filtros activos, tomado de los mismos tags que se ven sobre la tabla
+function obtenerDescripcionFiltros() {
+  const tags = Array.from(document.querySelectorAll('#tags .tag'))
+    .map(t => t.textContent.replace(/[×✕]/g, '').trim())
+    .filter(Boolean);
+  return tags.join('   ·   ');
+}
+
+// Recorta un texto con "…" hasta que quepa en maxWidth con la fuente ya seteada en ctx
+function truncarTexto(ctx, texto, maxWidth) {
+  if (ctx.measureText(texto).width <= maxWidth) return texto;
+  let t = texto;
+  while (t.length > 1 && ctx.measureText(t + '…').width > maxWidth) t = t.slice(0, -1);
+  return t + '…';
+}
+
 // ── COPIAR GRÁFICA AL PORTAPAPELES ────────────────────────────────────────
-async function copiarGrafica(canvasId) {
+async function copiarGrafica(canvasId, titulo) {
   const canvas = document.getElementById(canvasId);
   if (!canvas) return;
 
-  // Fondo blanco: el canvas de Chart.js es transparente, y pegado en Word/Excel
-  // sin fondo se ve mal. Se redibuja sobre un canvas temporal con fondo blanco.
+  // Fondo blanco + título (y filtros activos, si hay) dibujados encima: el canvas
+  // de Chart.js es transparente y no incluye esos rótulos (son <div> HTML aparte).
+  const pad = Math.round(canvas.width * 0.025);
+  const filtro = obtenerDescripcionFiltros();
+  const tituloAltura = titulo ? Math.max(filtro ? 78 : 60, Math.round(canvas.height * (filtro ? 0.17 : 0.13))) : 0;
+
   const tmp = document.createElement('canvas');
   tmp.width = canvas.width;
-  tmp.height = canvas.height;
+  tmp.height = canvas.height + tituloAltura;
   const ctx = tmp.getContext('2d');
   ctx.fillStyle = '#ffffff';
   ctx.fillRect(0, 0, tmp.width, tmp.height);
-  ctx.drawImage(canvas, 0, 0);
+
+  if (titulo) {
+    ctx.fillStyle = '#0d2b5e';
+    ctx.font = `bold ${Math.round(tituloAltura * (filtro ? 0.30 : 0.4))}px 'Segoe UI', Arial, sans-serif`;
+    ctx.textBaseline = 'middle';
+    ctx.fillText(titulo.toUpperCase(), pad, filtro ? tituloAltura * 0.38 : tituloAltura / 2);
+
+    if (filtro) {
+      ctx.fillStyle = '#64748b';
+      ctx.font = `${Math.round(tituloAltura * 0.19)}px 'Segoe UI', Arial, sans-serif`;
+      const texto = truncarTexto(ctx, `Filtros: ${filtro}`, tmp.width - pad * 2);
+      ctx.fillText(texto, pad, tituloAltura * 0.74);
+    }
+
+    ctx.strokeStyle = '#e2e8f0';
+    ctx.lineWidth = Math.max(1, Math.round(canvas.width * 0.0015));
+    ctx.beginPath();
+    ctx.moveTo(0, tituloAltura);
+    ctx.lineTo(tmp.width, tituloAltura);
+    ctx.stroke();
+  }
+
+  ctx.drawImage(canvas, 0, tituloAltura);
 
   tmp.toBlob(async (blob) => {
     if (!blob) { mostrarToast('❌ No se pudo generar la imagen'); return; }
