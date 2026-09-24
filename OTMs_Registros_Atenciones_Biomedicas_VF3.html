@@ -7,7 +7,7 @@
 <!--
 ══════════════════════════════════════════════════════════════
   BUSCADOR DE OTMs — CÓDIGO FUENTE
-  Versión: 3.16 | Setiembre 2026 — La copia de la gráfica también muestra los filtros activos (mes, establecimiento, etc.)
+  Versión: 3.17 | Setiembre 2026 — Botón "Copiar ficha" en el modal de detalle de cada OTM
   Cambio v3.5: interlineado de las tablas de insumos del
   informe de consumo (filas ya no van pegadas).
 ══════════════════════════════════════════════════════════════
@@ -984,7 +984,10 @@ function verificarAcceso() {
 ════════════════════════════════ -->
 <div class="mbg" id="modal" onclick="if(event.target===this)closeM()">
   <div class="mbox">
-    <div class="m-title" id="m-title">OTM</div>
+    <div style="display:flex;align-items:center;justify-content:space-between;gap:10px;padding-bottom:13px;border-bottom:2px solid var(--borde);margin-bottom:14px;">
+      <div class="m-title" id="m-title" style="padding-bottom:0;border-bottom:none;margin-bottom:0;">OTM</div>
+      <button onclick="copiarFichaOTM()" title="Copiar ficha completa (todos los datos)" style="flex-shrink:0;display:flex;align-items:center;gap:6px;padding:7px 13px;background:#eff6ff;border:1.5px solid #bfdbfe;border-radius:8px;font-size:12px;font-weight:700;color:#1d4ed8;cursor:pointer;font-family:inherit;white-space:nowrap;transition:background .15s" onmouseover="this.style.background='#dbeafe'" onmouseout="this.style.background='#eff6ff'">📋 Copiar ficha</button>
+    </div>
     <div class="m-layout">
       <div class="m-info">
         <div class="m-grid" id="m-body"></div>
@@ -1902,6 +1905,51 @@ async function buscarFileIdEnDrive(nombrePdf) {
     }
   }
   return null;
+}
+
+// ── COPIAR FICHA COMPLETA DEL OTM (texto) ─────────────────────────────────
+function construirTextoFichaOTM(r) {
+  const campos = [
+    ['N° OTM', r.id], ['Fecha', r.fdisp], ['Mes', r.mes_n],
+    ['Establecimiento', r.estab], ['Servicio', r.serv],
+    ['N° Etiqueta', r.etiq], ['Equipo', r.equipo],
+    ['Marca', r.marca], ['Modelo', r.modelo], ['Serie', r.serie],
+    ['Tipo Mantenimiento', r.tipo], ['Estado Funcional', r.estado],
+    ['Uso de Insumo', r.usoInsumo === 'SI' ? 'Sí' : 'No'],
+    ['Descripción de Insumos', r.usoInsumo === 'SI' ? (r.insumoDesc || '—') : '—'],
+    ['Ejecutor', r.ejec], ['Observaciones', r.obs],
+  ];
+  const lineas = [`FICHA DE MANTENIMIENTO — OTM #${r.id}`, ''];
+  campos.forEach(([k, v]) => lineas.push(`${k}: ${v || '—'}`));
+  return lineas.join('\n');
+}
+
+async function copiarFichaOTM() {
+  const r = ALL.find(x => x.id === currentOtmId);
+  if (!r) { mostrarToast('❌ No se encontró la OTM'); return; }
+  const texto = construirTextoFichaOTM(r);
+  try {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      await navigator.clipboard.writeText(texto);
+    } else {
+      throw new Error('Clipboard API no disponible');
+    }
+    mostrarToast('📋 Ficha copiada — puede pegarla con Ctrl+V');
+  } catch (e) {
+    console.warn('Clipboard API falló, usando fallback:', e);
+    const ta = document.createElement('textarea');
+    ta.value = texto;
+    ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select();
+    try {
+      document.execCommand('copy');
+      mostrarToast('📋 Ficha copiada — puede pegarla con Ctrl+V');
+    } catch (e2) {
+      mostrarToast('❌ No se pudo copiar la ficha');
+    }
+    document.body.removeChild(ta);
+  }
 }
 
 function showDetail(id) {
