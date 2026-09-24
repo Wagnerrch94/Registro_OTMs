@@ -7,7 +7,7 @@
 <!--
 ══════════════════════════════════════════════════════════════
   BUSCADOR DE OTMs — CÓDIGO FUENTE
-  Versión: 3.18 | Setiembre 2026 — Ficha copiada con formato compacto (tabla) para Word/Gmail
+  Versión: 3.19 | Setiembre 2026 — Fix mso-margin para que Word no agregue espacio extra entre filas
   Cambio v3.5: interlineado de las tablas de insumos del
   informe de consumo (filas ya no van pegadas).
 ══════════════════════════════════════════════════════════════
@@ -1929,17 +1929,24 @@ function construirTextoFichaOTM(r) {
 
 // Versión HTML: una sola tabla (no párrafos sueltos), para que Word/Gmail/Outlook
 // no le agreguen el espacio extra que ponen automáticamente entre párrafos.
+// Word ignora el margin normal dentro de <td>; hay que anularlo también con las
+// propiedades mso-margin-top-alt / mso-margin-bottom-alt que sí respeta.
 function construirHtmlFichaOTM(r) {
   const escapar = s => String(s ?? '—').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  const pReset = 'margin:0;mso-margin-top-alt:0;mso-margin-bottom-alt:0;mso-para-margin-top:0;mso-para-margin-bottom:0;line-height:1.35;';
   const filas = camposFichaOTM(r).map(([k, v]) => `
     <tr>
-      <td style="padding:2px 12px 2px 0;font-weight:bold;color:#0d2b5e;white-space:nowrap;vertical-align:top;">${escapar(k)}:</td>
-      <td style="padding:2px 0;color:#1e293b;">${escapar(v)}</td>
+      <td style="padding:2px 12px 2px 0;vertical-align:top;">
+        <p style="${pReset}font-weight:bold;color:#0d2b5e;white-space:nowrap;">${escapar(k)}:</p>
+      </td>
+      <td style="padding:2px 0;vertical-align:top;">
+        <p style="${pReset}color:#1e293b;">${escapar(v)}</p>
+      </td>
     </tr>`).join('');
   return `
     <div style="font-family:Arial,Helvetica,sans-serif;">
-      <p style="font-weight:bold;font-size:14px;color:#0d2b5e;margin:0 0 8px 0;">FICHA DE MANTENIMIENTO — OTM #${escapar(r.id)}</p>
-      <table style="border-collapse:collapse;font-size:12.5px;line-height:1.3;margin:0;">${filas}</table>
+      <p style="${pReset}font-weight:bold;font-size:14px;color:#0d2b5e;margin-bottom:8px;mso-margin-bottom-alt:8pt;">FICHA DE MANTENIMIENTO — OTM #${escapar(r.id)}</p>
+      <table style="border-collapse:collapse;font-size:12.5px;">${filas}</table>
     </div>`;
 }
 
