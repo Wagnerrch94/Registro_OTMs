@@ -7,9 +7,11 @@
 <!--
 ══════════════════════════════════════════════════════════════
   BUSCADOR DE OTMs — CÓDIGO FUENTE
-  Versión: 3.19 | Setiembre 2026 — Fix mso-margin para que Word no agregue espacio extra entre filas
-  Cambio v3.5: interlineado de las tablas de insumos del
-  informe de consumo (filas ya no van pegadas).
+  Versión: 3.20 | Noviembre 2026 — Fix edición de insumos:
+   · openEdit carga insumos desde movimientos o, si no hay, desde la ficha (insumoDesc)
+   · buscador de catálogo reintenta la carga si estaba vacío
+   · insumoDesc se guarda en formato "código - descripción x cantidad"
+  Cambio v3.19: Fix mso-margin para que Word no agregue espacio extra entre filas
 ══════════════════════════════════════════════════════════════
 -->
 
@@ -3031,7 +3033,7 @@ async function cargarCatalogoInsumos() {
   try {
     const resp = await fetch(SHEET_URL + '?action=catalogoInsumos&v=' + Date.now());
     const datos = await resp.json();
-    CATALOGO_INSUMOS = (datos || []).map(item => {
+    CATALOGO_INSUMOS = (Array.isArray(datos) ? datos : []).map(item => {
       const keys = Object.keys(item);
       return {
         codigo:      leerCampo(item, keys, 'Código', 'Codigo'),
@@ -3048,7 +3050,7 @@ async function cargarMovimientosInsumos() {
   try {
     const resp = await fetch(SHEET_URL + '?action=movimientosInsumos&v=' + Date.now());
     const datos = await resp.json();
-    MOVIMIENTOS_INSUMOS = (datos || []).map(item => {
+    MOVIMIENTOS_INSUMOS = (Array.isArray(datos) ? datos : []).map(item => {
       const keys = Object.keys(item);
       return {
         fecha:       leerCampo(item, keys, 'Fecha'),
@@ -3061,6 +3063,24 @@ async function cargarMovimientosInsumos() {
       };
     });
   } catch(e) { console.error('Error cargando movimientos de insumos:', e); }
+}
+
+// v3.20 — Convierte el texto de la ficha ("código - descripción x N; ...") en lista editable
+function parsearInsumoDesc(txt) {
+  return String(txt || '').split(';').map(s => s.trim()).filter(Boolean).map(p => {
+    const m = p.match(/^(.*?)\s*-\s*(.*?)\s*x\s*([\d.,]+)\s*$/i);
+    if (m) {
+      const codigo = m[1].trim();
+      const cat = CATALOGO_INSUMOS.find(i => i.codigo === codigo);
+      return {
+        codigo,
+        descripcion: m[2].trim(),
+        cantidad: Number(m[3].replace(',', '.')) || 1,
+        unidad: cat ? cat.unidad : '',
+      };
+    }
+    return { codigo: '', descripcion: p, cantidad: 1, unidad: '' };
+  });
 }
 
 function renderListaInsumosEdit() {
@@ -3082,7 +3102,7 @@ function renderListaInsumosEdit() {
     <div style="display:flex;align-items:center;gap:8px;background:#f8fafc;border:1px solid #e2e8f0;border-radius:8px;padding:6px 10px;">
       <div style="flex:1;min-width:0;">
         <div style="font-size:12.5px;font-weight:600;color:#0d2b5e;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${ins.descripcion}">${ins.descripcion}</div>
-        <div style="font-size:10.5px;color:#94a3b8;">Código: ${ins.codigo}${ins.unidad ? ' · ' + ins.unidad : ''}</div>
+        <div style="font-size:10.5px;color:#94a3b8;">Código: ${ins.codigo || '—'}${ins.unidad ? ' · ' + ins.unidad : ''}</div>
       </div>
       <input type="number" min="0.01" step="any" value="${ins.cantidad}"
         style="width:70px;padding:5px 7px;border:1.5px solid #e2e8f0;border-radius:6px;font-size:12px;font-family:inherit;"
@@ -3097,17 +3117,27 @@ function buscarInsumoEnCatalogo(q) {
   q = (q || '').trim().toLowerCase();
   if (!q) { cont.style.display = 'none'; cont.innerHTML = ''; return; }
 
+  // v3.20 — si el catálogo está vacío, reintentar la carga en vez de quedarse en "Cargando..."
+  if (!CATALOGO_INSUMOS.length) {
+    cont.innerHTML = '<div style="padding:10px;font-size:12px;color:#94a3b8;">Cargando catálogo...</div>';
+    cont.style.display = 'block';
+    cargarCatalogoInsumos().then(() => {
+      if (CATALOGO_INSUMOS.length) {
+        buscarInsumoEnCatalogo(document.getElementById('edit-insumo-buscar').value);
+      } else {
+        cont.innerHTML = '<div style="padding:10px;font-size:12px;color:#dc2626;">No se pudo cargar el catálogo de insumos. Revise el Apps Script (action=catalogoInsumos).</div>';
+        cont.style.display = 'block';
+      }
+    });
+    return;
+  }
+
   const yaAgregados = new Set(editingInsumos.map(i => i.codigo));
   const matches = CATALOGO_INSUMOS.filter(i =>
     !yaAgregados.has(i.codigo) &&
     (i.codigo.toLowerCase().includes(q) || i.descripcion.toLowerCase().includes(q))
   ).slice(0, 12);
 
-  if (!CATALOGO_INSUMOS.length) {
-    cont.innerHTML = '<div style="padding:10px;font-size:12px;color:#94a3b8;">Cargando catálogo...</div>';
-    cont.style.display = 'block';
-    return;
-  }
   if (!matches.length) {
     cont.innerHTML = '<div style="padding:10px;font-size:12px;color:#94a3b8;">Sin resultados</div>';
     cont.style.display = 'block';
@@ -3548,12 +3578,23 @@ async function openEdit(id) {
 
   document.getElementById('modal-edit').classList.add('open');
 
-  if (!CATALOGO_INSUMOS.length) cargarCatalogoInsumos();
-  await cargarMovimientosInsumos();
+  // v3.20 — cargar movimientos y catálogo en paralelo (el catálogo se reintenta si estaba vacío)
+  await Promise.all([
+    cargarMovimientosInsumos(),
+    CATALOGO_INSUMOS.length ? Promise.resolve() : cargarCatalogoInsumos(),
+  ]);
 
   editingInsumos = MOVIMIENTOS_INSUMOS
-    .filter(m => m.otmId === r.id)
-    .map(m => ({ codigo: m.codigo, descripcion: m.descripcion, cantidad: m.cantidad, unidad: '' }));
+    .filter(m => String(m.otmId).trim() === String(r.id).trim())
+    .map(m => {
+      const cat = CATALOGO_INSUMOS.find(i => i.codigo === m.codigo);
+      return { codigo: m.codigo, descripcion: m.descripcion, cantidad: m.cantidad, unidad: cat ? cat.unidad : '' };
+    });
+
+  // v3.20 — Respaldo: si no hay movimientos para esta OTM, usar lo que ya muestra la ficha
+  if (!editingInsumos.length && r.usoInsumo === 'SI' && r.insumoDesc) {
+    editingInsumos = parsearInsumoDesc(r.insumoDesc);
+  }
 
   document.getElementById('edit-insumos-vacio').textContent = 'Sin insumos agregados';
   renderListaInsumosEdit();
@@ -3644,7 +3685,8 @@ async function guardarEdicion() {
         r.ejec   = payload.ejec;
         r.obs    = payload.obs;
         r.usoInsumo  = payload.insumos.length ? 'SI' : 'NO';
-        r.insumoDesc = payload.insumos.map(i => `${i.descripcion} (x${i.cantidad})`).join('; ');
+        // v3.20 — formato "código - descripción x cantidad" (el mismo que lee el informe de consumo)
+        r.insumoDesc = payload.insumos.map(i => `${i.codigo} - ${i.descripcion} x ${i.cantidad}`).join('; ');
       }
       cargarCatalogoInsumos();
       cargarMovimientosInsumos();
