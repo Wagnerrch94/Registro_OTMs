@@ -7,7 +7,7 @@
 <!--
 ══════════════════════════════════════════════════════════════
   BUSCADOR DE OTMs — CÓDIGO FUENTE
-  Versión: 3.21 | Noviembre 2026 — Foto del equipo en el detalle de la OTM (campo foto / __foto_url__). Anterior 3.20 — Fix edición de insumos:
+  Versión: 3.22 | Fotos desde Drive vía action=fotos. Anterior 3.21 | Noviembre 2026 — Foto del equipo en el detalle de la OTM (campo foto / __foto_url__). Anterior 3.20 — Fix edición de insumos:
    · openEdit carga insumos desde movimientos o, si no hay, desde la ficha (insumoDesc)
    · buscador de catálogo reintenta la carga si estaba vacío
    · insumoDesc se guarda en formato "código - descripción x cantidad"
@@ -1997,14 +1997,30 @@ async function copiarFichaOTM() {
   }
 }
 
+// v3.22 — Fotos del equipo: el Apps Script devuelve {OTM_ID: fileId} leyendo los archivos "<OTM>_EQUIPO.jpg" de Drive
+let FOTOS_MAP = {};
+async function cargarFotosEquipo() {
+  try {
+    const resp = await fetch(SHEET_URL + '?action=fotos&v=' + Date.now());
+    const datos = await resp.json();
+    FOTOS_MAP = (datos && typeof datos === 'object' && !Array.isArray(datos)) ? datos : {};
+  } catch(e) { console.warn('No se pudo cargar el mapa de fotos:', e); }
+}
+function fotoDeOtm(r) {
+  if (r.foto) return r.foto;
+  const fid = FOTOS_MAP[String(r.id).toUpperCase()];
+  return fid ? 'https://drive.google.com/file/d/' + fid + '/view' : '';
+}
+
 function mostrarFotoEquipo(r) {
   const cont = document.getElementById('m-foto');
   if (!cont) return;
   const vacio = msg => `<div style="margin-top:12px;padding:14px;border:2px dashed #e2e8f0;border-radius:10px;text-align:center;color:#94a3b8;font-size:12px;">${msg}</div>`;
-  if (!r.foto) { cont.innerHTML = vacio('📷 Sin foto del equipo'); return; }
-  const m = r.foto.match(/\/file\/d\/([a-zA-Z0-9_-]+)/) || r.foto.match(/[?&]id=([a-zA-Z0-9_-]+)/) || r.foto.match(/\/d\/([a-zA-Z0-9_-]+)/);
-  const src  = m ? `https://drive.google.com/thumbnail?id=${m[1]}&sz=w1000` : r.foto;
-  const full = m ? `https://drive.google.com/file/d/${m[1]}/view` : r.foto;
+  const fotoUrl = fotoDeOtm(r);
+  if (!fotoUrl) { cont.innerHTML = vacio('📷 Sin foto del equipo'); return; }
+  const m = fotoUrl.match(/\/file\/d\/([a-zA-Z0-9_-]+)/) || fotoUrl.match(/[?&]id=([a-zA-Z0-9_-]+)/) || fotoUrl.match(/\/d\/([a-zA-Z0-9_-]+)/);
+  const src  = m ? `https://drive.google.com/thumbnail?id=${m[1]}&sz=w1000` : fotoUrl;
+  const full = m ? `https://drive.google.com/file/d/${m[1]}/view` : fotoUrl;
   cont.innerHTML = `
     <div style="margin-top:12px;">
       <div class="m-viewer-label" style="margin-bottom:6px;">FOTO DEL EQUIPO</div>
@@ -2112,6 +2128,7 @@ renderTable();
 window.addEventListener('DOMContentLoaded', () => {
     cargarDatosDesdeDrive();
     cargarCatalogoInsumos();
+    cargarFotosEquipo();
 });
 </script>
 
