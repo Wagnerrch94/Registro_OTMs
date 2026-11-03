@@ -7,7 +7,7 @@
 <!--
 ══════════════════════════════════════════════════════════════
   BUSCADOR DE OTMs — CÓDIGO FUENTE
-  Versión: 3.22 | Fotos desde Drive vía action=fotos. Anterior 3.21 | Noviembre 2026 — Foto del equipo en el detalle de la OTM (campo foto / __foto_url__). Anterior 3.20 — Fix edición de insumos:
+  Versión: 3.23 | La foto llega en __foto_url__ desde el Apps Script v3.3. Anterior 3.21 | Noviembre 2026 — Foto del equipo en el detalle de la OTM (campo foto / __foto_url__). Anterior 3.20 — Fix edición de insumos:
    · openEdit carga insumos desde movimientos o, si no hay, desde la ficha (insumoDesc)
    · buscador de catálogo reintenta la carga si estaba vacío
    · insumoDesc se guarda en formato "código - descripción x cantidad"
@@ -2128,7 +2128,6 @@ renderTable();
 window.addEventListener('DOMContentLoaded', () => {
     cargarDatosDesdeDrive();
     cargarCatalogoInsumos();
-    cargarFotosEquipo();
 });
 </script>
 
