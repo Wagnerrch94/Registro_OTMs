@@ -7,7 +7,7 @@
 <!--
 ══════════════════════════════════════════════════════════════
   BUSCADOR DE OTMs — CÓDIGO FUENTE
-  Versión: 3.25 — foto en la columna derecha (sobre el PDF), sin alargar el modal. Anterior 3.24 — rótulo OTM + equipo bajo la foto. Anterior 3.23 | La foto llega en __foto_url__ desde el Apps Script v3.3. Anterior 3.21 | Noviembre 2026 — Foto del equipo en el detalle de la OTM (campo foto / __foto_url__). Anterior 3.20 — Fix edición de insumos:
+  Versión: 3.26 — foto y PDF del mismo tamaño (300px). Anterior 3.25 — foto en la columna derecha (sobre el PDF), sin alargar el modal. Anterior 3.24 — rótulo OTM + equipo bajo la foto. Anterior 3.23 | La foto llega en __foto_url__ desde el Apps Script v3.3. Anterior 3.21 | Noviembre 2026 — Foto del equipo en el detalle de la OTM (campo foto / __foto_url__). Anterior 3.20 — Fix edición de insumos:
    · openEdit carga insumos desde movimientos o, si no hay, desde la ficha (insumoDesc)
    · buscador de catálogo reintenta la carga si estaba vacío
    · insumoDesc se guarda en formato "código - descripción x cantidad"
@@ -1865,7 +1865,7 @@ function mostrarVisorPDF(mViewer, fileId, nombrePdf) {
     <div class="m-viewer-bar">
       <a class="btn-dl" href="${dlUrl}" target="_blank" download>⬇️ Descargar PDF</a>
     </div>
-    <div style="position:relative;width:100%;height:430px;border:1.5px solid #e2e8f0;border-radius:10px;overflow:hidden;background:#f8fafc;">
+    <div style="position:relative;width:100%;height:300px;border:1.5px solid #e2e8f0;border-radius:10px;overflow:hidden;background:#f8fafc;">
       <div id="pdf-loading-${uid}" style="position:absolute;inset:0;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:10px;background:#f8fafc;z-index:2;">
         <div style="width:36px;height:36px;border:4px solid #dbeafe;border-top-color:#1d4ed8;border-radius:50%;animation:spin360 .8s linear infinite;"></div>
         <span style="font-size:13px;color:#64748b;font-weight:600;">Cargando PDF...</span>
@@ -2028,7 +2028,7 @@ function mostrarFotoEquipo(r) {
       <div class="m-viewer-label" style="margin-bottom:6px;">FOTO DEL EQUIPO</div>
       <a href="${full}" target="_blank" title="Abrir foto completa">
         <img id="m-foto-img" src="${src}" alt="Foto del equipo"
-          style="width:100%;height:190px;object-fit:contain;border-radius:10px;border:1.5px solid #e2e8f0;display:block;background:#f8fafc;">
+          style="width:100%;height:300px;object-fit:contain;border-radius:10px;border:1.5px solid #e2e8f0;display:block;background:#f8fafc;">
       </a>
       <div style="margin-top:5px;font-size:11px;font-weight:700;color:#475569;text-align:center;">${r.id} — ${r.equipo || ''}</div>
     </div>`;
